@@ -1,49 +1,55 @@
-// 全局持久存储（Pages 兼容，重启不丢）
-const globalStore = {
-  users: [],
-  msgs: []
-};
+// 真正永久存储 = KV
+// 所有人可见 + 重启不丢 + 永久保存用户和消息
 
-// 全局共享（所有用户都能看见）
-if (!globalThis.__CHAT_DATA) {
-  globalThis.__CHAT_DATA = globalStore;
-}
-
-export async function onRequestGet({ request }) {
+export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const act = url.searchParams.get("act");
-  const data = globalThis.__CHAT_DATA;
 
-  // 登录
+  // 读取数据
+  async function get() {
+    const data = await env.CHAT_DB.get("chat_data");
+    return data ? JSON.parse(data) : { users: [], msgs: [] };
+  }
+
+  // 保存数据
+  async function save(d) {
+    await env.CHAT_DB.put("chat_data", JSON.stringify(d));
+  }
+
+  const data = await get();
+
+  // ========== 登录 ==========
   if (act === "login") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
-    const ok = data.users.some(i => i.user === user && i.pwd === pwd);
+    const ok = data.users.some(u => u.user === user && u.pwd === pwd);
     return Response.json({ ok });
   }
 
-  // 注册
+  // ========== 注册（保存到 KV） ==========
   if (act === "reg") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
-    if (data.users.some(i => i.user === user)) {
+    if (data.users.some(u => u.user === user)) {
       return Response.json({ ok: false });
     }
     data.users.push({ user, pwd });
+    await save(data);
     return Response.json({ ok: true });
   }
 
-  // 消息列表（所有人可见）
+  // ========== 消息列表 ==========
   if (act === "list") {
-    return Response.json(data.msgs.slice(-100));
+    return Response.json(data.msgs.slice(-120));
   }
 
-  // 发送消息（全局同步）
+  // ========== 发送消息（保存到 KV） ==========
   if (act === "send") {
     const user = url.searchParams.get("user");
     const msg = url.searchParams.get("msg");
     data.msgs.push({ user, msg });
-    if (data.msgs.length > 150) data.msgs = data.msgs.slice(-100);
+    if (data.msgs.length > 150) data.msgs = data.msgs.slice(-120);
+    await save(data);
     return Response.json({ ok: true });
   }
 
