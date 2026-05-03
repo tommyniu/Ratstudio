@@ -74,7 +74,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <script>
 let username = "", uid = "";
 const ADMIN = "Ratstudio";
-const API = "https://rs-pro.ltc114514191.workers.dev";
+const API = "/api/chat";
 
 window.onload = function () {
   let u = localStorage.getItem("username");
@@ -85,7 +85,7 @@ window.onload = function () {
 async function login() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  let r = await fetch(`${API}/?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
+  let r = await fetch(`${API}?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
   let t = await r.text();
   if (!t) { alert("登录失败"); return; }
   localStorage.setItem("username", user);
@@ -96,7 +96,7 @@ async function login() {
 async function reg() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  let r = await fetch(`${API}/?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
+  let r = await fetch(`${API}?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
   let t = await r.text();
   alert(t==="ok" ? "注册成功" : "已存在");
 }
@@ -116,13 +116,13 @@ function loginSuccess() {
 async function sendMsg() {
   let txt = document.getElementById("msgInput").value;
   if (!txt) return;
-  await fetch(`${API}/?act=send&uid=${uid}&msg=${encodeURIComponent(txt)}`);
+  await fetch(`${API}?act=send&uid=${uid}&msg=${encodeURIComponent(txt)}`);
   document.getElementById("msgInput").value = "";
   loadMsg();
 }
 
 async function loadMsg() {
-  let r = await fetch(`${API}/?act=msg`);
+  let r = await fetch(`${API}?act=msg`);
   let list = await r.json();
   let box = document.getElementById("msgBox");
   box.innerHTML = "";
@@ -142,11 +142,11 @@ async function loadMsg() {
 }
 
 async function clearAllMsg() {
-  await fetch(`${API}/?act=clear&uid=${uid}`);
+  await fetch(`${API}?act=clear&uid=${uid}`);
   loadMsg();
 }
 async function deleteLastMsg() {
-  await fetch(`${API}/?act=delete&uid=${uid}`);
+  await fetch(`${API}?act=delete&uid=${uid}`);
   loadMsg();
 }
 </script>
