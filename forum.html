@@ -94,7 +94,7 @@ async function createPost() {
 }
 
 async function loadPosts() {
-  let r = await fetch(API + "?act=posts&_=" + Date.now());
+  let r = await.fetch(API + "?act=posts&_=" + Date.now());
   let list = await r.json();
   postsData = list;
   renderList();
