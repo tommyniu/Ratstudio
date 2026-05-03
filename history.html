@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>更新日志 - RatStudio的小站</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items:center;justify-content:center;height:100vh}
+.container{
+  display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;
+  background:rgba(255,255,255,.04);
+  backdrop-filter:blur(30px);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 0 50px rgba(60,120,255,0.25);
+}
+.sidebar{
+  width:140px;background:rgba(255,255,255,.05);padding:30px 10px;
+  display:flex;flex-direction:column;gap:10px;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.item{
+  padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;
+  cursor:pointer;transition:all 0.2s;
+  border:1px solid transparent;
+}
+.item:hover,.item.active{
+  background:rgba(60,130,255,.25);color:#fff;
+  border-color:rgba(100,160,255,0.4);
+  box-shadow:0 0 12px rgba(80,140,255,0.35);
+}
+.main{flex:1;position:relative}
+.top{
+  background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.content{
+  padding:30px;
+  color:#fff;
+  height:calc(100% - 61px);
+  overflow-y:auto;
+}
+h2{
+  margin-bottom:20px;
+}
+.item-log{
+  margin-bottom:10px;
+  line-height:1.4;
+}
+.ver{
+  color:#8cf;
+  font-weight:600;
+}
+.version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="sidebar">
+<div class="item" onclick="location.href='index.html'">聊天室</div>
+<div class="item" onclick="location.href='forum.html'">论坛</div>
+<div class="item active">更新日志</div>
+<div class="item" onclick="location.href='plan.html'">开发规划</div>
+</div>
+<div class="main">
+<div class="top">
+<span>更新日志</span>
+</div>
+<div class="content">
+<h2>更新日志</h2>
+<div class="item-log"><span class="ver">V1.2.4</span> 修复消息被输入框遮挡问题，全页面版本统一至 1.2.4</div>
+<div class="item-log"><span class="ver">V1.2.3</span> 新增开发规划页面，全菜单统一</div>
+<div class="item-log"><span class="ver">V1.2.2</span> 全页面UI统一，修复头像/UID布局，滚动优化</div>
+<div class="item-log"><span class="ver">V1.2.1</span> 修复消息显示、清空功能、数据持久化</div>
+<div class="item-log"><span class="ver">V1.2.0</span> 新增论坛系统、发帖按钮、点赞功能、三页面独立切换</div>
+<div class="item-log"><span class="ver">V1.1.4</span> 管理员标识、清空消息</div>
+<div class="item-log"><span class="ver">V1.1.3</span> 自动登录、圆角统一</div>
+<div class="item-log"><span class="ver">V1.0.1~V1.1.2</span> 完善UI、修复布局、独立日志页面</div>
+<div class="item-log"><span class="ver">V1.0.0</span> 基础聊天、注册登录系统</div>
+</div>
+<div class="version">V1.2.4</div>
+</div>
+</div>
+</body>
+</html>
