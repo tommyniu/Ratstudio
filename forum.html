@@ -7,69 +7,29 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
 body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items:center;justify-content:center;height:100vh}
-.container{
-  display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;
-  background:rgba(255,255,255,.04);backdrop-filter:blur(30px);
-  border:1px solid rgba(255,255,255,.1);
-  box-shadow:0 0 50px rgba(60,120,255,0.25);
-}
-.sidebar{
-  width:140px;background:rgba(255,255,255,.05);padding:30px 10px;
-  display:flex;flex-direction:column;gap:10px;
-  border-right:1px solid rgba(255,255,255,.08);
-}
-.item{
-  padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;
-  cursor:pointer;transition:all 0.2s;border:1px solid transparent;
-}
-.item:hover,.item.active{
-  background:rgba(60,130,255,.25);color:#fff;
-  border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35);
-}
+.container{display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;background:rgba(255,255,255,.04);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.1);box-shadow:0 0 50px rgba(60,120,255,0.25)}
+.sidebar{width:140px;background:rgba(255,255,255,.05);padding:30px 10px;display:flex;flex-direction:column;gap:10px;border-right:1px solid rgba(255,255,255,.08)}
+.item{padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;cursor:pointer;transition:all 0.2s;border:1px solid transparent}
+.item:hover,.item.active{background:rgba(60,130,255,.25);color:#fff;border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35)}
 .main{flex:1;position:relative}
-.top{
-  background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;
-  display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px solid rgba(255,255,255,.08);
-}
-.add{
-  width:32px;height:32px;background:rgba(60,120,255,.3);border:none;border-radius:50%;
-  color:#fff;font-size:18px;cursor:pointer;
-}
+.top{background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)}
+.add{width:32px;height:32px;background:rgba(60,120,255,.3);border:none;border-radius:50%;color:#fff;font-size:18px;cursor:pointer}
 .page{display:none;height:630px;overflow-y:auto;padding:20px}
 .page.active{display:block}
-.post{
-  background:rgba(255,255,255,.07);border-radius:18px;padding:16px;margin-bottom:12px;color:#fff;
-  border:1px solid rgba(255,255,255,.12);cursor:pointer;
-}
+.post{background:rgba(255,255,255,.07);border-radius:18px;padding:16px;margin-bottom:12px;color:#fff;border:1px solid rgba(255,255,255,.12);cursor:pointer}
 .post h3{margin-bottom:8px}
 .post .info{color:#aaa;font-size:12px;margin-bottom:8px}
 .post .content{margin-bottom:10px;line-height:1.5}
-.like{
-  background:rgba(255,80,80,.25);color:#fff;border:none;padding:6px 12px;border-radius:12px;cursor:pointer;
-}
+.like{background:rgba(255,80,80,.25);color:#fff;border:none;padding:6px 12px;border-radius:12px;cursor:pointer}
 .detail{padding:20px;color:#fff}
 .detail h2{margin-bottom:12px}
 .detail .info{color:#aaa;font-size:14px;margin-bottom:16px}
-.back{
-  background:#4080ff;color:#fff;border:none;padding:8px 14px;border-radius:12px;cursor:pointer;margin-bottom:16px;
-}
-.mask{
-  position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;
-}
-.pop{
-  background:#1a1c25;padding:30px;border-radius:24px;width:90%;max-width:400px;
-  border:1px solid rgba(255,255,255,.15);
-}
-.pop input,.pop textarea{
-  width:100%;margin-bottom:12px;background:#262833;border:none;border-radius:12px;
-  padding:12px;color:#fff;
-  border:1px solid rgba(255,255,255,.15);
-}
+.back{background:#4080ff;color:#fff;border:none;padding:8px 14px;border-radius:12px;cursor:pointer;margin-bottom:16px}
+.mask{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center}
+.pop{background:#1a1c25;padding:30px;border-radius:24px;width:90%;max-width:400px;border:1px solid rgba(255,255,255,.15)}
+.pop input,.pop textarea{width:100%;margin-bottom:12px;background:#262833;border:none;border-radius:12px;padding:12px;color:#fff;border:1px solid rgba(255,255,255,.15)}
 .pop textarea{height:120px;resize:none}
-.pop button{
-  width:100%;padding:12px;background:#4080ff;border:none;border-radius:12px;color:#fff;
-}
+.pop button{width:100%;padding:12px;background:#4080ff;border:none;border-radius:12px;color:#fff}
 .version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
 </style>
 </head>
@@ -108,6 +68,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 </div>
 
 <script>
+const API = "https://rs-pro.ltc114514191.workers.dev";
 const user = localStorage.getItem('username');
 const uid = localStorage.getItem('uid');
 let postsData = [];
@@ -125,14 +86,14 @@ async function createPost() {
   const title = document.getElementById('title').value;
   const content = document.getElementById('content').value;
   if (!title || !content) { alert('不能为空'); return; }
-  await fetch(`/?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
+  await fetch(`${API}/?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
   hidePost();
   loadPosts();
 }
 
 async function loadPosts() {
   try {
-    const r = await fetch("/?act=posts");
+    const r = await fetch(`${API}/?act=posts`);
     const list = await r.json();
     postsData = list;
     renderList();
@@ -172,6 +133,13 @@ function goBack() {
 
 function route() {
   const hash = location.hash.slice(1) || '/';
+  const listPage = document.getElementById('listPage');
+  const detailPage = document.getElementById('detailPage');
+  const detailTitle = document.getElementById('detailTitle');
+  const detailInfo = document.getElementById('detailInfo');
+  const detailContent = document.getElementById('detailContent');
+  const detailLikeBtn = document.getElementById('detailLikeBtn');
+
   if (hash === '/') {
     listPage.classList.add('active');
     detailPage.classList.remove('active');
@@ -196,7 +164,7 @@ window.addEventListener('hashchange', route);
 
 async function like(id) {
   try {
-    await fetch(`/?act=like&uid=${uid}&postId=${id}`);
+    await fetch(`${API}/?act=like&uid=${uid}&postId=${id}`);
     loadPosts();
   } catch (e) { console.error(e); }
 }
