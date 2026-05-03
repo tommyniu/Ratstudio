@@ -13,34 +13,31 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0f1419, #0a0c12);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #0f1419;
             height: 100vh;
-            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .window {
+        .app {
             width: 680px;
             height: 750px;
-            border-radius: 44px;
+            border-radius: 24px;
             background: rgba(255,255,255,0.04);
-            backdrop-filter: blur(30px);
             border: 1px solid rgba(255,255,255,0.1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        .top-bar {
-            padding: 20px;
+        .header {
+            padding: 16px;
             color: #fff;
-            font-weight: 600;
+            font-weight: bold;
             border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
-        /* 登录 */
         .login {
             flex: 1;
             padding: 40px;
@@ -48,184 +45,159 @@
             flex-direction: column;
             gap: 12px;
         }
+
         .login input {
             padding: 14px;
-            border-radius: 16px;
-            background: #262833;
-            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            background: #222;
+            border: 1px solid #444;
             color: #fff;
-            outline: none;
-        }
-        .login-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #fff;
-            font-size: 14px;
-        }
-        .login button {
-            padding: 14px;
-            border-radius: 16px;
-            background: #4080ff;
-            color: #fff;
-            border: none;
-            cursor: pointer;
         }
 
-        /* 聊天布局 */
+        .login button {
+            padding: 14px;
+            border-radius: 12px;
+            background: #4080ff;
+            color: white;
+            border: none;
+        }
+
         .chat {
             flex: 1;
             display: none;
             flex-direction: column;
+            height: 100%;
         }
+
         .user-bar {
-            padding: 12px 20px;
+            padding: 12px 16px;
             color: #ccc;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        .admin-btn {
-            background: rgba(255,80,80,0.3);
-            border: none;
-            padding: 6px 10px;
-            border-radius: 12px;
-            color: #fff;
-            cursor: pointer;
-            margin-left: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
-        /* 消息区域 —— 完全修复 */
-        .msg-container {
+        .msg-box {
             flex: 1;
-            padding: 20px;
+            padding: 16px;
             overflow-y: auto;
         }
+
         .msg {
-            max-width: 80%;
-            margin-bottom: 16px;
-            display: flex;
-            flex-direction: column;
+            max-width: 75%;
+            margin-bottom: 14px;
         }
+
         .msg.me {
             margin-left: auto;
-            align-items: flex-end;
+            text-align: right;
         }
+
         .msg-name {
-            font-size: 13px;
-            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            color: #888;
             margin-bottom: 4px;
         }
+
         .msg-bubble {
             padding: 10px 14px;
-            border-radius: 18px;
+            border-radius: 16px;
             background: rgba(255,255,255,0.07);
             color: #fff;
-            white-space: pre-wrap;
             word-break: break-word;
-            width: fit-content;
-            max-width: 100%;
+            display: inline-block;
         }
+
         .msg.me .msg-bubble {
             background: rgba(60,120,255,0.25);
         }
-        .msg-uid {
-            font-size: 11px;
-            color: rgba(255,255,255,0.3);
-            margin-top: 4px;
-        }
 
-        /* 输入框 —— 永远不被遮挡 */
         .input-bar {
             display: flex;
-            padding: 16px 20px;
+            padding: 12px;
             gap: 10px;
             border-top: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
+            background: #111;
         }
+
         #msgInput {
             flex: 1;
             height: 44px;
+            border-radius: 22px;
             padding: 0 16px;
-            border-radius: 24px;
-            background: #262833;
-            border: 1px solid rgba(255,255,255,0.15);
+            background: #222;
+            border: 1px solid #444;
             color: #fff;
             outline: none;
         }
+
         .send-btn {
             width: 70px;
             height: 44px;
-            border-radius: 24px;
+            border-radius: 22px;
             background: #4080ff;
-            color: #fff;
+            color: white;
             border: none;
-            cursor: pointer;
         }
 
-        .tag {
-            padding: 0 20px 14px;
-            color: #888;
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
+        .admin-btn {
+            background: rgba(255,80,80,0.3);
+            border: none;
+            padding: 4px 8px;
+            border-radius: 8px;
+            color: #fff;
+            margin-left: 6px;
         }
-        .admin-tag {
-            color: #ff4d4d;
-            display: none;
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            padding: 6px;
         }
     </style>
 </head>
-
 <body>
-<div class="window">
-    <div class="top-bar">聊天室</div>
+<div class="app">
+    <div class="header">聊天室</div>
 
-    <!-- 登录 -->
     <div class="login" id="loginPage">
         <input id="user" placeholder="账号">
         <input id="pwd" placeholder="密码" type="password">
-        <div class="login-row">
-            <input type="checkbox" id="autoLogin">
-            <span>10天自动登录</span>
-        </div>
+        <label style="color:#fff; font-size:14px;"><input type="checkbox" id="autoLogin"> 10天自动登录</label>
         <button onclick="reg()">注册</button>
         <button onclick="login()">登录</button>
     </div>
 
-    <!-- 聊天 -->
     <div class="chat" id="chatPage">
         <div class="user-bar">
             <span id="userInfo"></span>
             <div>
-                <button class="admin-btn" id="clearBtn" onclick="clearAll()" style="display:none;">清空</button>
-                <button class="admin-btn" id="delBtn" onclick="delLast()" style="display:none;">撤回</button>
+                <button class="admin-btn" id="clearBtn" style="display:none;" onclick="clearAll()">清空</button>
+                <button class="admin-btn" id="delBtn" style="display:none;" onclick="delLast()">撤回</button>
             </div>
         </div>
 
-        <div class="msg-container" id="msgBox"></div>
+        <div class="msg-box" id="msgBox"></div>
 
         <div class="input-bar">
-            <input id="msgInput" placeholder="Shift+Enter 换行">
+            <input id="msgInput" placeholder="Shift+Enter换行">
             <button class="send-btn" onclick="send()">发送</button>
         </div>
     </div>
 
-    <div class="tag">
-        <span class="admin-tag" id="adminTag">管理员</span>
-        <span>V2.0 最终版</span>
-    </div>
+    <div class="footer">V2.1 修复版</div>
 </div>
 
 <script>
     let username = "";
     let uid = 0;
 
-    // 自动登录
     window.onload = () => {
         const auto = localStorage.getItem("auto") === "1";
         const user = localStorage.getItem("user");
-        const u = parseInt(localStorage.getItem("uid") || 0);
+        const u = parseInt(localStorage.getItem("uid") || "0");
         if (auto && user && u > 0) {
             username = user;
             uid = u;
@@ -233,7 +205,6 @@
         }
     };
 
-    // 登录
     async function login() {
         const user = document.getElementById("user").value.trim();
         const pwd = document.getElementById("pwd").value.trim();
@@ -253,16 +224,14 @@
         openChat();
     }
 
-    // 注册
     async function reg() {
         const user = document.getElementById("user").value.trim();
         const pwd = document.getElementById("pwd").value.trim();
         const r = await fetch(`/api/chat?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
         const d = await r.json();
-        alert(d.ok ? "成功" : "已存在");
+        alert(d.ok ? "注册成功" : "用户名已存在");
     }
 
-    // 打开聊天
     function openChat() {
         document.getElementById("loginPage").style.display = "none";
         document.getElementById("chatPage").style.display = "flex";
@@ -271,22 +240,20 @@
         if (username === "Ratstudio") {
             document.getElementById("clearBtn").style.display = "inline-block";
             document.getElementById("delBtn").style.display = "inline-block";
-            document.getElementById("adminTag").style.display = "block";
         }
-        startSync();
+        sync();
+        setInterval(sync, 2500);
     }
 
-    // 发送
     async function send() {
         const i = document.getElementById("msgInput");
-        const t = i.value.trim();
-        if (!t) return;
-        await fetch(`/api/chat?act=send&user=${encodeURIComponent(username)}&msg=${encodeURIComponent(i.value)}`);
+        const t = i.value;
+        if (!t.trim()) return;
+        await fetch(`/api/chat?act=send&user=${encodeURIComponent(username)}&msg=${encodeURIComponent(t)}`);
         i.value = "";
         sync();
     }
 
-    // 同步消息
     async function sync() {
         const r = await fetch("/api/chat?act=list");
         const list = await r.json();
@@ -299,15 +266,13 @@
             div.className = "msg " + (isMe ? "me" : "");
             div.innerHTML = `
                 <div class="msg-name">${m.user}</div>
-                <div class="msg-bubble">${m.msg.replace(/\n/g, "<br>")}</div>
-                <div class="msg-uid">UID:${m.uid}</div>
+                <div class="msg-bubble">${m.msg.replace(/\n/g,"<br>")}</div>
             `;
             box.appendChild(div);
         });
         box.scrollTop = box.scrollHeight;
     }
 
-    // 快捷键
     document.getElementById("msgInput").addEventListener("keydown", e => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -315,11 +280,16 @@
         }
     });
 
-    // 管理员
-    async function clearAll() { if (confirm("确定？")) await fetch(`/api/chat?act=clear&uid=${uid}`), sync(); }
-    async function delLast() { await fetch(`/api/chat?act=delete&uid=${uid}`), sync(); }
+    async function clearAll() {
+        if (!confirm("确定清空所有消息？")) return;
+        await fetch(`/api/chat?act=clear&uid=${uid}`);
+        sync();
+    }
 
-    function startSync() { sync(); setInterval(sync, 2500); }
+    async function delLast() {
+        await fetch(`/api/chat?act=delete&uid=${uid}`);
+        sync();
+    }
 </script>
 </body>
 </html>
