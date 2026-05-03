@@ -1,18 +1,15 @@
-// 全局持久存储（Cloudflare KV 兼容模式，永久不丢）
 let store = {
   users: [],
   msgs: []
 };
 
-// 模拟持久化（Pages 环境稳定存储）
 function get() {
-  if (globalThis.__STORE__) return globalThis.__STORE__;
+  if (globalThis.__DATA__) return globalThis.__DATA__;
   return store;
 }
 
-function set(data) {
-  store = data;
-  globalThis.__STORE__ = data;
+function save(data) {
+  globalThis.__DATA__ = data;
 }
 
 export async function onRequestGet({ request }) {
@@ -20,7 +17,6 @@ export async function onRequestGet({ request }) {
   const act = url.searchParams.get("act");
   const data = get();
 
-  // 登录
   if (act === "login") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
@@ -28,7 +24,6 @@ export async function onRequestGet({ request }) {
     return Response.json({ ok });
   }
 
-  // 注册
   if (act === "reg") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
@@ -36,28 +31,20 @@ export async function onRequestGet({ request }) {
       return Response.json({ ok: false });
     }
     data.users.push({ user, pwd });
-    set(data);
+    save(data);
     return Response.json({ ok: true });
   }
 
-  // 获取消息
   if (act === "list") {
     return Response.json(data.msgs.slice(-80));
   }
 
-  // 发送消息
   if (act === "send") {
     const user = url.searchParams.get("user");
     const msg = url.searchParams.get("msg");
-    data.msgs.push({
-      user,
-      msg,
-      time: new Date().toLocaleString()
-    });
-    if (data.msgs.length > 150) {
-      data.msgs = data.msgs.slice(-80);
-    }
-    set(data);
+    data.msgs.push({ user, msg });
+    if (data.msgs.length > 150) data.msgs = data.msgs.slice(-80);
+    save(data);
     return Response.json({ ok: true });
   }
 
