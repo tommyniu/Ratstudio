@@ -20,6 +20,7 @@
             height: 100vh
         }
 
+        /* 外层容器 统一圆角44px */
         .container {
             display: flex;
             width: 680px;
@@ -32,6 +33,7 @@
             box-shadow: 0 0 50px rgba(60, 120, 255, 0.25);
         }
 
+        /* 侧边栏 同步44px圆角 */
         .sidebar {
             width: 140px;
             background: rgba(255, 255, 255, .05);
@@ -40,6 +42,7 @@
             flex-direction: column;
             gap: 10px;
             border-right: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 44px 0 0 44px;
         }
 
         .item {
@@ -149,7 +152,7 @@
 
         .uid {
             font-size: 11px;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba255, 255, 255, 0.4;
             margin-top: 4px;
         }
 
@@ -160,28 +163,32 @@
         .input-box {
             display: flex;
             padding: 12px 20px;
-            gap: 8px;
+            gap: 10px;
             align-items: center;
         }
 
+        /* 输入框 基准高度圆角 */
         #msgInput {
             flex: 1;
-            padding: 12px;
+            height: 44px;
+            padding: 0 16px;
             border-radius: 24px;
             background: #262833;
             border: 1px solid rgba(255, 255, 255, .15);
             color: #fff;
+            outline: none;
         }
 
-        /* 👇 这里是改小后的发送按钮 */
+        /* 发送按钮 和输入框同高、同圆角 完美对齐 */
         .input-box button {
-            flex: 0 0 70px;
-            padding: 8px 12px;
-            border-radius: 12px;
+            width: 70px;
+            height: 44px;
+            border-radius: 24px;
             background: #4080ff;
             color: #fff;
             border: none;
             font-size: 14px;
+            cursor: pointer;
         }
 
         .user-info {
@@ -198,6 +205,7 @@
             padding: 6px 10px;
             border-radius: 12px;
             color: #fff;
+            cursor: pointer;
         }
 
         .admin-tag {
@@ -218,8 +226,9 @@
             font-size: 12px;
         }
 
-        input, button {
-            border-radius: 12px;
+        /* 登录注册按钮统一样式 */
+        input, button.login-reg {
+            border-radius: 16px;
             padding: 12px;
             background: #262833;
             color: #fff;
@@ -227,9 +236,10 @@
             margin-bottom: 10px;
             width: 100%;
             font-size: 15px;
+            outline: none;
         }
 
-        button {
+        button.login-reg {
             background: #4080ff;
             cursor: pointer;
             font-weight: 500;
@@ -254,8 +264,8 @@
         <div class="login" id="loginPage">
             <input id="user" placeholder="账号">
             <input id="pwd" placeholder="密码" type="password">
-            <button onclick="reg()">注册</button>
-            <button onclick="login()">登录</button>
+            <button class="login-reg" onclick="reg()">注册</button>
+            <button class="login-reg" onclick="login()">登录</button>
         </div>
 
         <div class="chat" id="chatPage">
