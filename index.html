@@ -22,7 +22,7 @@
         .container {
             display: flex;
             width: 680px;
-            height: 750px;
+            height: 720px;
             border-radius: 44px;
             overflow: hidden;
             background: rgba(255, 255, 255, .04);
@@ -61,10 +61,11 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            padding-bottom: 10px;
         }
         .top {
             background: rgba(255, 255, 255, .05);
-            padding: 20px;
+            padding: 18px 20px;
             color: #fff;
             font-weight: 600;
             display: flex;
@@ -81,23 +82,25 @@
             display: none;
             flex-direction: column;
             height: 100%;
+            padding-bottom: 8px;
         }
         .user-info {
-            padding: 12px 20px;
+            padding: 10px 20px;
             color: #ccc;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .msg-box {
-            padding: 20px;
+            padding: 15px 20px;
             overflow-y: auto;
             flex: 1;
+            margin-bottom: 6px;
         }
         .msg-item {
             max-width: 75%;
             width: fit-content;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             display: flex;
             flex-direction: column;
         }
@@ -145,15 +148,17 @@
         }
         .input-box {
             display: flex;
-            padding: 16px 20px;
+            padding: 12px 18px;
             gap: 10px;
             align-items: center;
             background: rgba(255, 255, 255, .05);
             border-top: 1px solid rgba(255, 255, 255, .08);
+            margin: 0 10px;
+            border-radius: 30px;
         }
         #msgInput {
             flex: 1;
-            height: 44px;
+            height: 42px;
             padding: 0 16px;
             border-radius: 24px;
             background: #262833;
@@ -162,8 +167,8 @@
             outline: none;
         }
         .input-box button {
-            width: 70px;
-            height: 44px;
+            width: 66px;
+            height: 42px;
             border-radius: 24px;
             background: #4080ff;
             color: #fff;
@@ -174,16 +179,17 @@
         .admin-btn {
             background: rgba(255, 80, 80, .3);
             border: none;
-            padding: 6px 10px;
+            padding: 5px 9px;
             border-radius: 12px;
             color: #fff;
             cursor: pointer;
             margin-left: 6px;
+            font-size: 12px;
         }
         .admin-tag {
             position: absolute;
             left: 20px;
-            bottom: 12px;
+            bottom: 16px;
             color: #ff4d4d;
             font-size: 12px;
             text-shadow: 0 0 6px #ff4d4d;
@@ -192,7 +198,7 @@
         .version {
             position: absolute;
             right: 18px;
-            bottom: 12px;
+            bottom: 16px;
             color: #888;
             font-size: 12px;
         }
@@ -256,14 +262,13 @@
             </div>
         </div>
         <div class="admin-tag" id="adminTag">管理员</div>
-        <div class="version">V1.4.1（UID修复）</div>
+        <div class="version">V1.4.1</div>
     </div>
 </div>
 <script>
     let username = "";
     let uid = 0;
 
-    // 清除异常缓存
     function clearBadCache() {
         localStorage.removeItem("username");
         localStorage.removeItem("uid");
@@ -276,13 +281,12 @@
         const savedUser = localStorage.getItem("username") || "";
         const savedUid = parseInt(localStorage.getItem("uid") || "0");
 
-        // 前端强校验UID
         if (autoLogin && savedUser && !isNaN(savedUid) && savedUid > 0) {
             username = savedUser;
             uid = savedUid;
             loginSuccess();
         } else if (autoLogin && (isNaN(savedUid) || savedUid <= 0)) {
-            clearBadCache(); // 异常则清缓存
+            clearBadCache();
         }
     };
 
@@ -351,7 +355,7 @@
 
         list.forEach(item => {
             const itemUid = parseInt(item.uid || "0");
-            const safeUid = isNaN(itemUid) ? 0 : itemUid; // 消息UID兜底
+            const safeUid = isNaN(itemUid) ? 0 : itemUid;
             const isMe = item.user === username;
             const div = document.createElement("div");
             div.className = "msg-item " + (isMe ? "me" : "");
@@ -369,7 +373,6 @@
         box.scrollTop = box.scrollHeight;
     }
 
-    // Shift+Enter换行
     document.getElementById("msgInput").addEventListener("keydown", e => {
         if (e.key === "Enter") {
             if (e.shiftKey) return;
