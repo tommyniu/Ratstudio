@@ -20,7 +20,6 @@
             height: 100vh
         }
 
-        /* 外层容器 统一圆角44px */
         .container {
             display: flex;
             width: 680px;
@@ -33,7 +32,6 @@
             box-shadow: 0 0 50px rgba(60, 120, 255, 0.25);
         }
 
-        /* 侧边栏 同步44px圆角 */
         .sidebar {
             width: 140px;
             background: rgba(255, 255, 255, .05);
@@ -47,7 +45,7 @@
 
         .item {
             padding: 14px;
-            border-radius: 16px;
+            border-radius: 9999px;
             color: rgba(255, 255, 255, .8);
             text-align: center;
             cursor: pointer;
@@ -65,7 +63,10 @@
 
         .main {
             flex: 1;
-            position: relative
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .top {
@@ -81,18 +82,28 @@
 
         .login {
             padding: 30px;
-            height: 630px;
+            flex: 1;
             overflow-y: auto;
         }
 
         .chat {
             display: none;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .user-info {
+            padding: 12px 20px;
+            color: #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .msg-box {
             padding: 20px;
             overflow-y: auto;
-            height: 470px;
+            flex: 1;
         }
 
         .msg-item {
@@ -150,24 +161,14 @@
             margin-left: auto;
         }
 
-        .uid {
-            font-size: 11px;
-            color: rgba255, 255, 255, 0.4;
-            margin-top: 4px;
-        }
-
-        .msg-item.me .uid {
-            text-align: right;
-        }
-
         .input-box {
             display: flex;
-            padding: 12px 20px;
+            padding: 16px 20px;
             gap: 10px;
             align-items: center;
+            margin-top: auto;
         }
 
-        /* 输入框 基准高度圆角 */
         #msgInput {
             flex: 1;
             height: 44px;
@@ -179,7 +180,6 @@
             outline: none;
         }
 
-        /* 发送按钮 和输入框同高、同圆角 完美对齐 */
         .input-box button {
             width: 70px;
             height: 44px;
@@ -189,14 +189,6 @@
             border: none;
             font-size: 14px;
             cursor: pointer;
-        }
-
-        .user-info {
-            padding: 12px 20px;
-            color: #ccc;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .admin-btn {
@@ -226,7 +218,6 @@
             font-size: 12px;
         }
 
-        /* 登录注册按钮统一样式 */
         input, button.login-reg {
             border-radius: 16px;
             padding: 12px;
@@ -274,6 +265,7 @@
                 <button class="admin-btn" id="clearBtn" style="display:none;" onclick="clearAllMsg()">清空消息</button>
             </div>
             <div class="msg-box" id="msgBox"></div>
+
             <div class="input-box">
                 <input id="msgInput" placeholder="输入消息...">
                 <button onclick="sendMsg()">发送</button>
@@ -288,7 +280,6 @@
 <script>
     let username = "";
 
-    // 登录
     async function login() {
         let u = document.getElementById("user").value.trim();
         let p = document.getElementById("pwd").value.trim();
@@ -298,15 +289,13 @@
         if (d.ok) {
             username = u;
             document.getElementById("loginPage").style.display = "none";
-            document.getElementById("chatPage").style.display = "block";
-            document.getElementById("userInfoText").innerText = `用户：${username}`;
+            document.getElementById("chatPage").style.display = "flex";
             syncMsg();
         } else {
             alert("登录失败");
         }
     }
 
-    // 注册
     async function reg() {
         let u = document.getElementById("user").value.trim();
         let p = document.getElementById("pwd").value.trim();
@@ -316,7 +305,6 @@
         alert(d.ok ? "注册成功" : "注册失败");
     }
 
-    // 发送消息
     async function sendMsg() {
         let i = document.getElementById("msgInput");
         let m = i.value.trim();
@@ -326,7 +314,6 @@
         syncMsg();
     }
 
-    // 同步消息
     async function syncMsg() {
         let res = await fetch("/api/chat?act=list");
         let list = await res.json();
@@ -336,34 +323,44 @@
             let isMe = item.user === username;
             let div = document.createElement("div");
             div.className = "msg-item " + (isMe ? "me" : "");
+            // 显示换行
+            let showMsg = item.msg.replace(/\n/g, "<br>");
             div.innerHTML = `
                 <div class="name-row">
                     <div class="avatar"></div>
                     <div class="username">${item.user}</div>
                 </div>
-                <div class="bubble">${item.msg.replace(/</g, "&lt;")}</div>
+                <div class="bubble">${showMsg}</div>
             `;
             box.appendChild(div);
         });
         box.scrollTop = box.scrollHeight;
     }
 
-    // Ctrl + Enter 发送
-    document.getElementById("msgInput").addEventListener("keydown", e => {
-        if (e.ctrlKey && e.key === "Enter") sendMsg();
+    // ———————————————————— 这里是 Shift+Enter 换行 ————————————————————
+    const msgInput = document.getElementById("msgInput");
+    msgInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            if (e.shiftKey) {
+                // Shift + Enter = 换行
+                return true;
+            } else {
+                // 直接 Enter = 发送
+                e.preventDefault();
+                sendMsg();
+            }
+        }
     });
 
     setInterval(syncMsg, 2000);
 
-    // 侧边栏切换
     function switchTo(name) {
         if (name === "chat") {
             document.getElementById("loginPage").style.display = "none";
-            document.getElementById("chatPage").style.display = "block";
+            document.getElementById("chatPage").style.display = "flex";
         }
     }
 
-    // 清空消息（管理员）
     async function clearAllMsg() {
         if (!confirm("确定清空？")) return;
         await fetch("/api/chat?act=clear");
