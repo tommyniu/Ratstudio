@@ -13,16 +13,17 @@
         }
         body {
             background: linear-gradient(135deg, #0f1419, #0a0c12);
+            height: 100vh;
+            /* 关键：禁止溢出、不留底部空白 */
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            overflow: hidden;
         }
         .container {
             display: flex;
             width: 680px;
-            height: 750px;
+            height: 720px;
             border-radius: 44px;
             overflow: hidden;
             background: rgba(255, 255, 255, .04);
@@ -43,7 +44,7 @@
         .item {
             padding: 14px;
             border-radius: 9999px;
-            color: rgba(255, 255, 255, .8);
+            color: rgba255, 255, 255, .8;
             text-align: center;
             cursor: pointer;
             transition: all .2s;
@@ -60,7 +61,8 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            padding-bottom: 20px;
+            /* 取消底部内边距，让输入框贴底 */
+            padding-bottom: 0;
         }
         .top {
             padding: 20px;
@@ -85,12 +87,11 @@
             justify-content: space-between;
             align-items: center;
         }
-        /* 聊天框上移 + 不被遮挡 */
         .msg-box {
             flex: 1;
             padding: 10px 20px;
             overflow-y: auto;
-            margin-bottom: 20px;
+            margin-bottom: 0;
         }
         .msg-item {
             max-width: 75%;
@@ -140,15 +141,17 @@
         .msg-item.me .uid {
             text-align: right;
         }
+        /* 输入框贴底 + 不被遮挡修复 */
         .input-box {
             display: flex;
             align-items: center;
-            padding: 15px 20px;
+            padding: 12px 16px;
             gap: 10px;
             border-top: 1px solid rgba(255, 255, 255, .08);
             background: rgba(255,255,255,.04);
-            margin: 0 10px;
-            border-radius: 30px;
+            margin: 0;
+            border-radius: 0;
+            width: 100%;
         }
         #msgInput {
             flex: 1;
@@ -178,10 +181,11 @@
             cursor: pointer;
             margin-left: 6px;
         }
+        /* 底部文字绝对定位限制在容器内，不溢出遮挡 */
         .admin-tag {
             position: absolute;
             left: 20px;
-            bottom: 14px;
+            bottom: 6px;
             color: #ff4d4d;
             font-size: 12px;
             display: none;
@@ -189,7 +193,7 @@
         .version {
             position: absolute;
             right: 20px;
-            bottom: 14px;
+            bottom: 6px;
             color: #888;
             font-size: 12px;
         }
@@ -331,12 +335,13 @@
         let box = document.getElementById("msgBox");
         box.innerHTML = "";
         list.forEach(item=>{
+            // 修复undefined
+            let showUser = item.user ?? "未知用户";
             let itemUid = parseInt(item.uid||"0");
             let isMe = item.user === username;
             let div = document.createElement("div");
             div.className = "msg-item " + (isMe?"me":"");
             let html = item.msg.replace(/\n/g,"<br>");
-            let showUser = item.user || "Unknown";
             div.innerHTML = `
                 <div class="name-row">
                     <div class="avatar"></div>
