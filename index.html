@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>聊天室 - RatStudio的小站</title>
+    <title>聊天室 - Ratstudio的小站</title>
     <style>
         * {
             box-sizing: border-box;
@@ -112,10 +112,6 @@
             margin-bottom: 16px;
             display: flex;
             flex-direction: column;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            padding: 0;
         }
 
         .msg-item.me {
@@ -150,8 +146,6 @@
             border-radius: 18px;
             background: rgba(255, 255, 255, 0.07);
             color: #fff;
-            width: fit-content;
-            max-width: 100%;
             white-space: pre-wrap;
             word-break: break-all;
         }
@@ -159,6 +153,16 @@
         .msg-item.me .bubble {
             background: rgba(60, 120, 255, .25);
             margin-left: auto;
+        }
+
+        .uid {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 4px;
+        }
+
+        .msg-item.me .uid {
+            text-align: right;
         }
 
         .input-box {
@@ -198,6 +202,7 @@
             border-radius: 12px;
             color: #fff;
             cursor: pointer;
+            margin-left: 6px;
         }
 
         .admin-tag {
@@ -235,16 +240,25 @@
             cursor: pointer;
             font-weight: 500;
         }
+
+        .auto-login {
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="sidebar">
-        <div class="item active" onclick="switchTo('chat')">聊天室</div>
-        <div class="item" onclick="alert('即将上线')">论坛</div>
-        <div class="item" onclick="alert('即将上线')">更新日志</div>
-        <div class="item" onclick="alert('即将上线')">开发规划</div>
+        <div class="item active">聊天室</div>
+        <div class="item" onclick="alert('开发中')">论坛</div>
+        <div class="item" onclick="alert('开发中')">更新日志</div>
+        <div class="item" onclick="alert('开发中')">开发规划</div>
     </div>
 
     <div class="main">
@@ -255,6 +269,9 @@
         <div class="login" id="loginPage">
             <input id="user" placeholder="账号">
             <input id="pwd" placeholder="密码" type="password">
+            <div class="auto-login">
+                <input type="checkbox" id="autoLogin"> 10天自动登录
+            </div>
             <button class="login-reg" onclick="reg()">注册</button>
             <button class="login-reg" onclick="login()">登录</button>
         </div>
@@ -262,7 +279,10 @@
         <div class="chat" id="chatPage">
             <div class="user-info">
                 <span id="userInfoText"></span>
-                <button class="admin-btn" id="clearBtn" style="display:none;" onclick="clearAllMsg()">清空消息</button>
+                <div>
+                    <button class="admin-btn" id="clearBtn" style="display:none;" onclick="clearAllMsg()">清空</button>
+                    <button class="admin-btn" id="delBtn" style="display:none;" onclick="deleteLastMsg()">撤回</button>
+                </div>
             </div>
             <div class="msg-box" id="msgBox"></div>
 
@@ -273,98 +293,130 @@
         </div>
 
         <div class="admin-tag" id="adminTag">管理员</div>
-        <div class="version">V1.2.3</div>
+        <div class="version">V2.0</div>
     </div>
 </div>
 
 <script>
-    let username = "";
+    let username = localStorage.getItem("username") || "";
+    let uid = localStorage.getItem("uid") || "";
+    let autoLogin = localStorage.getItem("autoLogin") === "true";
 
+    window.onload = async function () {
+        if (autoLogin && username && uid) {
+            loginSuccess(username, uid);
+        }
+    };
+
+    // 登录
     async function login() {
-        let u = document.getElementById("user").value.trim();
-        let p = document.getElementById("pwd").value.trim();
-        if (!u || !p) return alert("请输入账号密码");
-        let res = await fetch(`/api/chat?act=login&user=${u}&pwd=${p}`);
-        let d = await res.json();
-        if (d.ok) {
-            username = u;
-            document.getElementById("loginPage").style.display = "none";
-            document.getElementById("chatPage").style.display = "flex";
-            syncMsg();
+        const user = document.getElementById("user").value.trim();
+        const pwd = document.getElementById("pwd").value.trim();
+        const auto = document.getElementById("autoLogin").checked;
+        if (!user || !pwd) return alert("请输入账号密码");
+
+        const res = await fetch(`/api/chat?act=login&user=${user}&pwd=${pwd}`);
+        const data = await res.json();
+        if (data.ok) {
+            loginSuccess(user, data.uid);
+            if (auto) {
+                localStorage.setItem("username", user);
+                localStorage.setItem("uid", data.uid);
+                localStorage.setItem("autoLogin", "true");
+            }
         } else {
-            alert("登录失败");
+            alert("账号或密码错误");
         }
     }
 
+    // 注册
     async function reg() {
-        let u = document.getElementById("user").value.trim();
-        let p = document.getElementById("pwd").value.trim();
-        if (!u || !p) return alert("请输入账号密码");
-        let res = await fetch(`/api/chat?act=reg&user=${u}&pwd=${p}`);
-        let d = await res.json();
-        alert(d.ok ? "注册成功" : "注册失败");
+        const user = document.getElementById("user").value.trim();
+        const pwd = document.getElementById("pwd").value.trim();
+        if (!user || !pwd) return alert("请输入账号密码");
+        const res = await fetch(`/api/chat?act=reg&user=${user}&pwd=${pwd}`);
+        const data = await res.json();
+        alert(data.ok ? "注册成功" : "用户名已存在");
     }
 
+    // 登录成功
+    function loginSuccess(user, myUid) {
+        username = user;
+        uid = parseInt(myUid);
+        document.getElementById("loginPage").style.display = "none";
+        document.getElementById("chatPage").style.display = "flex";
+        document.getElementById("userInfoText").innerText = `${username} (UID:${uid})`;
+
+        // 管理员权限
+        if (username === "Ratstudio") {
+            document.getElementById("clearBtn").style.display = "inline-block";
+            document.getElementById("delBtn").style.display = "inline-block";
+            document.getElementById("adminTag").style.display = "block";
+        }
+        startSync();
+    }
+
+    // 发送
     async function sendMsg() {
-        let i = document.getElementById("msgInput");
-        let m = i.value.trim();
-        if (!m || !username) return;
-        await fetch(`/api/chat?act=send&user=${username}&msg=${encodeURIComponent(m)}`);
+        const i = document.getElementById("msgInput");
+        const msg = i.value.trim();
+        if (!msg) return;
+        await fetch(`/api/chat?act=send&user=${username}&msg=${encodeURIComponent(msg)}`);
         i.value = "";
         syncMsg();
     }
 
+    // 消息同步
     async function syncMsg() {
-        let res = await fetch("/api/chat?act=list");
-        let list = await res.json();
-        let box = document.getElementById("msgBox");
+        const res = await fetch("/api/chat?act=list");
+        const list = await res.json();
+        const box = document.getElementById("msgBox");
         box.innerHTML = "";
-        list.forEach(item => {
-            let isMe = item.user === username;
-            let div = document.createElement("div");
+
+        list.forEach((item, index) => {
+            const isMe = item.user === username;
+            const div = document.createElement("div");
             div.className = "msg-item " + (isMe ? "me" : "");
-            // 显示换行
-            let showMsg = item.msg.replace(/\n/g, "<br>");
+            const showMsg = item.msg.replace(/\n/g, "<br>");
             div.innerHTML = `
                 <div class="name-row">
                     <div class="avatar"></div>
                     <div class="username">${item.user}</div>
                 </div>
                 <div class="bubble">${showMsg}</div>
+                <div class="uid">UID: ${item.uid}</div>
             `;
             box.appendChild(div);
         });
+
         box.scrollTop = box.scrollHeight;
     }
 
-    // ———————————————————— 这里是 Shift+Enter 换行 ————————————————————
-    const msgInput = document.getElementById("msgInput");
-    msgInput.addEventListener("keydown", (e) => {
+    // Shift+Enter 换行
+    document.getElementById("msgInput").addEventListener("keydown", e => {
         if (e.key === "Enter") {
-            if (e.shiftKey) {
-                // Shift + Enter = 换行
-                return true;
-            } else {
-                // 直接 Enter = 发送
-                e.preventDefault();
-                sendMsg();
-            }
+            if (e.shiftKey) return;
+            e.preventDefault();
+            sendMsg();
         }
     });
 
-    setInterval(syncMsg, 2000);
-
-    function switchTo(name) {
-        if (name === "chat") {
-            document.getElementById("loginPage").style.display = "none";
-            document.getElementById("chatPage").style.display = "flex";
-        }
+    // 清空
+    async function clearAllMsg() {
+        if (!confirm("确定清空全部消息？")) return;
+        await fetch(`/api/chat?act=clear&uid=${uid}`);
+        syncMsg();
     }
 
-    async function clearAllMsg() {
-        if (!confirm("确定清空？")) return;
-        await fetch("/api/chat?act=clear");
+    // 撤回最后一条（管理员）
+    async function deleteLastMsg() {
+        await fetch(`/api/chat?act=delete&uid=${uid}&index=-1`);
         syncMsg();
+    }
+
+    function startSync() {
+        syncMsg();
+        setInterval(syncMsg, 2500);
     }
 </script>
 </body>
