@@ -12,13 +12,12 @@
             font-family: system-ui
         }
         body {
-            background: linear-gradient(135deg, #0f1419, #0a0c19);
+            background: linear-gradient(135deg, #0f1419, #0a0c12);
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
             overflow: hidden;
-            margin: 0;
         }
         .container {
             display: flex;
@@ -30,6 +29,7 @@
             backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, .1);
             box-shadow: 0 0 50px rgba(60, 120, 255, 0.25);
+            /* 关键：作为内部绝对定位父容器 */
             position: relative;
         }
         .sidebar {
@@ -45,7 +45,7 @@
         .item {
             padding: 14px;
             border-radius: 9999px;
-            color: #ffffff;
+            color: #fff;
             text-align: center;
             cursor: pointer;
             transition: all .2s;
@@ -62,7 +62,8 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            padding-bottom: 70px;
+            /* 给底部输入框留高度 */
+            padding-bottom: 60px;
         }
         .top {
             padding: 20px;
@@ -92,21 +93,16 @@
             padding: 10px 20px;
             overflow-y: auto;
         }
-        /* 消息布局修复 不遮挡头像昵称 */
+        /* 消息修复：不拉长、不遮挡头像 */
         .msg-item {
-            width: 100%;
+            max-width: 75%;
+            width: fit-content;
             margin-bottom: 16px;
             display: flex;
             flex-direction: column;
         }
         .msg-item.me {
-            align-items: flex-end;
-        }
-        .msg-item.other {
-            align-items: flex-start;
-        }
-        .msg-wrap {
-            max-width: 75%;
+            margin-left: auto;
         }
         .name-row {
             display: flex;
@@ -135,6 +131,7 @@
             color: #fff;
             white-space: pre-wrap;
             word-break: break-all;
+            width: fit-content;
         }
         .msg-item.me .bubble {
             background: rgba(60, 120, 255, .25);
@@ -147,19 +144,19 @@
         .msg-item.me .uid {
             text-align: right;
         }
-        /* 输入框悬浮固定底部 不滚动、不塌陷 */
+        /* 输入框：锁死在容器最底部、同宽、不往外飘 */
         .input-box {
             position: absolute;
-            bottom: 0;
             left: 0;
+            bottom: 0;
             width: 100%;
             display: flex;
             align-items: center;
-            padding: 12px 16px;
+            padding: 15px 20px;
             gap: 10px;
             border-top: 1px solid rgba(255, 255, 255, .08);
-            background: #0f1419;
-            z-index: 99;
+            background: rgba(255,255,255,.04);
+            border-radius: 0 0 44px 0;
         }
         #msgInput {
             flex: 1;
@@ -170,7 +167,6 @@
             border: 1px solid rgba(255, 255, 255, .15);
             color: #fff;
             outline: none;
-            resize: none;
         }
         .input-box button {
             width: 70px;
@@ -193,19 +189,17 @@
         .admin-tag {
             position: absolute;
             left: 20px;
-            bottom: 75px;
+            bottom: 70px;
             color: #ff4d4d;
             font-size: 12px;
             display: none;
-            z-index: 10;
         }
         .version {
             position: absolute;
             right: 20px;
-            bottom: 75px;
+            bottom: 70px;
             color: #888;
             font-size: 12px;
-            z-index: 10;
         }
         input, button.login-reg {
             border-radius: 16px;
@@ -267,6 +261,12 @@
         <div class="admin-tag" id="adminTag">管理员</div>
         <div class="version"></div>
     </div>
+
+    <!-- 输入框留在container内部，绝对贴底同宽 -->
+    <div class="input-box">
+        <input id="msgInput" placeholder="Shift+Enter换行">
+        <button onclick="sendMsg()">发送</button>
+    </div>
 </div>
 
 <script>
@@ -277,9 +277,7 @@
         const items = document.querySelectorAll('.item');
         items.forEach(i => i.classList.remove('active'));
         items[index].classList.add('active');
-        if (index !== 0) {
-            alert('敬请期待');
-        }
+        if (index !== 0) alert('敬请期待');
     }
 
     window.onload = async function () {
@@ -348,40 +346,30 @@
 
         box.innerHTML = "";
         list.forEach(item=>{
-            let showUser = item.user || "未知用户";
+            let showUser = item.user ?? "未知用户";
             let itemUid = parseInt(item.uid||"0");
             let isMe = item.user === username;
-            
             let div = document.createElement("div");
-            div.className = "msg-item " + (isMe ? "me" : "other");
+            div.className = "msg-item " + (isMe?"me":"");
             let html = item.msg.replace(/\n/g,"<br>");
-            
             div.innerHTML = `
-                <div class="msg-wrap">
-                    <div class="name-row">
-                        <div class="avatar"></div>
-                        <div class="username">${showUser}</div>
-                    </div>
-                    <div class="bubble">${html}</div>
-                    <div class="uid">UID:${itemUid}</div>
+                <div class="name-row">
+                    <div class="avatar"></div>
+                    <div class="username">${showUser}</div>
                 </div>
+                <div class="bubble">${html}</div>
+                <div class="uid">UID:${itemUid}</div>
             `;
             box.appendChild(div);
         });
 
-        if (isAtBottom) {
-            box.scrollTop = box.scrollHeight;
-        }
+        if (isAtBottom) box.scrollTop = box.scrollHeight;
     }
 
-    // 修复Shift+Enter换行，Enter发送
-    document.getElementById("msgInput").addEventListener("keydown", function(e){
-        if (e.key === 'Enter') {
-            // Shift+Enter 换行
-            if (e.shiftKey) {
-                return true;
-            }
-            // 直接Enter发送
+    // 修复Shift+Enter换行
+    document.getElementById("msgInput").addEventListener("keydown",e=>{
+        if(e.key==="Enter"){
+            if(e.shiftKey) return;
             e.preventDefault();
             sendMsg();
         }
@@ -402,12 +390,5 @@
         setInterval(syncMsg,2500);
     }
 </script>
-
-<!-- 悬浮输入框 单独放这 -->
-<div class="input-box">
-    <textarea id="msgInput" placeholder="Shift+Enter换行"></textarea>
-    <button onclick="sendMsg()">发送</button>
-</div>
-
 </body>
 </html>
