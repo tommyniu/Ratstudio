@@ -2,31 +2,43 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const act = url.searchParams.get("act");
 
+  // ==============================================
+  // 自动兼容任何 KV 结构，不管以前存的啥都能读
+  // ==============================================
   async function getData() {
     const data = await env.CHAT_DB.get("chat_data");
-    return data ? JSON.parse(data) : { 
-      users: [], 
-      msgs: [], 
-      nextUID: 2,
-      posts: [],
-      nextPostId: 1
-    };
+    let parsed = { users: [], msgs: [], posts: [], nextUID: 2, nextPostId: 1 };
+    if (data) {
+      try {
+        const tmp = JSON.parse(data);
+        parsed.users = tmp.users || [];
+        parsed.msgs = tmp.msgs || [];
+        parsed.posts = tmp.posts || [];
+        parsed.nextUID = tmp.nextUID || 2;
+        parsed.nextPostId = tmp.nextPostId || 1;
+      } catch (e) {}
+    }
+    return parsed;
   }
 
   const data = await getData();
-  async function save(d) { 
-    await env.CHAT_DB.put("chat_data", JSON.stringify(d)); 
+  async function save(d) {
+    await env.CHAT_DB.put("chat_data", JSON.stringify(d));
   }
 
+  // ------------------------------
   // 登录
+  // ------------------------------
   if (act === "login") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
     const u = data.users.find(i => i.user === user && i.pwd === pwd);
-    return new Response(u ? u.uid.toString() : "");
+    return new Response(u ? String(u.uid) : "");
   }
 
+  // ------------------------------
   // 注册
+  // ------------------------------
   if (act === "reg") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
@@ -37,24 +49,35 @@ export async function onRequestGet({ request, env }) {
     return new Response("ok");
   }
 
+  // ------------------------------
   // 消息列表
+  // ------------------------------
   if (act === "msg") {
     return Response.json(data.msgs || []);
   }
 
+  // ------------------------------
   // 发消息
+  // ------------------------------
   if (act === "send") {
     const uid = url.searchParams.get("uid");
     const msg = url.searchParams.get("msg");
     const u = data.users.find(i => i.uid == uid);
     if (!u || !msg) return new Response("no");
-    data.msgs.push({ uid: u.uid, user: u.user, msg, time: Date.now() });
+    data.msgs.push({
+      uid: u.uid,
+      user: u.user,
+      msg,
+      time: Date.now()
+    });
     if (data.msgs.length > 200) data.msgs = data.msgs.slice(-200);
     await save(data);
     return new Response("ok");
   }
 
-  // 清空消息
+  // ------------------------------
+  // 清空消息（管理员）
+  // ------------------------------
   if (act === "clear") {
     const uid = parseInt(url.searchParams.get("uid") || 0);
     const admin = data.users.find(x => x.uid === uid && x.user === "Ratstudio");
@@ -64,57 +87,63 @@ export async function onRequestGet({ request, env }) {
     return new Response("ok");
   }
 
-  // 撤回最后一条
+  // ------------------------------
+  // 删除最后一条（管理员）
+  // ------------------------------
   if (act === "delete") {
     const uid = parseInt(url.searchParams.get("uid") || 0);
     const admin = data.users.find(x => x.uid === uid && x.user === "Ratstudio");
     if (!admin) return new Response("no");
-    if(data.msgs.length) data.msgs.pop();
+    if (data.msgs.length > 0) data.msgs.pop();
     await save(data);
     return new Response("ok");
   }
 
-  // ========== 论坛接口 补全 ==========
-  // 获取所有帖子
+  // ------------------------------
+  // 论坛 - 帖子列表
+  // ------------------------------
   if (act === "posts") {
     return Response.json(data.posts || []);
   }
 
-  // 发布帖子
+  // ------------------------------
+  // 论坛 - 发布帖子
+  // ------------------------------
   if (act === "createPost") {
     const uid = url.searchParams.get("uid");
-    const user = data.users.find(u => u.uid == uid);
     const title = url.searchParams.get("title");
     const content = url.searchParams.get("content");
-    if(!user || !title || !content) return new Response("err");
+    const u = data.users.find(i => i.uid == uid);
+    if (!u || !title || !content) return new Response("err");
 
-    const newPost = {
+    data.posts.push({
       postId: data.nextPostId++,
-      uid: user.uid,
-      user: user.user,
+      uid: u.uid,
+      user: u.user,
       title,
       content,
       time: new Date().toLocaleString(),
       like: 0,
       liked: []
-    };
-    data.posts.push(newPost);
+    });
     await save(data);
     return new Response("ok");
   }
 
-  // 点赞
+  // ------------------------------
+  // 论坛 - 点赞
+  // ------------------------------
   if (act === "like") {
     const uid = url.searchParams.get("uid");
     const postId = parseInt(url.searchParams.get("postId"));
-    const p = data.posts.find(x => x.postId === postId);
-    if(!p) return new Response("err");
+    const post = data.posts.find(p => p.postId === postId);
+    if (!post) return new Response("err");
 
-    if(p.liked.includes(uid)){
-      return new Response("repeat");
-    }
-    p.like++;
-    p.liked.push(uid);
+    if (!post.liked) post.liked = [];
+    if (post.liked.includes(uid)) return new Response("repeat");
+
+    post.like = (post.like || 0) + 1;
+    post.liked.push(uid);
     await save(data);
     return new Response("ok");
   }
