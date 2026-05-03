@@ -114,59 +114,44 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <script>
 let username = "", uid = "";
 const ADMIN = "Ratstudio";
-const API = "https://api.ratstudio-official.pages.dev";
 
 window.onload = function () {
   let u = localStorage.getItem("username");
   let id = localStorage.getItem("uid");
   if (u && id) { 
-    username = u; 
-    uid = id; 
-    if(document.getElementById("loginPage") && document.getElementById("chatPage")){
-      loginSuccess(); 
-    }
+    username = u;
+    uid = id;
+    loginSuccess();
   }
 };
 
 async function login() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  fetch(`${API}/?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
+  fetch(`/?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
   .then(r=>r.text()).then(t=>{
     if(!t){alert("登录失败");return;}
     localStorage.setItem("username", user);
     localStorage.setItem("uid", t);
-    username = user; uid = t; 
-    if(document.getElementById("loginPage") && document.getElementById("chatPage")){
-      loginSuccess(); 
-    }
+    username = user; uid = t; loginSuccess();
   });
 }
 
 async function reg() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  fetch(`${API}/?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
+  fetch(`/?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
   .then(r=>r.text()).then(t=>{ alert(t==="ok"?"注册成功":"已存在"); });
 }
 
 function loginSuccess() {
-  const loginPage = document.getElementById("loginPage");
-  const chatPage = document.getElementById("chatPage");
-  const userInfoText = document.getElementById("userInfoText");
-  
-  if(loginPage) loginPage.style.display = "none";
-  if(chatPage) chatPage.style.display = "flex";
-  if(userInfoText) userInfoText.innerText = username + " (" + uid + ")";
-
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("chatPage").style.display = "flex";
+  document.getElementById("userInfoText").innerText = username + " (" + uid + ")";
   if (username === ADMIN) {
-    const clearBtn = document.getElementById("clearBtn");
-    const delBtn = document.getElementById("delBtn");
-    const bottomAdminTip = document.getElementById("bottomAdminTip");
-    
-    if(clearBtn) clearBtn.style.display = "inline-block";
-    if(delBtn) delBtn.style.display = "inline-block";
-    if(bottomAdminTip) bottomAdminTip.style.display = "block";
+    document.getElementById("clearBtn").style.display = "inline-block";
+    document.getElementById("delBtn").style.display = "inline-block";
+    document.getElementById("bottomAdminTip").style.display = "block";
   }
   loadMsg();
 }
@@ -174,20 +159,15 @@ function loginSuccess() {
 async function sendMsg() {
   let txt = document.getElementById("msgInput").value;
   if (!txt) return;
-  fetch(`${API}/?act=send&uid=${uid}&msg=${encodeURIComponent(txt)}`)
-  .then(()=>{ 
-    document.getElementById("msgInput").value = ""; 
-    loadMsg(); 
-  });
+  fetch(`/?act=send&uid=${uid}&msg=${encodeURIComponent(txt)}`)
+  .then(()=>{ document.getElementById("msgInput").value = ""; loadMsg(); });
 }
 
 async function loadMsg() {
-  fetch(`${API}/?act=msg`)
+  fetch("/?act=msg")
   .then(r=>r.json())
   .then(list=>{
     let box = document.getElementById("msgBox");
-    if(!box) return;
-    
     box.innerHTML = "";
     list.forEach(m=>{
       let div = document.createElement("div");
@@ -205,8 +185,8 @@ async function loadMsg() {
   });
 }
 
-async function clearAllMsg() { fetch(`${API}/?act=clear&uid=${uid}`).then(loadMsg); }
-async function deleteLastMsg() { fetch(`${API}/?act=delete&uid=${uid}`).then(loadMsg); }
+async function clearAllMsg() { fetch(`/?act=clear&uid=${uid}`).then(loadMsg); }
+async function deleteLastMsg() { fetch(`/?act=delete&uid=${uid}`).then(loadMsg); }
 </script>
 </body>
 </html>
