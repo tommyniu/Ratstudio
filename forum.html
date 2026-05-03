@@ -108,7 +108,8 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 </div>
 
 <script>
-// 安全加载
+const API = "https://api.ratstudio-official.pages.dev";
+
 window.onload = function(){
   const user = localStorage.getItem('username');
   const uid = localStorage.getItem('uid');
@@ -136,14 +137,14 @@ window.onload = function(){
     const content = document.getElementById('content')?.value;
     if (!title || !content) { alert('不能为空'); return; }
 
-    await fetch(`/?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
+    await fetch(`${API}/?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
     hidePost();
     loadPosts();
   }
 
   window.loadPosts = async function() {
     try {
-      const r = await fetch("/?act=posts");
+      const r = await fetch(`${API}/?act=posts`);
       const list = await r.json();
       postsData = list;
       renderList();
@@ -218,7 +219,7 @@ window.onload = function(){
 
   window.like = async function(id) {
     try {
-      await fetch(`/?act=like&uid=${uid}&postId=${id}`);
+      await fetch(`${API}/?act=like&uid=${uid}&postId=${id}`);
       loadPosts();
     } catch (e) { console.error(e); }
   }
