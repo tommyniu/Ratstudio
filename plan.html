@@ -9,8 +9,7 @@
 body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items:center;justify-content:center;height:100vh}
 .container{
   display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;
-  background:rgba(255,255,255,.04);
-  backdrop-filter:blur(30px);
+  background:rgba(255,255,255,.04);backdrop-filter:blur(30px);
   border:1px solid rgba(255,255,255,.1);
   box-shadow:0 0 50px rgba(60,120,255,0.25);
 }
@@ -21,13 +20,11 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 }
 .item{
   padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;
-  cursor:pointer;transition:all 0.2s;
-  border:1px solid transparent;
+  cursor:pointer;transition:all 0.2s;border:1px solid transparent;
 }
 .item:hover,.item.active{
   background:rgba(60,130,255,.25);color:#fff;
-  border-color:rgba(100,160,255,0.4);
-  box-shadow:0 0 12px rgba(80,140,255,0.35);
+  border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35);
 }
 .main{flex:1;position:relative}
 .top{
@@ -35,29 +32,13 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
   display:flex;justify-content:space-between;align-items:center;
   border-bottom:1px solid rgba(255,255,255,.08);
 }
-.content{
-  padding:30px;
-  color:#fff;
-}
-.plan-box{
-  background:rgba(255,255,255,.07);
-  border-radius:18px;
-  padding:20px;
-  margin-bottom:16px;
-  border:1px solid rgba(255,255,255,.12);
-}
-.plan-box h3{
-  color:#6cf;
-  margin-bottom:12px;
-  font-size:16px;
-}
-.plan-box li{
-  margin-left:20px;
-  line-height:1.6;
-  margin-bottom:6px;
-}
+.content{padding:30px;color:#fff;}
+.plan-box{background:rgba(255,255,255,.07);border-radius:18px;padding:20px;margin-bottom:16px;border:1px solid rgba(255,255,255,.12);}
+.plan-box h3{color:#6cf;margin-bottom:12px;font-size:16px;}
+.plan-box li{margin-left:20px;line-height:1.6;margin-bottom:6px;}
 .version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
 </style>
+<script src="version.js"></script>
 </head>
 <body>
 <div class="container">
@@ -68,11 +49,8 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <div class="item active">开发规划</div>
 </div>
 <div class="main">
-<div class="top">
-<span>开发规划</span>
-</div>
+<div class="top"><span>开发规划</span></div>
 <div class="content">
-
 <div class="plan-box">
 <h3>📌 近期规划</h3>
 <ul>
@@ -82,7 +60,6 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <li>时间显示：显示发帖时间，记录点赞、注册、登录时间等</li>
 </ul>
 </div>
-
 <div class="plan-box">
 <h3>🚀 中期规划</h3>
 <ul>
@@ -92,16 +69,14 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <li>UI：增加亮色暗色模式切换，添加按钮点击弹性动画</li>
 </ul>
 </div>
-
 <div class="plan-box">
 <h3>🔮 远期 / 超远期规划</h3>
 <ul>
 <li>待定</li>
 </ul>
 </div>
-
 </div>
-<div class="version">V1.3.1</div>
+<div class="version version-text"></div>
 </div>
 </div>
 </body>
