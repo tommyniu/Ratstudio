@@ -14,7 +14,6 @@
         body {
             background: linear-gradient(135deg, #0f1419, #0a0c12);
             height: 100vh;
-            /* 关键：禁止溢出、不留底部空白 */
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -44,7 +43,7 @@
         .item {
             padding: 14px;
             border-radius: 9999px;
-            color: rgba255, 255, 255, .8;
+            color: rgba(255, 255, 255, .8);
             text-align: center;
             cursor: pointer;
             transition: all .2s;
@@ -61,7 +60,6 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            /* 取消底部内边距，让输入框贴底 */
             padding-bottom: 0;
         }
         .top {
@@ -93,15 +91,25 @@
             overflow-y: auto;
             margin-bottom: 0;
         }
+        /* 关键修复：气泡宽度自适应，不强行占75% */
         .msg-item {
-            max-width: 75%;
-            width: fit-content;
+            width: 100%; /* 让item撑满父级，方便左右对齐 */
             margin-bottom: 16px;
             display: flex;
             flex-direction: column;
         }
+        .msg-item .bubble-wrap {
+            max-width: 75%; /* 最大宽度限制 */
+            width: fit-content; /* 内容自适应宽度 */
+        }
         .msg-item.me {
-            margin-left: auto;
+            align-items: flex-end; /* 自己的消息右对齐 */
+        }
+        .msg-item.me .bubble-wrap {
+            /* 右边气泡同样自适应，不留白 */
+        }
+        .msg-item.other {
+            align-items: flex-start; /* 别人的消息左对齐 */
         }
         .name-row {
             display: flex;
@@ -141,7 +149,6 @@
         .msg-item.me .uid {
             text-align: right;
         }
-        /* 输入框贴底 + 不被遮挡修复 */
         .input-box {
             display: flex;
             align-items: center;
@@ -181,7 +188,6 @@
             cursor: pointer;
             margin-left: 6px;
         }
-        /* 底部文字绝对定位限制在容器内，不溢出遮挡 */
         .admin-tag {
             position: absolute;
             left: 20px;
@@ -335,20 +341,21 @@
         let box = document.getElementById("msgBox");
         box.innerHTML = "";
         list.forEach(item=>{
-            // 修复undefined
             let showUser = item.user ?? "未知用户";
             let itemUid = parseInt(item.uid||"0");
             let isMe = item.user === username;
             let div = document.createElement("div");
-            div.className = "msg-item " + (isMe?"me":"");
+            div.className = "msg-item " + (isMe ? "me" : "other");
             let html = item.msg.replace(/\n/g,"<br>");
             div.innerHTML = `
-                <div class="name-row">
-                    <div class="avatar"></div>
-                    <div class="username">${showUser}</div>
+                <div class="bubble-wrap">
+                    <div class="name-row">
+                        <div class="avatar"></div>
+                        <div class="username">${showUser}</div>
+                    </div>
+                    <div class="bubble">${html}</div>
+                    <div class="uid">UID:${itemUid}</div>
                 </div>
-                <div class="bubble">${html}</div>
-                <div class="uid">UID:${itemUid}</div>
             `;
             box.appendChild(div);
         });
