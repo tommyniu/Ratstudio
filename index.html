@@ -29,7 +29,6 @@
             backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, .1);
             box-shadow: 0 0 50px rgba(60, 120, 255, 0.25);
-            /* 关键：作为内部绝对定位父容器 */
             position: relative;
         }
         .sidebar {
@@ -62,8 +61,7 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            /* 给底部输入框留高度 */
-            padding-bottom: 60px;
+            padding-bottom: 70px;
         }
         .top {
             padding: 20px;
@@ -93,16 +91,26 @@
             padding: 10px 20px;
             overflow-y: auto;
         }
-        /* 消息修复：不拉长、不遮挡头像 */
         .msg-item {
-            max-width: 75%;
-            width: fit-content;
-            margin-bottom: 16px;
             display: flex;
-            flex-direction: column;
+            width: 100%;
+            margin-bottom: 16px;
         }
         .msg-item.me {
-            margin-left: auto;
+            justify-content: flex-end;
+        }
+        .bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .msg-item.me .bubble {
+            background: rgba(60, 120, 255, .25);
+            text-align: right;
         }
         .name-row {
             display: flex;
@@ -124,18 +132,6 @@
             font-size: 13px;
             color: rgba(255, 255, 255, 0.75);
         }
-        .bubble {
-            padding: 10px 14px;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.07);
-            color: #fff;
-            white-space: pre-wrap;
-            word-break: break-all;
-            width: fit-content;
-        }
-        .msg-item.me .bubble {
-            background: rgba(60, 120, 255, .25);
-        }
         .uid {
             font-size: 11px;
             color: rgba(255, 255, 255, 0.4);
@@ -144,19 +140,18 @@
         .msg-item.me .uid {
             text-align: right;
         }
-        /* 输入框：锁死在容器最底部、同宽、不往外飘 */
         .input-box {
             position: absolute;
-            left: 0;
             bottom: 0;
-            width: 100%;
+            left: 140px;
+            width: calc(100% - 140px);
             display: flex;
             align-items: center;
-            padding: 15px 20px;
+            padding: 12px 16px;
             gap: 10px;
             border-top: 1px solid rgba(255, 255, 255, .08);
-            background: rgba(255,255,255,.04);
-            border-radius: 0 0 44px 0;
+            background: #0f1419;
+            z-index: 10;
         }
         #msgInput {
             flex: 1;
@@ -183,13 +178,12 @@
             padding: 6px 10px;
             border-radius: 12px;
             color: #fff;
-            cursor: pointer;
             margin-left: 6px;
         }
         .admin-tag {
             position: absolute;
             left: 20px;
-            bottom: 70px;
+            bottom: 80px;
             color: #ff4d4d;
             font-size: 12px;
             display: none;
@@ -197,7 +191,7 @@
         .version {
             position: absolute;
             right: 20px;
-            bottom: 70px;
+            bottom: 80px;
             color: #888;
             font-size: 12px;
         }
@@ -236,7 +230,6 @@
     </div>
     <div class="main">
         <div class="top"><span>聊天室</span></div>
-
         <div class="login" id="loginPage">
             <input id="user" placeholder="账号">
             <input id="pwd" placeholder="密码" type="password">
@@ -246,7 +239,6 @@
             <button class="login-reg" onclick="reg()">注册</button>
             <button class="login-reg" onclick="login()">登录</button>
         </div>
-
         <div class="chat" id="chatPage">
             <div class="user-info">
                 <span id="userInfoText"></span>
@@ -257,12 +249,9 @@
             </div>
             <div class="msg-box" id="msgBox"></div>
         </div>
-
         <div class="admin-tag" id="adminTag">管理员</div>
         <div class="version"></div>
     </div>
-
-    <!-- 输入框留在container内部，绝对贴底同宽 -->
     <div class="input-box">
         <input id="msgInput" placeholder="Shift+Enter换行">
         <button onclick="sendMsg()">发送</button>
@@ -346,19 +335,21 @@
 
         box.innerHTML = "";
         list.forEach(item=>{
-            let showUser = item.user ?? "未知用户";
+            let showUser = item.user || "未知用户";
             let itemUid = parseInt(item.uid||"0");
             let isMe = item.user === username;
             let div = document.createElement("div");
-            div.className = "msg-item " + (isMe?"me":"");
+            div.className = "msg-item " + (isMe ? "me" : "");
             let html = item.msg.replace(/\n/g,"<br>");
             div.innerHTML = `
-                <div class="name-row">
-                    <div class="avatar"></div>
-                    <div class="username">${showUser}</div>
+                <div class="bubble">
+                    <div class="name-row">
+                        <div class="avatar"></div>
+                        <div class="username">${showUser}</div>
+                    </div>
+                    ${html}
+                    <div class="uid">UID:${itemUid}</div>
                 </div>
-                <div class="bubble">${html}</div>
-                <div class="uid">UID:${itemUid}</div>
             `;
             box.appendChild(div);
         });
@@ -366,7 +357,6 @@
         if (isAtBottom) box.scrollTop = box.scrollHeight;
     }
 
-    // 修复Shift+Enter换行
     document.getElementById("msgInput").addEventListener("keydown",e=>{
         if(e.key==="Enter"){
             if(e.shiftKey) return;
