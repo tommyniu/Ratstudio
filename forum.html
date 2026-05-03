@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>论坛 - RatStudio的小站</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items:center;justify-content:center;height:100vh}
+.container{
+  display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;
+  background:rgba(255,255,255,.04);
+  backdrop-filter:blur(30px);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 0 50px rgba(60,120,255,0.25);
+}
+.sidebar{
+  width:140px;background:rgba(255,255,255,.05);padding:30px 10px;
+  display:flex;flex-direction:column;gap:10px;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.item{
+  padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;
+  cursor:pointer;transition:all 0.2s;
+  border:1px solid transparent;
+}
+.item:hover,.item.active{
+  background:rgba(60,130,255,.25);color:#fff;
+  border-color:rgba(100,160,255,0.4);
+  box-shadow:0 0 12px rgba(80,140,255,0.35);
+}
+.main{flex:1;position:relative;display:flex;flex-direction:column}
+.top{
+  background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.content{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+}
+.content h1{
+  font-size:28px;
+  color:#8cf;
+  margin-bottom:16px;
+}
+.content p{
+  font-size:16px;
+  color:rgba(255,255,255,.7);
+}
+.version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="sidebar">
+<div class="item" onclick="location.href='index.html'">聊天室</div>
+<div class="item active">论坛</div>
+<div class="item" onclick="location.href='history.html'">更新日志</div>
+<div class="item" onclick="location.href='plan.html'">开发规划</div>
+</div>
+<div class="main">
+<div class="top">
+<span>论坛</span>
+</div>
+<div class="content">
+<h1>敬请期待</h1>
+<p>论坛功能正在开发中，即将上线...</p>
+</div>
+<div class="version">V1.3.0</div>
+</div>
+</div>
+</body>
+</html>
