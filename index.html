@@ -46,51 +46,49 @@ button{width:100%;padding:10px;border-radius:12px;border:none;background:#2383ff
 <script>
 let username = "";
 
-function login(){
+async function login() {
   let u = document.getElementById("user").value;
   let p = document.getElementById("pwd").value;
-  fetch("/api/user?act=login&user="+u+"&pwd="+p).then(r=>r.json()).then(d=>{
-    if(d.ok){
-      username = u;
-      document.getElementById("login").style.display = "none";
-      document.getElementById("chat").style.display = "block";
-      loadMsg();
-    }else{
-      alert("登录失败");
-    }
-  })
-}
-
-function reg(){
-  let u = document.getElementById("user").value;
-  let p = document.getElementById("pwd").value;
-  fetch("/api/user?act=reg&user="+u+"&pwd="+p).then(r=>r.json()).then(d=>{
-    alert(d.ok?"注册成功":"注册失败");
-  })
-}
-
-function send(){
-  let m = document.getElementById("msg").value;
-  if(!m)return;
-  fetch("/api/chat?act=send&user="+username+"&msg="+encodeURIComponent(m))
-  .then(()=>{
-    document.getElementById("msg").value = "";
+  let res = await fetch(`/api/chat?act=login&user=${u}&pwd=${p}`);
+  let d = await res.json();
+  if (d.ok) {
+    username = u;
+    document.getElementById("login").style.display = "none";
+    document.getElementById("chat").style.display = "block";
     loadMsg();
-  })
+  } else {
+    alert("登录失败");
+  }
 }
 
-function loadMsg(){
-  fetch("/api/chat?act=list").then(r=>r.json()).then(d=>{
-    let html = "";
-    d.forEach(m=>{
-      html += `<div class="msg"><span class="user">${m.user}</span>：${m.msg}</div>`;
-    });
-    document.getElementById("msgList").innerHTML = html;
-    document.getElementById("msgList").scrollTop = 99999;
-  })
+async function reg() {
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pwd").value;
+  let res = await fetch(`/api/chat?act=reg&user=${u}&pwd=${p}`);
+  let d = await res.json();
+  alert(d.ok ? "注册成功" : "注册失败（用户名已存在）");
 }
 
-setInterval(loadMsg,2000);
+async function send() {
+  let m = document.getElementById("msg").value;
+  if (!m) return;
+  await fetch(`/api/chat?act=send&user=${username}&msg=${encodeURIComponent(m)}`);
+  document.getElementById("msg").value = "";
+  loadMsg();
+}
+
+async function loadMsg() {
+  let res = await fetch("/api/chat?act=list");
+  let list = await res.json();
+  let html = "";
+  list.forEach(item => {
+    html += `<div class="msg"><span class="user">${item.user}</span>：${item.msg}</div>`;
+  });
+  document.getElementById("msgList").innerHTML = html;
+  document.getElementById("msgList").scrollTop = 999999;
+}
+
+setInterval(loadMsg, 2000);
 </script>
 </body>
 </html>
