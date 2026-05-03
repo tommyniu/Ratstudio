@@ -135,16 +135,21 @@ async function createPost() {
 }
 
 async function loadPosts() {
-  const r = await fetch('/api/posts');
-  const list = await r.json();
-  postsData = list;
-  renderList();
-  route();
+  try {
+    const r = await fetch('/api/posts');
+    const list = await r.json();
+    postsData = list;
+    renderList();
+    route();
+  } catch (e) {
+    console.error("加载帖子失败", e);
+  }
 }
 
 function renderList() {
   const box = document.getElementById('list');
   box.innerHTML = '';
+  if (!postsData) return;
   postsData.forEach(p => {
     const div = document.createElement('div');
     div.className = 'post';
@@ -194,14 +199,16 @@ function route() {
 window.addEventListener('hashchange', route);
 
 async function like(id) {
-  const r = await fetch('/api/like', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ uid, postId: id })
-  });
-  const t = await r.text();
-  if (t === 'repeat') alert('已点赞');
-  loadPosts();
+  try {
+    const r = await fetch('/api/like', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid, postId: id })
+    });
+    const t = await r.text();
+    if (t === 'repeat') alert('已点赞');
+    loadPosts();
+  } catch (e) { console.error(e); }
 }
 
 function likeDetail() {
