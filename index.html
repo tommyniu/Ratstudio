@@ -12,17 +12,18 @@
             font-family: system-ui
         }
         body {
-            background: linear-gradient(135deg, #0f1419, #0a0c12);
-            height: 100vh;
-            overflow: hidden;
+            background: linear-gradient(135deg, #0f1419, #0a0c19);
             display: flex;
             align-items: center;
             justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
         }
         .container {
             display: flex;
             width: 680px;
-            height: 720px;
+            height: 750px;
             border-radius: 44px;
             overflow: hidden;
             background: rgba(255, 255, 255, .04);
@@ -43,7 +44,7 @@
         .item {
             padding: 14px;
             border-radius: 9999px;
-            color: rgba(255, 255, 255, .8);
+            color: #ffffff;
             text-align: center;
             cursor: pointer;
             transition: all .2s;
@@ -61,6 +62,7 @@
             flex-direction: column;
             height: 100%;
             padding-bottom: 0;
+            position: relative;
         }
         .top {
             padding: 20px;
@@ -91,25 +93,27 @@
             overflow-y: auto;
             margin-bottom: 0;
         }
-        /* 关键修复：气泡宽度自适应，不强行占75% */
         .msg-item {
-            width: 100%; /* 让item撑满父级，方便左右对齐 */
-            margin-bottom: 16px;
             display: flex;
-            flex-direction: column;
-        }
-        .msg-item .bubble-wrap {
-            max-width: 75%; /* 最大宽度限制 */
-            width: fit-content; /* 内容自适应宽度 */
+            width: 100%;
+            margin-bottom: 16px;
         }
         .msg-item.me {
-            align-items: flex-end; /* 自己的消息右对齐 */
+            justify-content: flex-end;
         }
-        .msg-item.me .bubble-wrap {
-            /* 右边气泡同样自适应，不留白 */
+        .bubble {
+            max-width: 75%;
+            width: fit-content;
+            padding: 10px 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            white-space: pre-wrap;
+            word-break: break-all;
         }
-        .msg-item.other {
-            align-items: flex-start; /* 别人的消息左对齐 */
+        .msg-item.me .bubble {
+            background: rgba(60, 120, 255, .25);
+            text-align: right;
         }
         .name-row {
             display: flex;
@@ -119,6 +123,7 @@
         }
         .msg-item.me .name-row {
             flex-direction: row-reverse;
+            justify-content: flex-end;
         }
         .avatar {
             width: 32px;
@@ -130,25 +135,16 @@
             font-size: 13px;
             color: rgba(255, 255, 255, 0.75);
         }
-        .bubble {
-            padding: 10px 14px;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.07);
-            color: #fff;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        .msg-item.me .bubble {
-            background: rgba(60, 120, 255, .25);
-        }
         .uid {
             font-size: 11px;
             color: rgba(255, 255, 255, 0.4);
             margin-top: 4px;
+            text-align: left;
         }
         .msg-item.me .uid {
             text-align: right;
         }
+        /* 输入框贴底 永久不被挤飞 */
         .input-box {
             display: flex;
             align-items: center;
@@ -156,9 +152,8 @@
             gap: 10px;
             border-top: 1px solid rgba(255, 255, 255, .08);
             background: rgba(255,255,255,.04);
-            margin: 0;
-            border-radius: 0;
             width: 100%;
+            flex-shrink: 0;
         }
         #msgInput {
             flex: 1;
@@ -191,17 +186,19 @@
         .admin-tag {
             position: absolute;
             left: 20px;
-            bottom: 6px;
+            bottom: 10px;
             color: #ff4d4d;
             font-size: 12px;
             display: none;
+            z-index: 10;
         }
         .version {
             position: absolute;
             right: 20px;
-            bottom: 6px;
+            bottom: 10px;
             color: #888;
             font-size: 12px;
+            z-index: 10;
         }
         input, button.login-reg {
             border-radius: 16px;
@@ -231,10 +228,10 @@
 <body>
 <div class="container">
     <div class="sidebar">
-        <div class="item active">聊天室</div>
-        <div class="item">论坛</div>
-        <div class="item">更新日志</div>
-        <div class="item">开发规划</div>
+        <div class="item active" onclick="switchTab(0)">聊天室</div>
+        <div class="item" onclick="switchTab(1)">论坛</div>
+        <div class="item" onclick="switchTab(2)">更新日志</div>
+        <div class="item" onclick="switchTab(3)">开发规划</div>
     </div>
     <div class="main">
         <div class="top"><span>聊天室</span></div>
@@ -265,7 +262,7 @@
         </div>
 
         <div class="admin-tag" id="adminTag">管理员</div>
-        <div class="version">V1.4.1 修复版</div>
+        <div class="version">V1.4.1 最终修复版</div>
     </div>
 </div>
 
@@ -273,8 +270,14 @@
     let username = "";
     let uid = 0;
 
-    function clearBadCache(){
-        localStorage.clear();
+    // 侧边栏切换 + 敬请期待
+    function switchTab(index) {
+        const items = document.querySelectorAll('.item');
+        items.forEach(i => i.classList.remove('active'));
+        items[index].classList.add('active');
+        if (index !== 0) {
+            alert('敬请期待');
+        }
     }
 
     window.onload = async function () {
@@ -339,27 +342,38 @@
         let res = await fetch("/api/chat?act=list");
         let list = await res.json();
         let box = document.getElementById("msgBox");
+
+        // ---------- 关键修复：记录是否在底部 ----------
+        const isAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight <= 10;
+        // ------------------------------------------------
+
         box.innerHTML = "";
         list.forEach(item=>{
-            let showUser = item.user ?? "未知用户";
+            let showUser = item.user || "未知用户";
             let itemUid = parseInt(item.uid||"0");
             let isMe = item.user === username;
+            
             let div = document.createElement("div");
-            div.className = "msg-item " + (isMe ? "me" : "other");
-            let html = item.msg.replace(/\n/g,"<br>");
+            div.className = "msg-item " + (isMe ? "me" : "");
+            
             div.innerHTML = `
-                <div class="bubble-wrap">
+                <div class="bubble">
                     <div class="name-row">
                         <div class="avatar"></div>
                         <div class="username">${showUser}</div>
                     </div>
-                    <div class="bubble">${html}</div>
+                    ${item.msg.replace(/\n/g,"<br>")}
                     <div class="uid">UID:${itemUid}</div>
                 </div>
             `;
             box.appendChild(div);
         });
-        box.scrollTop = box.scrollHeight;
+
+        // ---------- 关键修复：只有在底部时才自动滚到底 ----------
+        if (isAtBottom) {
+            box.scrollTop = box.scrollHeight;
+        }
+        // ------------------------------------------------
     }
 
     document.getElementById("msgInput").addEventListener("keydown",e=>{
