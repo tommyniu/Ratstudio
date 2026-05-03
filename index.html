@@ -3,183 +3,239 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>RatStudio的小站</title>
+<title>聊天室 - RatStudio的小站</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
 body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
-.container{display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;background:rgba(255,255,255,.04);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.1);box-shadow:0 0 50px rgba(60,120,255,0.25);position:relative}
-.sidebar{width:140px;background:rgba(255,255,255,.05);padding:30px 10px;display:flex;flex-direction:column;gap:10px;border-right:1px solid rgba(255,255,255,.08)}
-.item{padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;cursor:pointer;transition:all .2s;border:1px solid transparent}
-.item:hover,.item.active{background:rgba(60,130,255,.25);color:#fff;border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35)}
-.main{flex:1;display:flex;flex-direction:column;height:100%;padding-bottom:70px}
-.top{background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)}
-.content{padding:30px;color:#fff;display:none}
-.chat{display:flex;flex-direction:column;height:100%}
+.container{
+  display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;
+  background:rgba(255,255,255,.04);
+  backdrop-filter:blur(30px);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 0 50px rgba(60,120,255,0.25);
+  position:relative;
+}
+.sidebar{
+  width:140px;background:rgba(255,255,255,.05);padding:30px 10px;
+  display:flex;flex-direction:column;gap:10px;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.item{
+  padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;
+  cursor:pointer;transition:all 0.2s;
+  border:1px solid transparent;
+}
+.item:hover,.item.active{
+  background:rgba(60,130,255,.25);color:#fff;
+  border-color:rgba(100,160,255,0.4);
+  box-shadow:0 0 12px rgba(80,140,255,0.35);
+}
+.main{flex:1;display:flex;flex-direction:column;height:100%;padding-bottom:80px}
+.top{
+  background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
 .user-info{padding:12px 20px;color:#ccc;display:flex;justify-content:space-between;align-items:center}
-.msg-box{flex:1;padding:10px 20px;overflow-y:auto}
+.msg-box{flex:1;padding:10px 20px;overflow-y:auto;padding-bottom:10px}
+
 .msg-item{display:flex;width:100%;margin-bottom:16px}
 .msg-item.me{justify-content:flex-end}
-.msg-content{max-width:75%;display:flex;flex-direction:column}
+.msg-wrap{max-width:75%;display:flex;flex-direction:column}
 .name-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .msg-item.me .name-row{flex-direction:row-reverse}
 .avatar{width:32px;height:32px;background:#444;border-radius:50%;flex-shrink:0}
 .username{font-size:13px;color:rgba(255,255,255,.75)}
-.bubble{padding:10px 14px;border-radius:18px;background:rgba(255,255,255,0.07);color:#fff;white-space:pre-wrap;word-break:break-all;width:fit-content}
+.bubble{
+  padding:10px 14px;border-radius:18px;
+  background:rgba(255,255,255,0.07);color:#fff;
+  white-space:pre-wrap;word-break:break-all;width:fit-content;
+}
 .msg-item.me .bubble{background:rgba(60,120,255,.25);margin-left:auto}
 .uid{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px}
 .msg-item.me .uid{text-align:right}
-.input-box{position:absolute;bottom:0;left:140px;width:calc(100% - 140px);display:flex;align-items:center;padding:12px 16px;gap:10px;border-top:1px solid rgba(255,255,255,.08);background:#0f1419}
-#msgInput{flex:1;height:44px;border-radius:24px;padding:0 16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;outline:none}
-.input-box button{width:70px;height:44px;border-radius:24px;background:#4080ff;color:#fff;border:none;cursor:pointer}
-.admin-btn{background:rgba(255,80,80,.3);border:none;padding:6px 10px;border-radius:12px;color:#fff;margin-left:6px}
+
+.input-box{
+  position:absolute;bottom:0;left:140px;
+  width:calc(100% - 140px);
+  display:flex;align-items:center;padding:12px 16px;gap:10px;
+  border-top:1px solid rgba(255,255,255,.08);background:#0f1419;
+}
+#msgInput{
+  flex:1;height:44px;border-radius:24px;padding:0 16px;
+  background:#262833;border:1px solid rgba(255,255,255,.15);
+  color:#fff;outline:none;
+}
+.input-box button{
+  width:70px;height:44px;border-radius:24px;
+  background:#4080ff;color:#fff;border:none;cursor:pointer;
+}
+.admin-btn{
+  background:rgba(255,80,80,.3);border:none;padding:6px 10px;
+  border-radius:12px;color:#fff;margin-left:6px;
+}
 .version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
-.ver{color:#8cf;font-weight:600}
-h2{margin-bottom:20px}
-.item-log{margin-bottom:10px;line-height:1.4}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="sidebar">
-    <div class="item active" onclick="showChat()">聊天室</div>
-    <div class="item" onclick="alert('敬请期待')">论坛</div>
-    <div class="item" onclick="showLog()">更新日志</div>
-    <div class="item" onclick="alert('敬请期待')">开发规划</div>
-  </div>
+<div class="sidebar">
+<div class="item active">聊天室</div>
+<div class="item" onclick="location.href='forum.html'">论坛</div>
+<div class="item" onclick="location.href='history.html'">更新日志</div>
+<div class="item" onclick="location.href='plan.html'">开发规划</div>
+</div>
 
-  <div class="main">
-    <div class="top" id="page-title">聊天室</div>
+<div class="main">
+<div class="top"><span>聊天室</span></div>
 
-    <!-- 聊天室 -->
-    <div class="chat" id="chat-page">
-      <div class="user-info">
-        <span id="userInfoText"></span>
-        <div>
-          <button class="admin-btn" id="clearBtn" style="display:none">清空</button>
-          <button class="admin-btn" id="delBtn" style="display:none">撤回</button>
-        </div>
-      </div>
-      <div class="msg-box" id="msgBox"></div>
-    </div>
+<div class="login" id="loginPage" style="flex:1;padding:30px;overflow-y:auto">
+<input id="user" placeholder="账号" style="width:100%;padding:12px;border-radius:16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
+<input id="pwd" placeholder="密码" type="password" style="width:100%;padding:12px;border-radius:16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
+<div class="auto-login" style="color:#fff;font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+<input type="checkbox" id="autoLogin"> 10天自动登录
+</div>
+<button class="login-reg" onclick="reg()" style="width:100%;padding:12px;border-radius:16px;background:#4080ff;color:#fff;border:none;margin-bottom:10px;cursor:pointer">注册</button>
+<button class="login-reg" onclick="login()" style="width:100%;padding:12px;border-radius:16px;background:#4080ff;color:#fff;border:none;cursor:pointer">登录</button>
+</div>
 
-    <!-- 更新日志 -->
-    <div class="content" id="log-page">
-      <h2>更新日志</h2>
-      <div class="item-log"><span class="ver">V1.2.3</span> 新增开发规划页面，全菜单统一</div>
-      <div class="item-log"><span class="ver">V1.2.2</span> 全页面UI统一，修复头像/UID布局，滚动优化</div>
-      <div class="item-log"><span class="ver">V1.2.1</span> 修复消息显示、清空功能、数据持久化</div>
-      <div class="item-log"><span class="ver">V1.2.0</span> 新增论坛系统、发帖按钮、点赞功能、三页面独立切换</div>
-      <div class="item-log"><span class="ver">V1.1.4</span> 管理员标识、清空消息</div>
-      <div class="item-log"><span class="ver">V1.1.3</span> 自动登录、圆角统一</div>
-      <div class="item-log"><span class="ver">V1.0.1~V1.1.2</span> 完善UI、修复布局、独立日志页面</div>
-      <div class="item-log"><span class="ver">V1.0.0</span> 基础聊天、注册登录系统</div>
-    </div>
+<div class="chat" id="chatPage" style="display:none;flex-direction:column;height:100%">
+<div class="user-info">
+<span id="userInfoText"></span>
+<div>
+<button class="admin-btn" id="clearBtn" style="display:none;" onclick="clearAllMsg()">清空</button>
+<button class="admin-btn" id="delBtn" style="display:none;" onclick="deleteLastMsg()">撤回</button>
+</div>
+</div>
+<div class="msg-box" id="msgBox"></div>
+</div>
 
-    <div class="version">V1.2.3</div>
-  </div>
+<div class="version">V1.2.4</div>
+</div>
 
-  <div class="input-box">
-    <input id="msgInput" placeholder="Enter发送 Shift+Enter换行">
-    <button onclick="sendMsg()">发送</button>
-  </div>
+<div class="input-box">
+<input id="msgInput" placeholder="Shift+Enter换行">
+<button onclick="sendMsg()">发送</button>
+</div>
 </div>
 
 <script>
 let username = "";
 let uid = 0;
 
-function showChat(){
-  document.getElementById("chat-page").style.display = "flex";
-  document.getElementById("log-page").style.display = "none";
-  document.getElementById("page-title").innerText = "聊天室";
-  document.querySelectorAll(".item").forEach(i=>i.classList.remove("active"));
-  document.querySelectorAll(".item")[0].classList.add("active");
-}
-function showLog(){
-  document.getElementById("chat-page").style.display = "none";
-  document.getElementById("log-page").style.display = "block";
-  document.getElementById("page-title").innerText = "更新日志";
-  document.querySelectorAll(".item").forEach(i=>i.classList.remove("active"));
-  document.querySelectorAll(".item")[2].classList.add("active");
-}
-
-window.onload = async function(){
-  const autoLogin = localStorage.getItem("autoLogin") === "true";
-  const un = localStorage.getItem("username");
-  const u = parseInt(localStorage.getItem("uid")||"0");
-  if(autoLogin && un && u>0){
-    username = un; uid = u; loginSuccess();
-  }
-}
+window.onload = async function () {
+    const autoLogin = localStorage.getItem("autoLogin") === "true";
+    const un = localStorage.getItem("username");
+    const u = parseInt(localStorage.getItem("uid")||"0");
+    if(autoLogin && un && u>0){
+        username = un;
+        uid = u;
+        loginSuccess();
+    }
+};
 
 async function login(){
-  let user = document.getElementById("user").value.trim();
-  let pwd = document.getElementById("pwd").value.trim();
-  let auto = document.getElementById("autoLogin").checked;
-  let res = await fetch(`/api/chat?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
-  let d = await res.json();
-  if(d.ok){
-    username = user; uid = parseInt(d.uid);
-    if(auto) localStorage.setItem("username",username),localStorage.setItem("uid",uid),localStorage.setItem("autoLogin","true");
-    loginSuccess();
-  }else alert("账号密码错误");
+    let user = document.getElementById("user").value.trim();
+    let pwd = document.getElementById("pwd").value.trim();
+    let auto = document.getElementById("autoLogin").checked;
+    let res = await fetch(`/api/chat?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
+    let d = await res.json();
+    if(d.ok){
+        username = user;
+        uid = parseInt(d.uid);
+        if(auto){
+            localStorage.setItem("username",username);
+            localStorage.setItem("uid",uid);
+            localStorage.setItem("autoLogin","true");
+        }
+        loginSuccess();
+    }else alert("账号密码错误");
+}
+
+async function reg(){
+    let user = document.getElementById("user").value.trim();
+    let pwd = document.getElementById("pwd").value.trim();
+    let res = await fetch(`/api/chat?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
+    let d = await res.json();
+    alert(d.ok?"注册成功":"用户名已存在");
 }
 
 function loginSuccess(){
-  document.getElementById("userInfoText").innerText = `${username} (UID:${uid})`;
-  if(username === "Ratstudio"){
-    document.getElementById("clearBtn").style.display = "inline-block";
-    document.getElementById("delBtn").style.display = "inline-block";
-  }
-  startSync();
+    document.getElementById("loginPage").style.display="none";
+    document.getElementById("chatPage").style.display="flex";
+    document.getElementById("userInfoText").innerText = `${username} (UID:${uid})`;
+    if(username === "Ratstudio"){
+        document.getElementById("clearBtn").style.display="inline-block";
+        document.getElementById("delBtn").style.display="inline-block";
+    }
+    startSync();
 }
 
 async function sendMsg(){
-  let inp = document.getElementById("msgInput");
-  let val = inp.value;
-  if(!val.trim()) return;
-  await fetch(`/api/chat?act=send&user=${encodeURIComponent(username)}&msg=${encodeURIComponent(val)}`);
-  inp.value = ""; syncMsg();
+    let inp = document.getElementById("msgInput");
+    let val = inp.value;
+    if(!val.trim())return;
+    await fetch(`/api/chat?act=send&user=${encodeURIComponent(username)}&msg=${encodeURIComponent(val)}`);
+    inp.value = "";
+    syncMsg();
 }
 
 async function syncMsg(){
-  let res = await fetch("/api/chat?act=list");
-  let list = await res.json();
-  let box = document.getElementById("msgBox");
-  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight <= 10;
-  box.innerHTML = "";
-  list.forEach(item=>{
-    let isMe = item.user === username;
-    let div = document.createElement("div");
-    div.className = "msg-item " + (isMe?"me":"");
-    div.innerHTML = `
-      <div class="msg-content">
-        <div class="name-row">
-          <div class="avatar"></div>
-          <div class="username">${item.user || "未知用户"}</div>
-        </div>
-        <div class="bubble">${item.msg.replace(/\n/g,"<br>")}</div>
-        <div class="uid">UID:${parseInt(item.uid||"0")}</div>
-      </div>
-    `;
-    box.appendChild(div);
-  });
-  if(atBottom) box.scrollTop = box.scrollHeight;
+    let res = await fetch("/api/chat?act=list");
+    let list = await res.json();
+    let box = document.getElementById("msgBox");
+    const isAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight <= 10;
+
+    box.innerHTML = "";
+    list.forEach(item=>{
+        let showUser = item.user || "未知用户";
+        let itemUid = parseInt(item.uid||"0");
+        let isMe = item.user === username;
+        
+        let div = document.createElement("div");
+        div.className = "msg-item " + (isMe ? "me" : "");
+        let html = item.msg.replace(/\n/g,"<br>");
+        
+        div.innerHTML = `
+            <div class="msg-wrap">
+                <div class="name-row">
+                    <div class="avatar"></div>
+                    <div class="username">${showUser}</div>
+                </div>
+                <div class="bubble">${html}</div>
+                <div class="uid">UID:${itemUid}</div>
+            </div>
+        `;
+        box.appendChild(div);
+    });
+
+    if (isAtBottom) {
+        box.scrollTop = box.scrollHeight;
+    }
 }
 
 document.getElementById("msgInput").addEventListener("keydown",e=>{
-  if(e.key==="Enter"){
-    if(e.shiftKey) return;
-    e.preventDefault(); sendMsg();
-  }
+    if(e.key==="Enter"){
+        if(e.shiftKey) return;
+        e.preventDefault();
+        sendMsg();
+    }
 });
 
 async function clearAllMsg(){
-  if(!confirm("确定清空？")) return;
-  await fetch(`/api/chat?act=clear&uid=${uid}`); syncMsg();
+    if(!confirm("确定清空全部消息？"))return;
+    await fetch(`/api/chat?act=clear&uid=${uid}`);
+    syncMsg();
+}
+async function deleteLastMsg(){
+    await fetch(`/api/chat?act=delete&uid=${uid}`);
+    syncMsg();
 }
 
-function startSync(){ syncMsg(); setInterval(syncMsg,2500); }
+function startSync(){
+    syncMsg();
+    setInterval(syncMsg,2500);
+}
 </script>
 </body>
 </html>
