@@ -79,26 +79,35 @@ const API = "/api/chat";
 window.onload = function () {
   let u = localStorage.getItem("username");
   let id = localStorage.getItem("uid");
-  if (u && id) { username = u; uid = id; loginSuccess(); }
+  if (u && id) {
+    username = u;
+    uid = id;
+    loginSuccess();
+  }
 };
 
 async function login() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  let r = await fetch(`${API}?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
+  let r = await fetch(API + "?act=login&user=" + encodeURIComponent(user) + "&pwd=" + encodeURIComponent(pwd));
   let t = await r.text();
-  if (!t) { alert("登录失败"); return; }
+  if (!t) {
+    alert("登录失败");
+    return;
+  }
   localStorage.setItem("username", user);
   localStorage.setItem("uid", t);
-  username = user; uid = t; loginSuccess();
+  username = user;
+  uid = t;
+  loginSuccess();
 }
 
 async function reg() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  let r = await fetch(`${API}?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
+  let r = await.fetch(API + "?act=reg&user=" + encodeURIComponent(user) + "&pwd=" + encodeURIComponent(pwd));
   let t = await r.text();
-  alert(t==="ok" ? "注册成功" : "已存在");
+  alert(t === "ok" ? "注册成功" : "已存在");
 }
 
 function loginSuccess() {
@@ -116,14 +125,13 @@ function loginSuccess() {
 async function sendMsg() {
   let txt = document.getElementById("msgInput").value;
   if (!txt) return;
-  await fetch(`${API}?act=send&uid=${uid}&msg=${encodeURIComponent(txt)}`);
+  await fetch(API + "?act=send&uid=" + uid + "&msg=" + encodeURIComponent(txt));
   document.getElementById("msgInput").value = "";
   loadMsg();
 }
 
-// ✅ 修复：防缓存 + 强制刷新消息
 async function loadMsg() {
-  let r = await fetch(`${API}?act=msg&_=${Date.now()}`);
+  let r = await fetch(API + "?act=msg&_=" + Date.now());
   let list = await r.json();
   let box = document.getElementById("msgBox");
   box.innerHTML = "";
@@ -143,11 +151,12 @@ async function loadMsg() {
 }
 
 async function clearAllMsg() {
-  await fetch(`${API}?act=clear&uid=${uid}`);
+  await fetch(API + "?act=clear&uid=" + uid);
   loadMsg();
 }
+
 async function deleteLastMsg() {
-  await.fetch(`${API}?act=delete&uid=${uid}`);
+  await fetch(API + "?act=delete&uid=" + uid);
   loadMsg();
 }
 </script>
