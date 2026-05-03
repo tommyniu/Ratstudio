@@ -118,34 +118,28 @@ const ADMIN = "Ratstudio";
 window.onload = function () {
   let u = localStorage.getItem("username");
   let id = localStorage.getItem("uid");
-  if (u && id) {
-    username = u;
-    uid = id;
-    loginSuccess();
-  }
+  if (u && id) { username = u; uid = id; loginSuccess(); }
 };
 
+// ✅ 登录：和后端对齐
 async function login() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  fetch("/api/login?user="+encodeURIComponent(user)+"&pwd="+encodeURIComponent(pwd))
+  fetch(`/?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
   .then(r=>r.text()).then(t=>{
-    if(!t){alert("失败");return;}
+    if(!t){alert("登录失败");return;}
     localStorage.setItem("username", user);
     localStorage.setItem("uid", t);
-    username = user;
-    uid = t;
-    loginSuccess();
+    username = user; uid = t; loginSuccess();
   });
 }
 
+// ✅ 注册：和后端对齐
 async function reg() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  fetch("/api/reg?user="+encodeURIComponent(user)+"&pwd="+encodeURIComponent(pwd))
-  .then(r=>r.text()).then(t=>{
-    alert(t==="ok"?"成功":"已存在");
-  });
+  fetch(`/?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
+  .then(r=>r.text()).then(t=>{ alert(t==="ok"?"注册成功":"已存在"); });
 }
 
 function loginSuccess() {
@@ -160,19 +154,17 @@ function loginSuccess() {
   loadMsg();
 }
 
+// ✅ 发送消息：和后端对齐
 async function sendMsg() {
   let txt = document.getElementById("msgInput").value;
   if (!txt) return;
-  fetch("/api/send?uid="+uid+"&msg="+encodeURIComponent(txt))
-  .then(()=>{
-    document.getElementById("msgInput").value = "";
-    loadMsg();
-  });
+  fetch(`/?act=send&uid=${uid}&msg=${encodeURIComponent(txt)}`)
+  .then(()=>{ document.getElementById("msgInput").value = ""; loadMsg(); });
 }
 
-// ✅ 只修这里！和你后端完全对齐！
+// ✅ 加载消息：和后端对齐
 async function loadMsg() {
-  fetch("/api/msg")
+  fetch("/?act=msg")
   .then(r=>r.json())
   .then(list=>{
     let box = document.getElementById("msgBox");
@@ -190,13 +182,12 @@ async function loadMsg() {
       box.appendChild(div);
     });
     box.scrollTop = box.scrollHeight;
-  }).catch(e=>{
-    console.log("消息加载失败", e);
   });
 }
 
-async function clearAllMsg() { fetch("/api/clear?uid="+uid).then(loadMsg); }
-async function deleteLastMsg() { fetch("/api/delete?uid="+uid).then(loadMsg); }
+// ✅ 管理员功能：和后端对齐
+async function clearAllMsg() { fetch(`/?act=clear&uid=${uid}`).then(loadMsg); }
+async function deleteLastMsg() { fetch(`/?act=delete&uid=${uid}`).then(loadMsg); }
 </script>
 </body>
 </html>
