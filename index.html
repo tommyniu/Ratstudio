@@ -17,7 +17,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh
+            height: 100vh;
+            overflow: hidden;
         }
 
         .container {
@@ -89,7 +90,7 @@
         .chat {
             display: none;
             flex-direction: column;
-            flex: 1;
+            height: 100%;
         }
 
         .user-info {
@@ -170,7 +171,8 @@
             padding: 16px 20px;
             gap: 10px;
             align-items: center;
-            margin-top: auto;
+            background: rgba(255, 255, 255, .05);
+            border-top: 1px solid rgba(255, 255, 255, .08);
         }
 
         #msgInput {
@@ -293,61 +295,66 @@
         </div>
 
         <div class="admin-tag" id="adminTag">管理员</div>
-        <div class="version">V2.0</div>
+        <div class="version">V1.4.1</div>
     </div>
 </div>
 
 <script>
-    let username = localStorage.getItem("username") || "";
-    let uid = localStorage.getItem("uid") || "";
-    let autoLogin = localStorage.getItem("autoLogin") === "true";
+    let username = "";
+    let uid = 0;
 
     window.onload = async function () {
-        if (autoLogin && username && uid) {
-            loginSuccess(username, uid);
+        // 自动登录
+        const autoLogin = localStorage.getItem("autoLogin") === "true";
+        const savedUser = localStorage.getItem("username") || "";
+        const savedUid = parseInt(localStorage.getItem("uid") || "0");
+
+        if (autoLogin && savedUser && savedUid > 0) {
+            username = savedUser;
+            uid = savedUid;
+            loginSuccess();
         }
     };
 
-    // 登录
     async function login() {
         const user = document.getElementById("user").value.trim();
         const pwd = document.getElementById("pwd").value.trim();
         const auto = document.getElementById("autoLogin").checked;
         if (!user || !pwd) return alert("请输入账号密码");
 
-        const res = await fetch(`/api/chat?act=login&user=${user}&pwd=${pwd}`);
+        const res = await fetch(`/api/chat?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
         const data = await res.json();
         if (data.ok) {
-            loginSuccess(user, data.uid);
+            username = user;
+            uid = parseInt(data.uid || "0");
+            if (uid <= 0) return alert("登录异常：UID 错误");
+
             if (auto) {
-                localStorage.setItem("username", user);
-                localStorage.setItem("uid", data.uid);
+                localStorage.setItem("username", username);
+                localStorage.setItem("uid", String(uid));
                 localStorage.setItem("autoLogin", "true");
             }
+            loginSuccess();
         } else {
             alert("账号或密码错误");
         }
     }
 
-    // 注册
     async function reg() {
         const user = document.getElementById("user").value.trim();
         const pwd = document.getElementById("pwd").value.trim();
         if (!user || !pwd) return alert("请输入账号密码");
-        const res = await fetch(`/api/chat?act=reg&user=${user}&pwd=${pwd}`);
+        const res = await fetch(`/api/chat?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
         const data = await res.json();
         alert(data.ok ? "注册成功" : "用户名已存在");
     }
 
-    // 登录成功
-    function loginSuccess(user, myUid) {
-        username = user;
-        uid = parseInt(myUid);
+    function loginSuccess() {
         document.getElementById("loginPage").style.display = "none";
         document.getElementById("chatPage").style.display = "flex";
         document.getElementById("userInfoText").innerText = `${username} (UID:${uid})`;
 
-        // 管理员权限
+        // 管理员
         if (username === "Ratstudio") {
             document.getElementById("clearBtn").style.display = "inline-block";
             document.getElementById("delBtn").style.display = "inline-block";
@@ -356,24 +363,23 @@
         startSync();
     }
 
-    // 发送
     async function sendMsg() {
-        const i = document.getElementById("msgInput");
-        const msg = i.value.trim();
-        if (!msg) return;
-        await fetch(`/api/chat?act=send&user=${username}&msg=${encodeURIComponent(msg)}`);
-        i.value = "";
+        const input = document.getElementById("msgInput");
+        const msg = input.value;
+        if (!msg.trim()) return;
+        await fetch(`/api/chat?act=send&user=${encodeURIComponent(username)}&msg=${encodeURIComponent(msg)}`);
+        input.value = "";
         syncMsg();
     }
 
-    // 消息同步
     async function syncMsg() {
         const res = await fetch("/api/chat?act=list");
         const list = await res.json();
         const box = document.getElementById("msgBox");
         box.innerHTML = "";
 
-        list.forEach((item, index) => {
+        list.forEach(item => {
+            const itemUid = parseInt(item.uid || "0");
             const isMe = item.user === username;
             const div = document.createElement("div");
             div.className = "msg-item " + (isMe ? "me" : "");
@@ -384,15 +390,16 @@
                     <div class="username">${item.user}</div>
                 </div>
                 <div class="bubble">${showMsg}</div>
-                <div class="uid">UID: ${item.uid}</div>
+                <div class="uid">UID:${itemUid}</div>
             `;
             box.appendChild(div);
         });
 
+        // 自动滚到底
         box.scrollTop = box.scrollHeight;
     }
 
-    // Shift+Enter 换行
+    // Shift+Enter换行
     document.getElementById("msgInput").addEventListener("keydown", e => {
         if (e.key === "Enter") {
             if (e.shiftKey) return;
@@ -401,16 +408,14 @@
         }
     });
 
-    // 清空
     async function clearAllMsg() {
         if (!confirm("确定清空全部消息？")) return;
         await fetch(`/api/chat?act=clear&uid=${uid}`);
         syncMsg();
     }
 
-    // 撤回最后一条（管理员）
     async function deleteLastMsg() {
-        await fetch(`/api/chat?act=delete&uid=${uid}&index=-1`);
+        await fetch(`/api/chat?act=delete&uid=${uid}`);
         syncMsg();
     }
 
