@@ -114,16 +114,14 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <script>
 let username = "", uid = "";
 const ADMIN = "Ratstudio";
+const API = "https://api.ratstudio-official.pages.dev";
 
-// 等页面完全加载完再运行，彻底修复 null 报错
 window.onload = function () {
   let u = localStorage.getItem("username");
   let id = localStorage.getItem("uid");
   if (u && id) { 
     username = u; 
     uid = id; 
-    
-    // 加一层安全判断
     if(document.getElementById("loginPage") && document.getElementById("chatPage")){
       loginSuccess(); 
     }
@@ -133,7 +131,7 @@ window.onload = function () {
 async function login() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  fetch(`/?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
+  fetch(`${API}/?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
   .then(r=>r.text()).then(t=>{
     if(!t){alert("登录失败");return;}
     localStorage.setItem("username", user);
@@ -148,12 +146,11 @@ async function login() {
 async function reg() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  fetch(`/?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
+  fetch(`${API}/?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
   .then(r=>r.text()).then(t=>{ alert(t==="ok"?"注册成功":"已存在"); });
 }
 
 function loginSuccess() {
-  // 安全判断：元素存在才操作
   const loginPage = document.getElementById("loginPage");
   const chatPage = document.getElementById("chatPage");
   const userInfoText = document.getElementById("userInfoText");
@@ -177,7 +174,7 @@ function loginSuccess() {
 async function sendMsg() {
   let txt = document.getElementById("msgInput").value;
   if (!txt) return;
-  fetch(`/?act=send&uid=${uid}&msg=${encodeURIComponent(txt)}`)
+  fetch(`${API}/?act=send&uid=${uid}&msg=${encodeURIComponent(txt)}`)
   .then(()=>{ 
     document.getElementById("msgInput").value = ""; 
     loadMsg(); 
@@ -185,7 +182,7 @@ async function sendMsg() {
 }
 
 async function loadMsg() {
-  fetch("/?act=msg")
+  fetch(`${API}/?act=msg`)
   .then(r=>r.json())
   .then(list=>{
     let box = document.getElementById("msgBox");
@@ -208,8 +205,8 @@ async function loadMsg() {
   });
 }
 
-async function clearAllMsg() { fetch(`/?act=clear&uid=${uid}`).then(loadMsg); }
-async function deleteLastMsg() { fetch(`/?act=delete&uid=${uid}`).then(loadMsg); }
+async function clearAllMsg() { fetch(`${API}/?act=clear&uid=${uid}`).then(loadMsg); }
+async function deleteLastMsg() { fetch(`${API}/?act=delete&uid=${uid}`).then(loadMsg); }
 </script>
 </body>
 </html>
