@@ -108,128 +108,104 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 </div>
 
 <script>
-const API = "https://api.ratstudio-official.pages.dev";
+const user = localStorage.getItem('username');
+const uid = localStorage.getItem('uid');
+let postsData = [];
+let currentPostId = null;
 
-window.onload = function(){
-  const user = localStorage.getItem('username');
-  const uid = localStorage.getItem('uid');
-  let postsData = [];
-  let currentPostId = null;
+if (!user || !uid) {
+  alert('请先登录');
+  location.href = 'index.html';
+}
 
-  if (!user || !uid) {
-    alert('请先登录');
-    location.href = 'index.html';
-    return;
-  }
+function showPost() { document.getElementById('mask').style.display = 'grid' }
+function hidePost() { document.getElementById('mask').style.display = 'none' }
 
-  window.showPost = function() { 
-    const mask = document.getElementById('mask');
-    if(mask) mask.style.display = 'grid';
-  }
-  
-  window.hidePost = function() { 
-    const mask = document.getElementById('mask');
-    if(mask) mask.style.display = 'none';
-  }
-
-  window.createPost = async function() {
-    const title = document.getElementById('title')?.value;
-    const content = document.getElementById('content')?.value;
-    if (!title || !content) { alert('不能为空'); return; }
-
-    await fetch(`${API}/?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
-    hidePost();
-    loadPosts();
-  }
-
-  window.loadPosts = async function() {
-    try {
-      const r = await fetch(`${API}/?act=posts`);
-      const list = await r.json();
-      postsData = list;
-      renderList();
-      route();
-    } catch (e) {
-      console.error("加载帖子失败", e);
-    }
-  }
-
-  window.renderList = function() {
-    const box = document.getElementById('list');
-    if(!box) return;
-    
-    box.innerHTML = '';
-    if (!postsData) return;
-    postsData.forEach(p => {
-      const div = document.createElement('div');
-      div.className = 'post';
-      div.innerHTML = `
-        <h3>${p.title}</h3>
-        <div class="info">${p.user} (${p.uid}) ${p.time || ''}</div>
-        <div class="content">${p.content.substring(0, 80)}${p.content.length > 80 ? '...' : ''}</div>
-        <button class="like" onclick="event.stopPropagation();like(${p.postId})">点赞 ${p.like || 0}</button>
-      `;
-      div.onclick = () => goDetail(p.postId);
-      box.appendChild(div);
-    });
-  }
-
-  window.goDetail = function(id) {
-    history.pushState(null, null, `#/${id}`);
-    route();
-  }
-
-  window.goBack = function() {
-    history.pushState(null, null, `#/`);
-    route();
-  }
-
-  window.route = function() {
-    const hash = location.hash.slice(1) || '/';
-    const listPage = document.getElementById('listPage');
-    const detailPage = document.getElementById('detailPage');
-    
-    if (hash === '/') {
-      if(listPage) listPage.classList.add('active');
-      if(detailPage) detailPage.classList.remove('active');
-    } else {
-      const id = hash.replace('/', '');
-      const p = postsData.find(x => x.postId == id);
-      if (p) {
-        currentPostId = id;
-        if(listPage) listPage.classList.remove('active');
-        if(detailPage) detailPage.classList.add('active');
-        
-        const detailTitle = document.getElementById('detailTitle');
-        const detailInfo = document.getElementById('detailInfo');
-        const detailContent = document.getElementById('detailContent');
-        const detailLikeBtn = document.getElementById('detailLikeBtn');
-        
-        if(detailTitle) detailTitle.textContent = p.title;
-        if(detailInfo) detailInfo.textContent = `${p.user} (${p.uid}) ${p.time || ''}`;
-        if(detailContent) detailContent.textContent = p.content;
-        if(detailLikeBtn) detailLikeBtn.textContent = `点赞 ${p.like || 0}`;
-      } else {
-        goBack();
-      }
-    }
-  }
-
-  window.addEventListener('hashchange', route);
-
-  window.like = async function(id) {
-    try {
-      await fetch(`${API}/?act=like&uid=${uid}&postId=${id}`);
-      loadPosts();
-    } catch (e) { console.error(e); }
-  }
-
-  window.likeDetail = function() {
-    like(currentPostId);
-  }
-
+async function createPost() {
+  const title = document.getElementById('title').value;
+  const content = document.getElementById('content').value;
+  if (!title || !content) { alert('不能为空'); return; }
+  await fetch(`/?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
+  hidePost();
   loadPosts();
 }
+
+async function loadPosts() {
+  try {
+    const r = await fetch("/?act=posts");
+    const list = await r.json();
+    postsData = list;
+    renderList();
+    route();
+  } catch (e) {
+    console.error("加载帖子失败", e);
+  }
+}
+
+function renderList() {
+  const box = document.getElementById('list');
+  box.innerHTML = '';
+  if (!postsData) return;
+  postsData.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'post';
+    div.innerHTML = `
+      <h3>${p.title}</h3>
+      <div class="info">${p.user} (${p.uid}) ${p.time || ''}</div>
+      <div class="content">${p.content.substring(0, 80)}${p.content.length > 80 ? '...' : ''}</div>
+      <button class="like" onclick="event.stopPropagation();like(${p.postId})">点赞 ${p.like || 0}</button>
+    `;
+    div.onclick = () => goDetail(p.postId);
+    box.appendChild(div);
+  });
+}
+
+function goDetail(id) {
+  history.pushState(null, null, `#/${id}`);
+  route();
+}
+
+function goBack() {
+  history.pushState(null, null, `#/`);
+  route();
+}
+
+function route() {
+  const hash = location.hash.slice(1) || '/';
+  if (hash === '/') {
+    listPage.classList.add('active');
+    detailPage.classList.remove('active');
+  } else {
+    const id = hash.replace('/', '');
+    const p = postsData.find(x => x.postId == id);
+    if (p) {
+      currentPostId = id;
+      listPage.classList.remove('active');
+      detailPage.classList.add('active');
+      detailTitle.textContent = p.title;
+      detailInfo.textContent = `${p.user} (${p.uid}) ${p.time || ''}`;
+      detailContent.textContent = p.content;
+      detailLikeBtn.textContent = `点赞 ${p.like || 0}`;
+    } else {
+      goBack();
+    }
+  }
+}
+
+window.addEventListener('hashchange', route);
+
+async function like(id) {
+  try {
+    await fetch(`/?act=like&uid=${uid}&postId=${id}`);
+    loadPosts();
+  } catch (e) { console.error(e); }
+}
+
+function likeDetail() {
+  like(currentPostId);
+}
+
+loadPosts();
 </script>
 </body>
 </html>
