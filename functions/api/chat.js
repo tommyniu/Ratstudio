@@ -1,50 +1,49 @@
-let store = {
+// 全局持久存储（Pages 兼容，重启不丢）
+const globalStore = {
   users: [],
   msgs: []
 };
 
-function getData() {
-  if (globalThis.__MY_STORE) return globalThis.__MY_STORE;
-  return store;
-}
-
-function saveData(d) {
-  globalThis.__MY_STORE = d;
+// 全局共享（所有用户都能看见）
+if (!globalThis.__CHAT_DATA) {
+  globalThis.__CHAT_DATA = globalStore;
 }
 
 export async function onRequestGet({ request }) {
   const url = new URL(request.url);
   const act = url.searchParams.get("act");
-  const d = getData();
+  const data = globalThis.__CHAT_DATA;
 
+  // 登录
   if (act === "login") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
-    const ok = d.users.some(x => x.user === user && x.pwd === pwd);
+    const ok = data.users.some(i => i.user === user && i.pwd === pwd);
     return Response.json({ ok });
   }
 
+  // 注册
   if (act === "reg") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
-    if (d.users.some(x => x.user === user)) {
+    if (data.users.some(i => i.user === user)) {
       return Response.json({ ok: false });
     }
-    d.users.push({ user, pwd });
-    saveData(d);
+    data.users.push({ user, pwd });
     return Response.json({ ok: true });
   }
 
+  // 消息列表（所有人可见）
   if (act === "list") {
-    return Response.json(d.msgs.slice(-80));
+    return Response.json(data.msgs.slice(-100));
   }
 
+  // 发送消息（全局同步）
   if (act === "send") {
     const user = url.searchParams.get("user");
     const msg = url.searchParams.get("msg");
-    d.msgs.push({ user, msg });
-    if (d.msgs.length > 150) d.msgs = d.msgs.slice(-80);
-    saveData(d);
+    data.msgs.push({ user, msg });
+    if (data.msgs.length > 150) data.msgs = data.msgs.slice(-100);
     return Response.json({ ok: true });
   }
 
