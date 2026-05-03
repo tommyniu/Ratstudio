@@ -121,22 +121,21 @@ if (!user || !uid) {
 function showPost() { document.getElementById('mask').style.display = 'grid' }
 function hidePost() { document.getElementById('mask').style.display = 'none' }
 
+// ✅ 发布帖子（适配你的后端）
 async function createPost() {
   const title = document.getElementById('title').value;
   const content = document.getElementById('content').value;
   if (!title || !content) { alert('不能为空'); return; }
-  await fetch('/api/createPost', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ uid, user, title, content })
-  });
+
+  await fetch(`/?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
   hidePost();
   loadPosts();
 }
 
+// ✅ 加载帖子（适配你的后端）
 async function loadPosts() {
   try {
-    const r = await fetch('/api/posts');
+    const r = await fetch("/?act=posts");
     const list = await r.json();
     postsData = list;
     renderList();
@@ -198,15 +197,10 @@ function route() {
 
 window.addEventListener('hashchange', route);
 
+// ✅ 点赞（适配你的后端）
 async function like(id) {
   try {
-    const r = await fetch('/api/like', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ uid, postId: id })
-    });
-    const t = await r.text();
-    if (t === 'repeat') alert('已点赞');
+    await fetch(`/?act=like&uid=${uid}&postId=${id}`);
     loadPosts();
   } catch (e) { console.error(e); }
 }
