@@ -120,17 +120,33 @@ export async function onRequestGet({ request, env }) {
   }
 
   // ======================
-  // 查看 KV 内容（你要的）
+  // 查看 KV 内容（修复版）
   // ======================
   if (act === "debug") {
-    const raw = await env.CHAT_DB.get("chat_data");
-    return new Response(JSON.stringify({
-      current: data,
-      kvRaw: raw
-    }, null, 2), {
-      headers: { "Content-Type": "application/json" }
-    });
+    try {
+      const raw = await env.CHAT_DB.get("chat_data");
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch (e) { parsed = "JSON 解析失败"; }
+      return new Response(JSON.stringify({
+        status: "ok",
+        kv_raw: raw,
+        kv_parsed: parsed,
+        runtime_data: data
+      }, null, 2), {
+        headers: { "Content-Type": "application/json" }
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: String(e) }), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
   }
 
-  return new Response("no");
+  // ✅ 修复：如果没有任何 act，返回 JSON 而不是空白
+  return new Response(JSON.stringify({
+    error: "no act",
+    tip: "use ?act=msg / ?act=debug / ?act=posts"
+  }), {
+    headers: { "Content-Type": "application/json" }
+  });
 }
