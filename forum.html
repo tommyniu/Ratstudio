@@ -68,7 +68,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 </div>
 
 <script>
-const API = "https://rs-pro.ltc114514191.workers.dev";
+const API = "/api/chat";
 const user = localStorage.getItem('username');
 const uid = localStorage.getItem('uid');
 let postsData = [];
@@ -86,13 +86,13 @@ async function createPost() {
   const title = document.getElementById('title').value;
   const content = document.getElementById('content').value;
   if (!title || !content) { alert('不能为空'); return; }
-  await fetch(`${API}/?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
+  await fetch(`${API}?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
   hidePost();
   loadPosts();
 }
 
 async function loadPosts() {
-  let r = await fetch(`${API}/?act=posts`);
+  let r = await fetch(`${API}?act=posts`);
   let list = await r.json();
   postsData = list;
   renderList();
@@ -151,7 +151,7 @@ function route() {
 }
 
 async function like(id) {
-  await fetch(`${API}/?act=like&uid=${uid}&postId=${id}`);
+  await fetch(`${API}?act=like&uid=${uid}&postId=${id}`);
   loadPosts();
 }
 
