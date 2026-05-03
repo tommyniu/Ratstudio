@@ -115,7 +115,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 let username = "", uid = "";
 const ADMIN = "Ratstudio";
 
-window.onload = function () {
+window.onload = async function () {
   let u = localStorage.getItem("username");
   let id = localStorage.getItem("uid");
   if (u && id) {
@@ -168,23 +168,25 @@ async function sendMsg() {
 }
 
 async function loadMsg() {
-  let r = await fetch("/api/msg");
-  let list = await r.json();
-  let box = document.getElementById("msgBox");
-  box.innerHTML = "";
-  list.forEach(m => {
-    let div = document.createElement("div");
-    div.className = "msg-item " + (m.uid == uid ? "me" : "");
-    let adminBadge = m.user === ADMIN ? '<span class="admin-tag">管理员</span>' : "";
-    div.innerHTML = `
-      <div class="msg-wrap">
-        <div class="name-row"><div class="avatar"></div><div class="username">${m.user}</div>${adminBadge}</div>
-        <div class="bubble">${m.msg}</div>
-        <div class="uid">UID:${m.uid}</div>
-      </div>`;
-    box.appendChild(div);
-  });
-  box.scrollTop = box.scrollHeight;
+  try {
+    let r = await fetch("/api/msg");
+    let list = await r.json();
+    let box = document.getElementById("msgBox");
+    box.innerHTML = "";
+    list.forEach(m => {
+      let div = document.createElement("div");
+      div.className = "msg-item " + (m.uid == uid ? "me" : "");
+      let adminBadge = m.user === ADMIN ? '<span class="admin-tag">管理员</span>' : "";
+      div.innerHTML = `
+        <div class="msg-wrap">
+          <div class="name-row"><div class="avatar"></div><div class="username">${m.user}</div>${adminBadge}</div>
+          <div class="bubble">${m.msg}</div>
+          <div class="uid">UID:${m.uid}</div>
+        </div>`;
+      box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+  } catch (e) { console.error(e); }
 }
 
 async function clearAllMsg() { await fetch("/api/clear"); loadMsg(); }
