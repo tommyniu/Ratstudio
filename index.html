@@ -22,7 +22,7 @@
         .container {
             display: flex;
             width: 680px;
-            height: 720px;
+            height: 750px;
             border-radius: 44px;
             overflow: hidden;
             background: rgba(255, 255, 255, .04);
@@ -57,50 +57,44 @@
         }
         .main {
             flex: 1;
-            position: relative;
             display: flex;
             flex-direction: column;
             height: 100%;
-            padding-bottom: 10px;
         }
         .top {
-            background: rgba(255, 255, 255, .05);
-            padding: 18px 20px;
+            padding: 20px;
             color: #fff;
             font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, .08);
         }
         .login {
-            padding: 30px;
             flex: 1;
+            padding: 30px;
             overflow-y: auto;
         }
         .chat {
             display: none;
             flex-direction: column;
             height: 100%;
-            padding-bottom: 8px;
         }
         .user-info {
-            padding: 10px 20px;
+            padding: 12px 20px;
             color: #ccc;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+        /* 修复：聊天区域高度正常，不会被底部遮挡 */
         .msg-box {
-            padding: 15px 20px;
-            overflow-y: auto;
             flex: 1;
-            margin-bottom: 6px;
+            padding: 10px 20px;
+            overflow-y: auto;
+            margin-bottom: 10px;
         }
         .msg-item {
             max-width: 75%;
             width: fit-content;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             display: flex;
             flex-direction: column;
         }
@@ -136,7 +130,6 @@
         }
         .msg-item.me .bubble {
             background: rgba(60, 120, 255, .25);
-            margin-left: auto;
         }
         .uid {
             font-size: 11px;
@@ -148,57 +141,52 @@
         }
         .input-box {
             display: flex;
-            padding: 12px 18px;
-            gap: 10px;
             align-items: center;
-            background: rgba(255, 255, 255, .05);
+            padding: 15px 20px;
+            gap: 10px;
             border-top: 1px solid rgba(255, 255, 255, .08);
-            margin: 0 10px;
-            border-radius: 30px;
+            background: rgba(255,255,255,.04);
         }
         #msgInput {
             flex: 1;
-            height: 42px;
-            padding: 0 16px;
+            height: 44px;
             border-radius: 24px;
+            padding: 0 16px;
             background: #262833;
             border: 1px solid rgba(255, 255, 255, .15);
             color: #fff;
             outline: none;
         }
         .input-box button {
-            width: 66px;
-            height: 42px;
+            width: 70px;
+            height: 44px;
             border-radius: 24px;
             background: #4080ff;
             color: #fff;
             border: none;
-            font-size: 14px;
             cursor: pointer;
         }
         .admin-btn {
             background: rgba(255, 80, 80, .3);
             border: none;
-            padding: 5px 9px;
+            padding: 6px 10px;
             border-radius: 12px;
             color: #fff;
             cursor: pointer;
             margin-left: 6px;
-            font-size: 12px;
         }
         .admin-tag {
             position: absolute;
             left: 20px;
-            bottom: 16px;
+            bottom: 14px;
             color: #ff4d4d;
             font-size: 12px;
-            text-shadow: 0 0 6px #ff4d4d;
             display: none;
         }
         .version {
             position: absolute;
-            right: 18px;
-            bottom: 16px;
+            right: 20px;
+            bottom: 14px;
             color: #888;
             font-size: 12px;
         }
@@ -216,7 +204,6 @@
         button.login-reg {
             background: #4080ff;
             cursor: pointer;
-            font-weight: 500;
         }
         .auto-login {
             color: #fff;
@@ -232,12 +219,13 @@
 <div class="container">
     <div class="sidebar">
         <div class="item active">聊天室</div>
-        <div class="item" onclick="alert('开发中')">论坛</div>
-        <div class="item" onclick="alert('开发中')">更新日志</div>
-        <div class="item" onclick="alert('开发中')">开发规划</div>
+        <div class="item">论坛</div>
+        <div class="item">更新日志</div>
+        <div class="item">开发规划</div>
     </div>
     <div class="main">
         <div class="top"><span>聊天室</span></div>
+
         <div class="login" id="loginPage">
             <input id="user" placeholder="账号">
             <input id="pwd" placeholder="密码" type="password">
@@ -247,6 +235,7 @@
             <button class="login-reg" onclick="reg()">注册</button>
             <button class="login-reg" onclick="login()">登录</button>
         </div>
+
         <div class="chat" id="chatPage">
             <div class="user-info">
                 <span id="userInfoText"></span>
@@ -257,144 +246,127 @@
             </div>
             <div class="msg-box" id="msgBox"></div>
             <div class="input-box">
-                <input id="msgInput" placeholder="输入消息...">
+                <input id="msgInput" placeholder="Shift+Enter换行">
                 <button onclick="sendMsg()">发送</button>
             </div>
         </div>
+
         <div class="admin-tag" id="adminTag">管理员</div>
-        <div class="version">V1.4.1</div>
+        <div class="version">V1.4.1 修复版</div>
     </div>
 </div>
+
 <script>
     let username = "";
     let uid = 0;
 
-    function clearBadCache() {
-        localStorage.removeItem("username");
-        localStorage.removeItem("uid");
-        localStorage.removeItem("autoLogin");
-        alert("本地缓存异常，已重置，请重新登录");
+    function clearBadCache(){
+        localStorage.clear();
     }
 
     window.onload = async function () {
         const autoLogin = localStorage.getItem("autoLogin") === "true";
-        const savedUser = localStorage.getItem("username") || "";
-        const savedUid = parseInt(localStorage.getItem("uid") || "0");
-
-        if (autoLogin && savedUser && !isNaN(savedUid) && savedUid > 0) {
-            username = savedUser;
-            uid = savedUid;
+        const un = localStorage.getItem("username");
+        const u = parseInt(localStorage.getItem("uid")||"0");
+        if(autoLogin && un && u>0){
+            username = un;
+            uid = u;
             loginSuccess();
-        } else if (autoLogin && (isNaN(savedUid) || savedUid <= 0)) {
-            clearBadCache();
         }
     };
 
-    async function login() {
-        const user = document.getElementById("user").value.trim();
-        const pwd = document.getElementById("pwd").value.trim();
-        const auto = document.getElementById("autoLogin").checked;
-        if (!user || !pwd) return alert("请输入账号密码");
-
-        const res = await fetch(`/api/chat?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
-        const data = await res.json();
-        if (data.ok) {
-            const parsedUid = parseInt(data.uid || "0");
-            if (isNaN(parsedUid) || parsedUid <= 0) {
-                return alert("登录异常：UID无效，请重试");
-            }
+    async function login(){
+        let user = document.getElementById("user").value.trim();
+        let pwd = document.getElementById("pwd").value.trim();
+        let auto = document.getElementById("autoLogin").checked;
+        let res = await fetch(`/api/chat?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
+        let d = await res.json();
+        if(d.ok){
             username = user;
-            uid = parsedUid;
-
-            if (auto) {
-                localStorage.setItem("username", username);
-                localStorage.setItem("uid", String(uid));
-                localStorage.setItem("autoLogin", "true");
+            uid = parseInt(d.uid);
+            if(auto){
+                localStorage.setItem("username",username);
+                localStorage.setItem("uid",uid);
+                localStorage.setItem("autoLogin","true");
             }
             loginSuccess();
-        } else {
-            alert("账号或密码错误");
-        }
+        }else alert("账号密码错误");
     }
 
-    async function reg() {
-        const user = document.getElementById("user").value.trim();
-        const pwd = document.getElementById("pwd").value.trim();
-        if (!user || !pwd) return alert("请输入账号密码");
-        const res = await fetch(`/api/chat?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
-        const data = await res.json();
-        alert(data.ok ? "注册成功" : "用户名已存在");
+    async function reg(){
+        let user = document.getElementById("user").value.trim();
+        let pwd = document.getElementById("pwd").value.trim();
+        let res = await fetch(`/api/chat?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
+        let d = await res.json();
+        alert(d.ok?"注册成功":"用户名已存在");
     }
 
-    function loginSuccess() {
-        document.getElementById("loginPage").style.display = "none";
-        document.getElementById("chatPage").style.display = "flex";
+    function loginSuccess(){
+        document.getElementById("loginPage").style.display="none";
+        document.getElementById("chatPage").style.display="flex";
         document.getElementById("userInfoText").innerText = `${username} (UID:${uid})`;
-        if (username === "Ratstudio") {
-            document.getElementById("clearBtn").style.display = "inline-block";
-            document.getElementById("delBtn").style.display = "inline-block";
-            document.getElementById("adminTag").style.display = "block";
+        if(username === "Ratstudio"){
+            document.getElementById("clearBtn").style.display="inline-block";
+            document.getElementById("delBtn").style.display="inline-block";
+            document.getElementById("adminTag").style.display="block";
         }
         startSync();
     }
 
-    async function sendMsg() {
-        const input = document.getElementById("msgInput");
-        const msg = input.value;
-        if (!msg.trim()) return;
-        await fetch(`/api/chat?act=send&user=${encodeURIComponent(username)}&msg=${encodeURIComponent(msg)}`);
-        input.value = "";
+    async function sendMsg(){
+        let inp = document.getElementById("msgInput");
+        let val = inp.value;
+        if(!val.trim())return;
+        await fetch(`/api/chat?act=send&user=${encodeURIComponent(username)}&msg=${encodeURIComponent(val)}`);
+        inp.value = "";
         syncMsg();
     }
 
-    async function syncMsg() {
-        const res = await fetch("/api/chat?act=list");
-        const list = await res.json();
-        const box = document.getElementById("msgBox");
+    async function syncMsg(){
+        let res = await fetch("/api/chat?act=list");
+        let list = await res.json();
+        let box = document.getElementById("msgBox");
         box.innerHTML = "";
-
-        list.forEach(item => {
-            const itemUid = parseInt(item.uid || "0");
-            const safeUid = isNaN(itemUid) ? 0 : itemUid;
-            const isMe = item.user === username;
-            const div = document.createElement("div");
-            div.className = "msg-item " + (isMe ? "me" : "");
-            const showMsg = item.msg.replace(/\n/g, "<br>");
+        list.forEach(item=>{
+            let itemUid = parseInt(item.uid||"0");
+            let isMe = item.user === username;
+            let div = document.createElement("div");
+            div.className = "msg-item " + (isMe?"me":"");
+            let html = item.msg.replace(/\n/g,"<br>");
             div.innerHTML = `
                 <div class="name-row">
                     <div class="avatar"></div>
                     <div class="username">${item.user}</div>
                 </div>
-                <div class="bubble">${showMsg}</div>
-                <div class="uid">UID:${safeUid}</div>
+                <div class="bubble">${html}</div>
+                <div class="uid">UID:${itemUid}</div>
             `;
             box.appendChild(div);
         });
         box.scrollTop = box.scrollHeight;
     }
 
-    document.getElementById("msgInput").addEventListener("keydown", e => {
-        if (e.key === "Enter") {
-            if (e.shiftKey) return;
+    document.getElementById("msgInput").addEventListener("keydown",e=>{
+        if(e.key==="Enter"){
+            if(e.shiftKey)return;
             e.preventDefault();
             sendMsg();
         }
     });
 
-    async function clearAllMsg() {
-        if (!confirm("确定清空全部消息？")) return;
+    async function clearAllMsg(){
+        if(!confirm("确定清空全部消息？"))return;
         await fetch(`/api/chat?act=clear&uid=${uid}`);
         syncMsg();
     }
-
-    async function deleteLastMsg() {
+    async function deleteLastMsg(){
         await fetch(`/api/chat?act=delete&uid=${uid}`);
         syncMsg();
     }
 
-    function startSync() {
+    function startSync(){
         syncMsg();
-        setInterval(syncMsg, 2500);
+        setInterval(syncMsg,2500);
     }
 </script>
 </body>
