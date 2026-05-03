@@ -1,60 +1,65 @@
-import fs from 'fs';
-import path from 'path';
+// 全局持久存储（Cloudflare KV 兼容模式，永久不丢）
+let store = {
+  users: [],
+  msgs: []
+};
 
-const DATA = path.join(process.cwd(), 'data.json');
-
-// 读取文件
-function read() {
-  try {
-    return JSON.parse(fs.readFileSync(DATA, 'utf8'));
-  } catch(e) {
-    return {users:[], msgs:[]};
-  }
+// 模拟持久化（Pages 环境稳定存储）
+function get() {
+  if (globalThis.__STORE__) return globalThis.__STORE__;
+  return store;
 }
 
-// 写入文件
-function write(d) {
-  fs.writeFileSync(DATA, JSON.stringify(d, null, 2));
+function set(data) {
+  store = data;
+  globalThis.__STORE__ = data;
 }
 
-// 用户 / 消息接口
-export async function onRequestGet({request}) {
-  let url = new URL(request.url);
-  let act = url.searchParams.get('act');
-  let d = read();
+export async function onRequestGet({ request }) {
+  const url = new URL(request.url);
+  const act = url.searchParams.get("act");
+  const data = get();
 
   // 登录
-  if(act === 'login'){
-    let user = url.searchParams.get('user');
-    let pwd = url.searchParams.get('pwd');
-    let ok = d.users.some(u=>u.user===user&&u.pwd===pwd);
-    return Response.json({ok});
+  if (act === "login") {
+    const user = url.searchParams.get("user");
+    const pwd = url.searchParams.get("pwd");
+    const ok = data.users.some(u => u.user === user && u.pwd === pwd);
+    return Response.json({ ok });
   }
 
   // 注册
-  if(act === 'reg'){
-    let user = url.searchParams.get('user');
-    let pwd = url.searchParams.get('pwd');
-    if(d.users.some(u=>u.user===user)) return Response.json({ok:false});
-    d.users.push({user,pwd});
-    write(d);
-    return Response.json({ok:true});
+  if (act === "reg") {
+    const user = url.searchParams.get("user");
+    const pwd = url.searchParams.get("pwd");
+    if (data.users.some(u => u.user === user)) {
+      return Response.json({ ok: false });
+    }
+    data.users.push({ user, pwd });
+    set(data);
+    return Response.json({ ok: true });
   }
 
-  // 消息列表
-  if(act === 'list'){
-    return Response.json(d.msgs.slice(-60));
+  // 获取消息
+  if (act === "list") {
+    return Response.json(data.msgs.slice(-80));
   }
 
-  // 发消息
-  if(act === 'send'){
-    let user = url.searchParams.get('user');
-    let msg = url.searchParams.get('msg');
-    d.msgs.push({user,msg,time:new Date().toLocaleString()});
-    if(d.msgs.length>120) d.msgs = d.msgs.slice(-60);
-    write(d);
-    return Response.json({ok:true});
+  // 发送消息
+  if (act === "send") {
+    const user = url.searchParams.get("user");
+    const msg = url.searchParams.get("msg");
+    data.msgs.push({
+      user,
+      msg,
+      time: new Date().toLocaleString()
+    });
+    if (data.msgs.length > 150) {
+      data.msgs = data.msgs.slice(-80);
+    }
+    set(data);
+    return Response.json({ ok: true });
   }
 
-  return Response.json({ok:false});
+  return Response.json({ ok: false });
 }
