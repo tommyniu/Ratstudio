@@ -2,9 +2,6 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const act = url.searchParams.get("act");
 
-  // ==============================================
-  // 自动兼容任何 KV 结构，不管以前存的啥都能读
-  // ==============================================
   async function getData() {
     const data = await env.CHAT_DB.get("chat_data");
     let parsed = { users: [], msgs: [], posts: [], nextUID: 2, nextPostId: 1 };
@@ -26,9 +23,7 @@ export async function onRequestGet({ request, env }) {
     await env.CHAT_DB.put("chat_data", JSON.stringify(d));
   }
 
-  // ------------------------------
   // 登录
-  // ------------------------------
   if (act === "login") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
@@ -36,9 +31,7 @@ export async function onRequestGet({ request, env }) {
     return new Response(u ? String(u.uid) : "");
   }
 
-  // ------------------------------
   // 注册
-  // ------------------------------
   if (act === "reg") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
@@ -49,35 +42,24 @@ export async function onRequestGet({ request, env }) {
     return new Response("ok");
   }
 
-  // ------------------------------
   // 消息列表
-  // ------------------------------
   if (act === "msg") {
     return Response.json(data.msgs || []);
   }
 
-  // ------------------------------
   // 发消息
-  // ------------------------------
   if (act === "send") {
     const uid = url.searchParams.get("uid");
     const msg = url.searchParams.get("msg");
     const u = data.users.find(i => i.uid == uid);
     if (!u || !msg) return new Response("no");
-    data.msgs.push({
-      uid: u.uid,
-      user: u.user,
-      msg,
-      time: Date.now()
-    });
+    data.msgs.push({ uid: u.uid, user: u.user, msg, time: Date.now() });
     if (data.msgs.length > 200) data.msgs = data.msgs.slice(-200);
     await save(data);
     return new Response("ok");
   }
 
-  // ------------------------------
-  // 清空消息（管理员）
-  // ------------------------------
+  // 清空
   if (act === "clear") {
     const uid = parseInt(url.searchParams.get("uid") || 0);
     const admin = data.users.find(x => x.uid === uid && x.user === "Ratstudio");
@@ -87,9 +69,7 @@ export async function onRequestGet({ request, env }) {
     return new Response("ok");
   }
 
-  // ------------------------------
-  // 删除最后一条（管理员）
-  // ------------------------------
+  // 删除最后一条
   if (act === "delete") {
     const uid = parseInt(url.searchParams.get("uid") || 0);
     const admin = data.users.find(x => x.uid === uid && x.user === "Ratstudio");
@@ -99,23 +79,18 @@ export async function onRequestGet({ request, env }) {
     return new Response("ok");
   }
 
-  // ------------------------------
-  // 论坛 - 帖子列表
-  // ------------------------------
+  // 帖子列表
   if (act === "posts") {
     return Response.json(data.posts || []);
   }
 
-  // ------------------------------
-  // 论坛 - 发布帖子
-  // ------------------------------
+  // 发布帖子
   if (act === "createPost") {
     const uid = url.searchParams.get("uid");
     const title = url.searchParams.get("title");
     const content = url.searchParams.get("content");
     const u = data.users.find(i => i.uid == uid);
     if (!u || !title || !content) return new Response("err");
-
     data.posts.push({
       postId: data.nextPostId++,
       uid: u.uid,
@@ -130,22 +105,31 @@ export async function onRequestGet({ request, env }) {
     return new Response("ok");
   }
 
-  // ------------------------------
-  // 论坛 - 点赞
-  // ------------------------------
+  // 点赞
   if (act === "like") {
     const uid = url.searchParams.get("uid");
     const postId = parseInt(url.searchParams.get("postId"));
     const post = data.posts.find(p => p.postId === postId);
     if (!post) return new Response("err");
-
     if (!post.liked) post.liked = [];
     if (post.liked.includes(uid)) return new Response("repeat");
-
     post.like = (post.like || 0) + 1;
     post.liked.push(uid);
     await save(data);
     return new Response("ok");
+  }
+
+  // ======================
+  // 查看 KV 内容（你要的）
+  // ======================
+  if (act === "debug") {
+    const raw = await env.CHAT_DB.get("chat_data");
+    return new Response(JSON.stringify({
+      current: data,
+      kvRaw: raw
+    }, null, 2), {
+      headers: { "Content-Type": "application/json" }
+    });
   }
 
   return new Response("no");
