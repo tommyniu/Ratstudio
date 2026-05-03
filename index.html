@@ -11,7 +11,6 @@
             padding: 0;
             font-family: system-ui
         }
-
         body {
             background: linear-gradient(135deg, #0f1419, #0a0c12);
             display: flex;
@@ -20,7 +19,6 @@
             height: 100vh;
             overflow: hidden;
         }
-
         .container {
             display: flex;
             width: 680px;
@@ -32,7 +30,6 @@
             border: 1px solid rgba(255, 255, 255, .1);
             box-shadow: 0 0 50px rgba(60, 120, 255, 0.25);
         }
-
         .sidebar {
             width: 140px;
             background: rgba(255, 255, 255, .05);
@@ -43,7 +40,6 @@
             border-right: 1px solid rgba(255, 255, 255, .08);
             border-radius: 44px 0 0 44px;
         }
-
         .item {
             padding: 14px;
             border-radius: 9999px;
@@ -53,15 +49,12 @@
             transition: all .2s;
             border: 1px solid transparent;
         }
-
-        .item:hover,
-        .item.active {
+        .item:hover, .item.active {
             background: rgba(60, 130, 255, .25);
             color: #fff;
             border-color: rgba(100, 160, 255, .4);
             box-shadow: 0 0 12px rgba(80, 140, 255, .35);
         }
-
         .main {
             flex: 1;
             position: relative;
@@ -69,7 +62,6 @@
             flex-direction: column;
             height: 100%;
         }
-
         .top {
             background: rgba(255, 255, 255, .05);
             padding: 20px;
@@ -80,19 +72,16 @@
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, .08);
         }
-
         .login {
             padding: 30px;
             flex: 1;
             overflow-y: auto;
         }
-
         .chat {
             display: none;
             flex-direction: column;
             height: 100%;
         }
-
         .user-info {
             padding: 12px 20px;
             color: #ccc;
@@ -100,13 +89,11 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .msg-box {
             padding: 20px;
             overflow-y: auto;
             flex: 1;
         }
-
         .msg-item {
             max-width: 75%;
             width: fit-content;
@@ -114,34 +101,28 @@
             display: flex;
             flex-direction: column;
         }
-
         .msg-item.me {
             margin-left: auto;
         }
-
         .name-row {
             display: flex;
             align-items: center;
             gap: 8px;
             margin-bottom: 4px;
         }
-
         .msg-item.me .name-row {
             flex-direction: row-reverse;
         }
-
         .avatar {
             width: 32px;
             height: 32px;
             background: #444;
             border-radius: 50%;
         }
-
         .username {
             font-size: 13px;
             color: rgba(255, 255, 255, 0.75);
         }
-
         .bubble {
             padding: 10px 14px;
             border-radius: 18px;
@@ -150,22 +131,18 @@
             white-space: pre-wrap;
             word-break: break-all;
         }
-
         .msg-item.me .bubble {
             background: rgba(60, 120, 255, .25);
             margin-left: auto;
         }
-
         .uid {
             font-size: 11px;
             color: rgba(255, 255, 255, 0.4);
             margin-top: 4px;
         }
-
         .msg-item.me .uid {
             text-align: right;
         }
-
         .input-box {
             display: flex;
             padding: 16px 20px;
@@ -174,7 +151,6 @@
             background: rgba(255, 255, 255, .05);
             border-top: 1px solid rgba(255, 255, 255, .08);
         }
-
         #msgInput {
             flex: 1;
             height: 44px;
@@ -185,7 +161,6 @@
             color: #fff;
             outline: none;
         }
-
         .input-box button {
             width: 70px;
             height: 44px;
@@ -196,7 +171,6 @@
             font-size: 14px;
             cursor: pointer;
         }
-
         .admin-btn {
             background: rgba(255, 80, 80, .3);
             border: none;
@@ -206,7 +180,6 @@
             cursor: pointer;
             margin-left: 6px;
         }
-
         .admin-tag {
             position: absolute;
             left: 20px;
@@ -216,7 +189,6 @@
             text-shadow: 0 0 6px #ff4d4d;
             display: none;
         }
-
         .version {
             position: absolute;
             right: 18px;
@@ -224,7 +196,6 @@
             color: #888;
             font-size: 12px;
         }
-
         input, button.login-reg {
             border-radius: 16px;
             padding: 12px;
@@ -236,13 +207,11 @@
             font-size: 15px;
             outline: none;
         }
-
         button.login-reg {
             background: #4080ff;
             cursor: pointer;
             font-weight: 500;
         }
-
         .auto-login {
             color: #fff;
             font-size: 14px;
@@ -254,7 +223,6 @@
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="sidebar">
         <div class="item active">聊天室</div>
@@ -262,12 +230,8 @@
         <div class="item" onclick="alert('开发中')">更新日志</div>
         <div class="item" onclick="alert('开发中')">开发规划</div>
     </div>
-
     <div class="main">
-        <div class="top">
-            <span>聊天室</span>
-        </div>
-
+        <div class="top"><span>聊天室</span></div>
         <div class="login" id="loginPage">
             <input id="user" placeholder="账号">
             <input id="pwd" placeholder="密码" type="password">
@@ -277,7 +241,6 @@
             <button class="login-reg" onclick="reg()">注册</button>
             <button class="login-reg" onclick="login()">登录</button>
         </div>
-
         <div class="chat" id="chatPage">
             <div class="user-info">
                 <span id="userInfoText"></span>
@@ -287,32 +250,39 @@
                 </div>
             </div>
             <div class="msg-box" id="msgBox"></div>
-
             <div class="input-box">
                 <input id="msgInput" placeholder="输入消息...">
                 <button onclick="sendMsg()">发送</button>
             </div>
         </div>
-
         <div class="admin-tag" id="adminTag">管理员</div>
-        <div class="version">V1.4.1</div>
+        <div class="version">V1.4.1（UID修复）</div>
     </div>
 </div>
-
 <script>
     let username = "";
     let uid = 0;
 
+    // 清除异常缓存
+    function clearBadCache() {
+        localStorage.removeItem("username");
+        localStorage.removeItem("uid");
+        localStorage.removeItem("autoLogin");
+        alert("本地缓存异常，已重置，请重新登录");
+    }
+
     window.onload = async function () {
-        // 自动登录
         const autoLogin = localStorage.getItem("autoLogin") === "true";
         const savedUser = localStorage.getItem("username") || "";
         const savedUid = parseInt(localStorage.getItem("uid") || "0");
 
-        if (autoLogin && savedUser && savedUid > 0) {
+        // 前端强校验UID
+        if (autoLogin && savedUser && !isNaN(savedUid) && savedUid > 0) {
             username = savedUser;
             uid = savedUid;
             loginSuccess();
+        } else if (autoLogin && (isNaN(savedUid) || savedUid <= 0)) {
+            clearBadCache(); // 异常则清缓存
         }
     };
 
@@ -325,9 +295,12 @@
         const res = await fetch(`/api/chat?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
         const data = await res.json();
         if (data.ok) {
+            const parsedUid = parseInt(data.uid || "0");
+            if (isNaN(parsedUid) || parsedUid <= 0) {
+                return alert("登录异常：UID无效，请重试");
+            }
             username = user;
-            uid = parseInt(data.uid || "0");
-            if (uid <= 0) return alert("登录异常：UID 错误");
+            uid = parsedUid;
 
             if (auto) {
                 localStorage.setItem("username", username);
@@ -353,8 +326,6 @@
         document.getElementById("loginPage").style.display = "none";
         document.getElementById("chatPage").style.display = "flex";
         document.getElementById("userInfoText").innerText = `${username} (UID:${uid})`;
-
-        // 管理员
         if (username === "Ratstudio") {
             document.getElementById("clearBtn").style.display = "inline-block";
             document.getElementById("delBtn").style.display = "inline-block";
@@ -380,6 +351,7 @@
 
         list.forEach(item => {
             const itemUid = parseInt(item.uid || "0");
+            const safeUid = isNaN(itemUid) ? 0 : itemUid; // 消息UID兜底
             const isMe = item.user === username;
             const div = document.createElement("div");
             div.className = "msg-item " + (isMe ? "me" : "");
@@ -390,12 +362,10 @@
                     <div class="username">${item.user}</div>
                 </div>
                 <div class="bubble">${showMsg}</div>
-                <div class="uid">UID:${itemUid}</div>
+                <div class="uid">UID:${safeUid}</div>
             `;
             box.appendChild(div);
         });
-
-        // 自动滚到底
         box.scrollTop = box.scrollHeight;
     }
 
