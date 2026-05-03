@@ -121,8 +121,9 @@ async function sendMsg() {
   loadMsg();
 }
 
+// ✅ 修复：防缓存 + 强制刷新消息
 async function loadMsg() {
-  let r = await fetch(`${API}?act=msg`);
+  let r = await fetch(`${API}?act=msg&_=${Date.now()}`);
   let list = await r.json();
   let box = document.getElementById("msgBox");
   box.innerHTML = "";
@@ -146,7 +147,7 @@ async function clearAllMsg() {
   loadMsg();
 }
 async function deleteLastMsg() {
-  await fetch(`${API}?act=delete&uid=${uid}`);
+  await.fetch(`${API}?act=delete&uid=${uid}`);
   loadMsg();
 }
 </script>
