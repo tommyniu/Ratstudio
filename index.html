@@ -10,27 +10,28 @@ body{background:#0b0f14;color:#eee;font-family:system-ui}
 .container{max-width:680px;margin:40px auto;padding:20px}
 h2{text-align:center;margin-bottom:20px;color:#58a6ff}
 
-/* 登录框样式和聊天框统一风格 */
 .login-box,.chat-box{background:rgba(255,255,255,0.05);padding:20px;border-radius:16px}
 .login-box{margin-bottom:15px}
 
 input{width:100%;padding:10px;margin:6px 0;border-radius:12px;border:none;background:#222;color:#fff;outline:none}
-button{width:100%;padding:10px;border-radius:12px;border:none;background:#2383ff;color:#fff;margin-top:6px;cursor:pointer}
+button{border-radius:12px;border:none;background:#2383ff;color:#fff;cursor:pointer}
 
 #chat{display:none}
 #msgList{height:500px;overflow-y:auto;padding:10px;background:rgba(255,255,255,0.03);border-radius:16px;margin-bottom:15px}
 .msgItem{padding:8px 12px;margin:6px 0;border-radius:12px;background:rgba(255,255,255,0.07)}
 .userName{color:#58a6ff;font-weight:bold;margin-right:6px}
 
-.inputWrap{display:flex;gap:10px;align-items:center}
+/* 输入栏布局修复 */
+.inputWrap{display:flex;gap:10px;align-items:flex-end}
 #nick{width:120px;padding:10px;border-radius:12px;border:none;background:#222;color:#fff;outline:none}
-#input{flex:1;padding:10px;border-radius:12px;border:none;background:#222;color:#fff;outline:none}
-#send{padding:10px 20px;border-radius:12px;border:none;background:#2383ff;color:#fff;cursor:pointer}
+/* 消息输入框：支持多行换行 */
+#msgInput{flex:1;min-height:44px;max-height:120px;padding:10px;border-radius:12px;border:none;background:#222;color:#fff;outline:none;resize:none}
+/* 发送按钮缩小固定宽度，不挤占 */
+#sendBtn{width:80px;padding:10px;font-size:14px}
 </style>
 </head>
 <body>
 <div class="container">
-  <!-- 登录注册 -->
   <div id="login">
     <div class="login-box">
       <h2>登录 / 注册</h2>
@@ -41,14 +42,14 @@ button{width:100%;padding:10px;border-radius:12px;border:none;background:#2383ff
     </div>
   </div>
 
-  <!-- 聊天界面（还原旧版UI） -->
   <div id="chat">
     <h2>RatStudio 全局聊天室</h2>
     <div id="msgList"></div>
     <div class="inputWrap">
       <input id="nick" placeholder="昵称" value="游客" disabled style="opacity:0.7">
-      <input id="input" placeholder="输入消息...">
-      <button id="send" onclick="sendMsg()">发送</button>
+      <!-- 改用 textarea 支持换行 -->
+      <textarea id="msgInput" placeholder="输入消息...（回车换行，Ctrl+回车发送）"></textarea>
+      <button id="sendBtn" onclick="sendMsg()">发送</button>
     </div>
   </div>
 </div>
@@ -83,11 +84,12 @@ async function reg() {
 }
 
 async function sendMsg() {
-  let msgInput = document.getElementById("input");
-  let m = msgInput.value.trim();
+  let input = document.getElementById("msgInput");
+  let m = input.value.trim();
   if(!m) return;
+  // 保留换行符发给后端
   await fetch(`/api/chat?act=send&user=${username}&msg=${encodeURIComponent(m)}`);
-  msgInput.value = "";
+  input.value = "";
   loadMsg();
 }
 
@@ -96,11 +98,26 @@ async function loadMsg() {
   let list = await res.json();
   let html = "";
   list.forEach(item=>{
-    html += `<div class="msgItem"><span class="userName">${item.user}</span>：${item.msg}</div>`;
+    // 把换行转成 <br> 页面显示换行
+    let content = item.msg.replace(/\n/g,"<br>");
+    html += `<div class="msgItem"><span class="userName">${item.user}</span>：${content}</div>`;
   });
   document.getElementById("msgList").innerHTML = html;
   document.getElementById("msgList").scrollTop = document.getElementById("msgList").scrollHeight;
 }
+
+// 键盘监听：回车换行，Ctrl+回车发送
+document.getElementById("msgInput").addEventListener("keydown",function(e){
+  if(e.key === "Enter"){
+    if(e.ctrlKey){
+      // Ctrl+回车 发送
+      e.preventDefault();
+      sendMsg();
+    }else{
+      // 单纯回车 允许换行，不拦截
+    }
+  }
+});
 
 setInterval(loadMsg,2000);
 </script>
