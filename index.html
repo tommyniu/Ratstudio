@@ -3,68 +3,94 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>全局聊天室</title>
+<title>RatStudio 聊天室</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0b0f14;color:#eee;font-family:system-ui}
 .container{max-width:680px;margin:40px auto;padding:20px}
-h2{text-align:center;margin-bottom:20px;color:#58a6ff}
-#msgList{height:500px;overflow-y:auto;padding:10px;background:rgba(255,255,255,0.05);border-radius:16px;margin-bottom:15px}
-.msgItem{padding:8px 12px;margin:6px 0;border-radius:12px;background:rgba(255,255,255,0.07)}
-.userName{color:#58a6ff;font-weight:bold;margin-right:6px}
-.inputWrap{display:flex;gap:10px;align-items:center}
-#nick{width:120px;padding:10px;border-radius:12px;border:none;background:#222;color:#fff}
-#input{flex:1;padding:10px;border-radius:12px;border:none;background:#222;color:#fff}
-#send{padding:10px 20px;border-radius:12px;border:none;background:#2383ff;color:#fff;cursor:pointer}
+.box{background:rgba(255,255,255,.05);padding:20px;border-radius:16px;margin-bottom:10px}
+h2{text-align:center;margin-bottom:16px;color:#58a6ff}
+input{width:100%;padding:10px;margin:6px 0;border-radius:12px;border:none;background:#222;color:#fff}
+button{width:100%;padding:10px;border-radius:12px;border:none;background:#2383ff;color:#fff;margin-top:6px}
+#chat{display:none}
+#msgList{height:400px;overflow-y:auto;padding:10px;background:rgba(255,255,255,0.03);border-radius:12px;margin:10px 0}
+.msg{padding:8px 12px;margin:6px 0;background:rgba(255,255,255,.07);border-radius:10px}
+.user{color:#58a6ff;font-weight:bold}
+.inputBar{display:flex;gap:8px}
 </style>
 </head>
 <body>
 <div class="container">
-  <h2>RatStudio 全局聊天室</h2>
-  <div id="msgList"></div>
-  <div class="inputWrap">
-    <input id="nick" placeholder="昵称" value="游客">
-    <input id="input" placeholder="输入消息...">
-    <button id="send" onclick="sendMsg()">发送</button>
+  <div id="login">
+    <div class="box">
+      <h2>登录 / 注册</h2>
+      <input id="user" placeholder="用户名">
+      <input id="pwd" placeholder="密码" type="password">
+      <button onclick="login()">登录</button>
+      <button onclick="reg()">注册</button>
+    </div>
+  </div>
+
+  <div id="chat">
+    <div class="box">
+      <h2>全局聊天室</h2>
+      <div id="msgList"></div>
+      <div class="inputBar">
+        <input id="msg" placeholder="输入消息...">
+        <button onclick="send()" style="width:100px">发送</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-let nickEl = document.getElementById('nick');
-let inputEl = document.getElementById('input');
-let listEl = document.getElementById('msgList');
+let username = "";
 
-// 拉取消息
-async function getMsg(){
-  let res = await fetch('/api/chat');
-  let data = await res.json();
-  listEl.innerHTML = '';
-  data.forEach(item=>{
-    let div = document.createElement('div');
-    div.className = 'msgItem';
-    div.innerHTML = `<span class="userName">${item.user}：</span>${item.msg}`;
-    listEl.appendChild(div);
-  });
-  listEl.scrollTop = listEl.scrollHeight;
+function login(){
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pwd").value;
+  fetch("/api/user?act=login&user="+u+"&pwd="+p).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      username = u;
+      document.getElementById("login").style.display = "none";
+      document.getElementById("chat").style.display = "block";
+      loadMsg();
+    }else{
+      alert("登录失败");
+    }
+  })
 }
 
-// 发消息
-async function sendMsg(){
-  let nick = nickEl.value.trim() || '游客';
-  let msg = inputEl.value.trim();
-  if(!msg) return;
-  await fetch('/api/chat',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({user:nick,msg})
-  });
-  inputEl.value = '';
-  getMsg();
+function reg(){
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pwd").value;
+  fetch("/api/user?act=reg&user="+u+"&pwd="+p).then(r=>r.json()).then(d=>{
+    alert(d.ok?"注册成功":"注册失败");
+  })
 }
 
-// 2秒刷新一次
-setInterval(getMsg,2000);
-getMsg();
+function send(){
+  let m = document.getElementById("msg").value;
+  if(!m)return;
+  fetch("/api/chat?act=send&user="+username+"&msg="+encodeURIComponent(m))
+  .then(()=>{
+    document.getElementById("msg").value = "";
+    loadMsg();
+  })
+}
+
+function loadMsg(){
+  fetch("/api/chat?act=list").then(r=>r.json()).then(d=>{
+    let html = "";
+    d.forEach(m=>{
+      html += `<div class="msg"><span class="user">${m.user}</span>：${m.msg}</div>`;
+    });
+    document.getElementById("msgList").innerHTML = html;
+    document.getElementById("msgList").scrollTop = 99999;
+  })
+}
+
+setInterval(loadMsg,2000);
 </script>
 </body>
 </html>
