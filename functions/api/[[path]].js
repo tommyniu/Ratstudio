@@ -17,98 +17,81 @@ export async function onRequestGet({ request, env }) {
       db = { users: [], msgs: [], nextUID: 3 };
     }
 
-    // 强制固定：Ratstudio UID=1 密码固定为 LTC505666
-    let adminIdx = db.users.findIndex(u => u.user === "Ratstudio");
-    if (adminIdx > -1) {
-      db.users[adminIdx].uid = 1;
-      db.users[adminIdx].pwd = "LTC505666";
+    // 强制管理员
+    let admin = db.users.find(u => u.user === "Ratstudio");
+    if (admin) {
+      admin.uid = 1;
+      admin.pwd = "LTC505666";
     } else {
-      // 不存在就新建一条
       db.users.unshift({ uid: 1, user: "Ratstudio", pwd: "LTC505666" });
     }
 
-    // 强制 RsTest UID=2
-    let testIdx = db.users.findIndex(u => u.user === "RsTest");
-    if (testIdx > -1) {
-      db.users[testIdx].uid = 2;
-    }
+    // 强制测试号
+    let test = db.users.find(u => u.user === "RsTest");
+    if (test) test.uid = 2;
 
-    // 新用户从3开始
     db.nextUID = 3;
-
-    // 保存回KV
     await env.CHAT_DB.put("db", JSON.stringify(db));
 
-    // 登录
     if (path === "/api/login") {
       const user = url.searchParams.get("user");
       const pwd = url.searchParams.get("pwd");
-      const found = db.users.find(u => u.user === user && u.pwd === pwd);
-      return new Response(found ? String(found.uid) : "", { headers: corsHeaders });
+      const f = db.users.find(x => x.user === user && x.pwd === pwd);
+      return new Response(f ? String(f.uid) : "", { headers: corsHeaders });
     }
 
-    // 注册
     if (path === "/api/reg") {
       const user = url.searchParams.get("user");
       const pwd = url.searchParams.get("pwd");
-      if (db.users.some(u => u.user === user)) {
-        return new Response("no", { headers: corsHeaders });
-      }
-      const newUid = db.nextUID++;
-      db.users.push({ uid: newUid, user, pwd });
+      if (db.users.some(x => x.user === user)) return new Response("no", { headers: corsHeaders });
+      const nu = db.nextUID++;
+      db.users.push({ uid: nu, user, pwd });
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // 发消息
     if (path === "/api/send") {
       const uid = url.searchParams.get("uid");
       const msg = url.searchParams.get("msg");
-      const user = db.users.find(u => u.uid == uid);
-      if (!user || !msg) return new Response("no", { headers: corsHeaders });
-      db.msgs.push({ uid: user.uid, user: user.user, msg });
+      const u = db.users.find(x => x.uid == uid);
+      if (!u || !msg) return new Response("no", { headers: corsHeaders });
+      db.msgs.push({ uid: u.uid, user: u.user, msg });
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // 取消息
     if (path === "/api/msg") {
       return new Response(JSON.stringify(db.msgs || []), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    // 清空管理员校验
     if (path === "/api/clear") {
-      const admin = db.users.find(u => u.uid === 1 && u.user === "Ratstudio");
-      if (!admin) return new Response("no", { headers: corsHeaders });
+      const a = db.users.find(x => x.uid === 1 && x.user === "Ratstudio");
+      if (!a) return new Response("no", { headers: corsHeaders });
       db.msgs = [];
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // 撤回
     if (path === "/api/delete") {
-      const admin = db.users.find(u => u.uid === 1 && u.user === "Ratstudio");
-      if (!admin) return new Response("no", { headers: corsHeaders });
-      if (db.msgs.length > 0) db.msgs.pop();
+      const a = db.users.find(x => x.uid === 1 && x.user === "Ratstudio");
+      if (!a) return new Response("no", { headers: corsHeaders });
+      if (db.msgs.length) db.msgs.pop();
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
     }
 
     return new Response("ok", { headers: corsHeaders });
-
   } catch (err) {
     return new Response("error", { headers: corsHeaders });
   }
 }
 
 export async function onRequestOptions() {
-  return new Response(null, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Headers": "Content-Type"
-    }
-  });
+  return new Response(null, { headers: {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  }});
 }
