@@ -27,7 +27,13 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
   background:rgba(60,130,255,.25);color:#fff;
   border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35);
 }
-.main{flex:1;display:flex;flex-direction:column;height:100%}
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  padding-bottom:70px; /* 这里彻底避开输入栏 */
+}
 .top{
   background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;
   display:flex;justify-content:space-between;align-items:center;
@@ -37,7 +43,6 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 .msg-box{
   flex:1;
   padding:10px 20px;
-  padding-bottom: 80px;
   overflow-y:auto;
 }
 .msg-item{display:flex;width:100%;margin-bottom:16px}
@@ -123,7 +128,6 @@ window.onload=()=>{
   if(u&&id){username=u;uid=id;loginSuccess();}
 };
 
-// 退出登录
 function logout(){
   localStorage.removeItem("username");
   localStorage.removeItem("uid");
@@ -190,11 +194,8 @@ async function loadMsg(){
         </div>`;
       box.appendChild(div);
     });
-    // 自动滚到底部
     box.scrollTop = box.scrollHeight;
-  } catch (e) {
-    console.error("加载消息失败:", e);
-  }
+  } catch (e) {}
 }
 
 async function clearAllMsg(){
