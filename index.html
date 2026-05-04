@@ -5,234 +5,321 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>聊天室 - RatStudio的小站</title>
 <style>
-/* ==================== 新版 方块全屏UI 蓝色主题 ==================== */
+/* ========== 全局 B 站风格：小圆角 + 清爽全屏 ========== */
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
-.container{
-  width:100%;height:100%;display:flex;
-  background:#f1f2f3;
-}
-.sidebar{
-  width:180px;height:100%;background:#fff;
-  border-right:1px solid #e5e6eb;
-  display:flex;flex-direction:column;
-}
-.sidebar .item{
-  width:100%;padding:16px 20px;
-  font-size:15px;color:#61666d;
-  cursor:pointer;border:none;background:none;
-  text-align:left;
-  border-radius:0;
-}
-.sidebar .item.active{
-  background:#f1f2f3;color:#0066cc;font-weight:bold;
-}
-.sidebar .item:hover{background:#f8f9fa}
-
-.main{
-  flex:1;height:100%;display:flex;flex-direction:column;
-  overflow:hidden;
-}
-.top-bar{
-  width:100%;height:56px;background:#fff;
+/* ========== 顶部导航栏（原侧边栏移到这里） ========== */
+.top-nav{
+  width:100%;
+  height:56px;
+  background:#fff;
   border-bottom:1px solid #e5e6eb;
-  display:flex;align-items:center;justify-content:space-between;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
   padding:0 20px;
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:999;
 }
-.top-bar h2{font-size:18px;font-weight:500}
-.old-ui-btn{
-  padding:6px 12px;background:#f1f2f3;border:1px solid #e5e6eb;
-  font-size:13px;cursor:pointer;color:#333;
-  border-radius:0;
+
+/* 左上角：头像 + 昵称 + UID */
+.nav-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.avatar{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#0066cc;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+.user-info-mini{
+  display:flex;
+  flex-direction:column;
+  font-size:12px;
+  color:#666;
+  line-height:1.3;
+}
+.user-info-mini .name{
+  font-weight:bold;
+  color:#333;
+}
+
+/* 右上角：导航菜单 */
+.nav-right{
+  display:flex;
+  gap:18px;
+  align-items:center;
+}
+.nav-item{
+  font-size:14px;
+  color:#666;
+  cursor:pointer;
+  padding:6px 10px;
+  border-radius:6px;
+}
+.nav-item.active{
+  color:#0066cc;
+  background:#e8f0fe;
+}
+.nav-item:hover{
+  background:#f1f5ff;
+}
+
+/* UI 切换按钮 */
+.ui-toggle{
+  padding:6px 12px;
+  background:#f1f2f3;
+  border:1px solid #e5e6eb;
+  border-radius:6px;
+  font-size:13px;
+  cursor:pointer;
+}
+
+/* ========== 主内容区 ========== */
+.container{
+  width:100%;
+  height:calc(100% - 56px);
+  margin-top:56px;
+  display:flex;
+  flex-direction:column;
+  background:#f1f2f3;
 }
 
 /* 聊天区域 */
-#loginPage, #chatPage{flex:1;overflow:hidden}
-.user-info{
-  padding:12px 20px;background:#fff;border-bottom:1px solid #e5e6eb;
-  display:flex;justify-content:space-between;align-items:center;
-}
-.user-info span{color:#666}
-.user-info button{
-  padding:5px 10px;background:#f1f2f3;border:1px solid #e5e6eb;
-  border-radius:0;cursor:pointer;margin-left:6px;
+.chat-wrap{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
 
+/* 消息列表 */
 .msg-box{
-  flex:1;padding:16px 20px;overflow-y:auto;background:#f9f9f9;
-  height:calc(100% - 120px);
+  flex:1;
+  padding:16px 24px;
+  overflow-y:auto;
+  background:#f9f9f9;
 }
-.msg-item{margin-bottom:14px;max-width:80%}
-.msg-item.me{margin-left:auto}
-.msg-name{font-size:12px;color:#999;margin-bottom:4px}
+.msg-item{
+  margin-bottom:12px;
+  max-width:75%;
+  display:flex;
+  flex-direction:column;
+}
+.msg-item.me{
+  margin-left:auto;
+  align-items:flex-end;
+}
+.msg-name{
+  font-size:12px;
+  color:#888;
+  margin-bottom:4px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
 .msg-bubble{
-  padding:10px 14px;background:#fff;border:1px solid #e5e6eb;
-  font-size:14px;line-height:1.5;border-radius:0;
+  padding:10px 14px;
+  background:#fff;
+  border:1px solid #e5e6eb;
+  border-radius:8px; /* B 站小圆角 */
+  font-size:14px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-break:break-all;
 }
-.msg-item.me .msg-bubble{background:#0066cc;color:#fff;border-color:#0066cc}
-.msg-uid{font-size:11px;color:#ccc;margin-top:4px}
-.revoke-btn{font-size:12px;color:#d93025;background:none;border:none;cursor:pointer;margin-left:6px}
+.msg-item.me .msg-bubble{
+  background:#0066cc;
+  color:#fff;
+  border-color:#0066cc;
+}
+.revoke-btn{
+  font-size:12px;
+  color:#ff4d4f;
+  background:none;
+  border:none;
+  cursor:pointer;
+}
 
-/* 输入栏 */
-.input-box{
-  height:60px;background:#fff;border-top:1px solid #e5e6eb;
-  display:flex;align-items:center;gap:10px;padding:0 20px;
+/* 输入框区域（保留小圆角） */
+.input-wrap{
+  height:60px;
+  background:#fff;
+  border-top:1px solid #e5e6eb;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 20px;
 }
 #msgInput{
-  flex:1;height:40px;padding:0 16px;border:1px solid #e5e6eb;
-  background:#f9f9f9;outline:none;font-size:14px;border-radius:0;
+  flex:1;
+  height:38px;
+  padding:0 14px;
+  border:1px solid #e5e6eb;
+  border-radius:8px;
+  background:#fafafa;
+  outline:none;
+  font-size:14px;
 }
-.input-box button{
-  width:70px;height:40px;background:#0066cc;color:#fff;
-  border:none;cursor:pointer;font-size:14px;border-radius:0;
+.send-btn{
+  width:70px;
+  height:38px;
+  background:#0066cc;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
 }
 
-/* 登录框 */
-.login-wrap{padding:30px}
-.login-wrap input{
-  width:100%;height:42px;padding:0 12px;margin-bottom:12px;
-  border:1px solid #e5e6eb;background:#fff;outline:none;border-radius:0;
+/* 登录界面 */
+.login-box{
+  width:100%;
+  max-width:360px;
+  margin:80px auto;
+  padding:24px;
+  background:#fff;
+  border:1px solid #e5e6eb;
+  border-radius:12px;
 }
-.login-wrap button{
-  width:100%;height:42px;background:#0066cc;color:#fff;
-  border:none;cursor:pointer;margin-top:6px;border-radius:0;
+.login-box input{
+  width:100%;
+  height:40px;
+  padding:0 12px;
+  margin-bottom:12px;
+  border:1px solid #e5e6eb;
+  border-radius:8px;
+  outline:none;
+}
+.login-box button{
+  width:100%;
+  height:40px;
+  background:#0066cc;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  margin-top:6px;
 }
 
-.version{position:absolute;right:18px;bottom:12px;color:#aaa;font-size:12px}
-
-/* ==================== 旧版UI 完全套用你原版暗黑磨砂代码 ==================== */
+/* 旧版 UI 完全保留你原版 */
 body.old-ui{
-  background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items:center;justify-content:center;height:100vh;
+  background:linear-gradient(135deg,#0f1419,#0a0c12);
 }
-body.old-ui .container{
-  display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;
-  background:rgba(255,255,255,.04);
-  backdrop-filter:blur(30px);
-  border:1px solid rgba(255,255,255,.1);
-  box-shadow:0 0 50px rgba(60,120,255,0.25);
+body.old-ui .top-nav{
+  background:rgba(255,255,255,.05);
+  border-color:rgba(255,255,255,.08);
 }
-body.old-ui .sidebar{
-  width:140px;background:rgba(255,255,255,.05);padding:30px 10px;
-  display:flex;flex-direction:column;gap:10px;
-  border-right:1px solid rgba(255,255,255,.08);
+body.old-ui .nav-item{
+  color:rgba(255,255,255,.8);
 }
-body.old-ui .item{
-  padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;
-  cursor:pointer;transition:all 0.2s;border:1px solid transparent;
-}
-body.old-ui .item:hover,
-body.old-ui .item.active{
-  background:rgba(60,130,255,.25);color:#fff;
-  border-color:rgba(100,160,255,0.4);
-  box-shadow:0 0 12px rgba(80,140,255,0.35);
-}
-body.old-ui .main{flex:1;position:relative}
-body.old-ui .top-bar{
-  background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;
-  display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px solid rgba(255,255,255,.08);
-}
-/* 旧版下按钮样式改成旧版风格 */
-body.old-ui .old-ui-btn{
+body.old-ui .ui-toggle{
   background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.2);
-  color:#eee;
+  border-color:rgba(255,255,255,.2);
+  color:#fff;
 }
-body.old-ui .user-info{
-  background:transparent;border-color:rgba(255,255,255,.08);
+body.old-ui .msg-box{
+  background:transparent;
 }
-body.old-ui .user-info span{color:#ccc}
-body.old-ui .user-info button{
-  background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#eee;
-}
-body.old-ui .msg-box{background:transparent}
 body.old-ui .msg-bubble{
-  background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);color:#eee;
+  background:rgba(255,255,255,.07);
+  border-color:rgba(255,255,255,.12);
+  color:#fff;
 }
-body.old-ui .msg-item.me .msg-bubble{
-  background:rgba(60,130,255,.25);border-color:rgba(100,160,255,0.4);
+body.old-ui .input-wrap{
+  background:#0f1419;
+  border-color:rgba(255,255,255,.08);
 }
-body.old-ui .input-box{background:#0f1419;border-color:rgba(255,255,255,.08)}
 body.old-ui #msgInput{
-  background:#262833;border-color:rgba(255,255,255,.15);color:#fff;
+  background:#262833;
+  border-color:rgba(255,255,255,.15);
+  color:#fff;
 }
-body.old-ui .login-wrap input{
-  background:#262833;border-color:rgba(255,255,255,.15);color:#fff;
-}
+
+/* 滚动条美化 */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#ddd;border-radius:3px}
 </style>
 </head>
+
 <body>
+<!-- 顶部导航：左上角头像+昵称+UID，右上角菜单 -->
+<div class="top-nav">
+  <div class="nav-left" id="userHead" style="display:none">
+    <div class="avatar">U</div>
+    <div class="user-info-mini">
+      <div class="name" id="miniName">用户名</div>
+      <div>UID: <span id="miniUid">1</span></div>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-item active">聊天室</div>
+    <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
+    <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
+    <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
+    <button class="ui-toggle" id="uiBtn" onclick="toggleUI()">旧版UI</button>
+  </div>
+</div>
+
 <div class="container">
-<div class="sidebar">
-<div class="item active">聊天室</div>
-<div class="item" onclick="location.href='forum.html'">论坛</div>
-<div class="item" onclick="location.href='history.html'">更新日志</div>
-<div class="item" onclick="location.href='plan.html'">开发规划</div>
-</div>
-<div class="main">
-<div class="top-bar">
-<h2>聊天室</h2>
-<button class="old-ui-btn" id="uiBtn" onclick="toggleOldUI()">旧版UI</button>
-</div>
+  <!-- 登录界面 -->
+  <div id="loginPage" class="login-box" style="display:none">
+    <input id="user" placeholder="账号">
+    <input id="pwd" placeholder="密码" type="password">
+    <button onclick="login()">登录</button>
+    <button onclick="reg()" style="background:#f1f2f3;color:#333;margin-top:8px">注册</button>
+  </div>
 
-<div id="loginPage" class="login-wrap" style="display:none;">
-<input id="user" placeholder="账号">
-<input id="pwd" placeholder="密码" type="password">
-<button onclick="login()">登录</button>
-<button onclick="reg()">注册</button>
-</div>
-
-<div id="chatPage" style="display:none;flex-direction:column;">
-<div class="user-info">
-<span id="userInfoText"></span>
-<div>
-<button onclick="clearAllMsg()">清空记录</button>
-<button onclick="logout()">退出登录</button>
-</div>
-</div>
-<div class="msg-box" id="msgBox"></div>
-<div class="input-box">
-<input id="msgInput" placeholder="输入消息...">
-<button onclick="sendMsg()">发送</button>
-</div>
-</div>
-
-<div class="version version-text">V1.3.4</div>
-</div>
+  <!-- 聊天界面 -->
+  <div id="chatPage" class="chat-wrap" style="display:none">
+    <div class="msg-box" id="msgBox"></div>
+    <div class="input-wrap">
+      <input id="msgInput" placeholder="输入消息..." autocomplete="off">
+      <button class="send-btn" onclick="sendMsg()">发送</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const uiBtn = document.getElementById('uiBtn');
+let username = '', uid = '';
+const API = '/api';
+let lastCount = 0;
 
-// UI切换 本地记忆 + 按钮文字动态切换
-function toggleOldUI(){
-  document.body.classList.toggle("old-ui");
-  let isOld = document.body.classList.contains("old-ui");
-  localStorage.setItem("indexOldUI", isOld);
-  // 切换按钮文字
-  uiBtn.innerText = isOld ? "新版UI" : "旧版UI";
+// UI 切换
+function toggleUI(){
+  document.body.classList.toggle('old-ui');
+  let old = document.body.classList.contains('old-ui');
+  localStorage.setItem('ui', old);
+  uiBtn.innerText = old ? '新版UI' : '旧版UI';
 }
 
+// 初始化
 window.onload = () => {
-  let isOld = localStorage.getItem("indexOldUI") === "true";
-  if(isOld){
-    document.body.classList.add("old-ui");
-    uiBtn.innerText = "新版UI";
-  }else{
-    uiBtn.innerText = "旧版UI";
+  let old = localStorage.getItem('ui') === 'true';
+  if(old){
+    document.body.classList.add('old-ui');
+    uiBtn.innerText = '新版UI';
   }
-  initUser();
+  checkLogin();
+  setInterval(loadMsg, 2000);
 };
 
-// 聊天核心逻辑
-let username = "", uid = "";
-const API = "/api";
-let lastMsgCount = 0;
-
-function initUser(){
-  let u = localStorage.getItem("username");
-  let id = localStorage.getItem("uid");
+// 登录状态
+function checkLogin(){
+  let u = localStorage.getItem('username');
+  let id = localStorage.getItem('uid');
   if(u && id){
     username = u;
     uid = id;
@@ -243,103 +330,76 @@ function initUser(){
 }
 
 function showLogin(){
-  document.getElementById("loginPage").style.display = "block";
-  document.getElementById("chatPage").style.display = "none";
+  document.getElementById('loginPage').style.display = 'block';
+  document.getElementById('chatPage').style.display = 'none';
+  document.getElementById('userHead').style.display = 'none';
 }
 function showChat(){
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("chatPage").style.display = "flex";
-  document.getElementById("userInfoText").innerText = username + " (" + uid + ")";
-  lastMsgCount = 0;
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('chatPage').style.display = 'flex';
+  document.getElementById('userHead').style.display = 'flex';
+  document.getElementById('miniName').innerText = username;
+  document.getElementById('miniUid').innerText = uid;
   loadMsg();
-  setInterval(loadMsg, 2000);
 }
 
-function logout(){
-  localStorage.clear();
-  username = "";
-  uid = "";
-  showLogin();
-}
-
+// 登录注册
 async function login(){
-  let user = document.getElementById("user").value.trim();
-  let pwd = document.getElementById("pwd").value.trim();
-  if(!user||!pwd)return alert("请输入账号密码");
-  let res = await fetch(`${API}/login?user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
-  let txt = await res.text();
-  if(!txt)return alert("账号密码错误");
-  localStorage.setItem("username",user);
-  localStorage.setItem("uid",txt);
-  username = user;
-  uid = txt;
+  let u = document.getElementById('user').value.trim();
+  let p = document.getElementById('pwd').value.trim();
+  if(!u||!p)return alert('请输入账号密码');
+  let res = await fetch(`${API}/login?user=${u}&pwd=${p}`);
+  let t = await res.text();
+  if(!t)return alert('登录失败');
+  localStorage.setItem('username',u);
+  localStorage.setItem('uid',t);
+  username=u;uid=t;
   showChat();
 }
-
 async function reg(){
-  let user = document.getElementById("user").value.trim();
-  let pwd = document.getElementById("pwd").value.trim();
-  if(!user||!pwd)return alert("请输入账号密码");
-  let res = await fetch(`${API}/reg?user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
-  let txt = await res.text();
-  if(txt === "ok") alert("注册成功，请登录");
-  else alert("注册失败："+txt);
+  let u = document.getElementById('user').value.trim();
+  let p = document.getElementById('pwd').value.trim();
+  let res = await fetch(`${API}/reg?user=${u}&pwd=${p}`);
+  alert(await res.text() === 'ok' ? '成功' : '失败');
 }
 
+// 发送消息
 async function sendMsg(){
-  let val = document.getElementById("msgInput").value.trim();
-  if(!val)return;
-  await fetch(`${API}/send?uid=${uid}&msg=${encodeURIComponent(val)}`);
-  document.getElementById("msgInput").value = "";
+  let txt = document.getElementById('msgInput').value.trim();
+  if(!txt)return;
+  await fetch(`${API}/send?uid=${uid}&msg=${txt}`);
+  document.getElementById('msgInput').value = '';
   loadMsg();
 }
 
-// 修复刷新滚动丢失问题
+// 加载消息（已删除尾部空白）
 async function loadMsg(){
-  try{
-    let res = await fetch(`${API}/msg?_=${Date.now()}`);
-    let list = await res.json();
-    let box = document.getElementById("msgBox");
+  let res = await fetch(`${API}/msg`);
+  let list = await res.json();
+  let box = document.getElementById('msgBox');
 
-    const {scrollTop, scrollHeight, clientHeight} = box;
-    const isBottom = scrollHeight - scrollTop - clientHeight <= 10;
+  let autoScroll = Math.abs(box.scrollTop + box.clientHeight - box.scrollHeight) < 10;
+  
+  box.innerHTML = '';
+  list.forEach(m => {
+    let me = m.uid == uid;
+    let del = (me || uid == 1) ? `<button class="revoke-btn" onclick="rev(${m.id})">撤回</button>` : '';
 
-    if(list.length !== lastMsgCount){
-      box.innerHTML = "";
-      list.forEach((m,i)=>{
-        let isMe = m.uid == uid;
-        let btn = (isMe || Number(uid) === 1) ? `<button class="revoke-btn" onclick="revokeMsg(${i})">撤回</button>` : "";
-        let item = document.createElement("div");
-        item.className = "msg-item " + (isMe?"me":"");
-        item.innerHTML = `
-          <div class="msg-name">${m.user} ${btn}</div>
-          <div class="msg-bubble">${m.msg}</div>
-          <div class="msg-uid">UID:${m.uid}</div>
-        `;
-        box.appendChild(item);
-      });
-      lastMsgCount = list.length;
-    }
+    let html = `
+      <div class="msg-item ${me?'me':''}">
+        <div class="msg-name">${m.user} ${del}</div>
+        <div class="msg-bubble">${m.msg}</div>
+      </div>
+    `;
+    box.innerHTML += html;
+  });
 
-    if(isBottom){
-      requestAnimationFrame(()=>{
-        box.scrollTop = box.scrollHeight;
-      });
-    }
-  }catch(e){console.error(e)}
+  if(autoScroll) box.scrollTop = box.scrollHeight;
 }
 
-async function revokeMsg(idx){
-  if(!confirm("确定撤回这条消息？"))return;
-  await fetch(`${API}?act=deleteMsg&uid=${uid}&targetId=${idx}`);
-  lastMsgCount = 0;
-  loadMsg();
-}
-
-async function clearAllMsg(){
-  if(!confirm("清空全部聊天记录？"))return;
-  await fetch(`${API}/clear?uid=${uid}`);
-  lastMsgCount = 0;
+async function rev(id){
+  if(!confirm('确定撤回？'))return;
+  await fetch(`${API}?act=deleteMsg&uid=${uid}&targetId=${id}`);
   loadMsg();
 }
 </script>
