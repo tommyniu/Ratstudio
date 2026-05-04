@@ -2,263 +2,251 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>聊天室 - RatStudio的小站</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>聊天室 - RatStudio</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
-.container{
-  display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;
-  background:rgba(255,255,255,.04);backdrop-filter:blur(30px);
-  border:1px solid rgba(255,255,255,.1);
-  box-shadow:0 0 50px rgba(60,120,255,0.25);
-  position:relative;
+* { margin:0; padding:0; box-sizing:border-box; font-family:system-ui }
+body {
+  background: linear-gradient(135deg,#0f1419,#0a0c12);
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-.sidebar{
-  width:140px;background:rgba(255,255,255,.05);padding:30px 10px;
-  display:flex;flex-direction:column;gap:10px;
-  border-right:1px solid rgba(255,255,255,.08);
+.top-bar {
+  padding: 16px 20px;
+  background: rgba(255,255,255,.05);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.item{
-  padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;
-  cursor:pointer;transition:all 0.2s;border:1px solid transparent;
+.nav a {
+  color: #aaa;
+  text-decoration: none;
+  margin-left: 16px;
 }
-.item:hover,.item.active{
-  background:rgba(60,130,255,.25);color:#fff;
-  border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35);
+.nav a.active { color:#4080ff; font-weight:bold }
+
+#msgBox {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
 }
-.main{
+.msg {
+  padding: 10px 14px;
+  background: rgba255,255,255,.07;
+  background: rgba(255,255,255,.07);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  max-width: 90%;
+  position: relative;
+}
+.msg.admin {
+  border: 1px solid rgba(64,128,255,.3);
+}
+.msg .name {
+  font-size: 13px;
+  color: #8cf;
+  margin-bottom: 4px;
+}
+.msg .content {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.del-btn {
+  margin-left: 10px;
+  font-size: 12px;
+  color: #f66;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.input-wrap {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  display: flex;
+  gap: 10px;
+}
+#msgInput {
   flex:1;
-  display:flex;
-  flex-direction:column;
-  height:100%;
-  padding-bottom:120px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #fff;
+  outline: none;
 }
-.top{
-  background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;
-  display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px solid rgba(255,255,255,.08);
+#sendBtn {
+  padding: 12px 20px;
+  background: #4080ff;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
 }
-.user-info{padding:12px 20px;color:#ccc;display:flex;justify-content:space-between;align-items:center}
-.msg-box{
-  flex:1;
-  padding:10px 20px;
-  overflow-y:auto;
+
+.login-mask {
+  position: fixed;
+  inset:0;
+  background: rgba(0,0,0,.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
 }
-.msg-item{display:flex;width:100%;margin-bottom:16px}
-.msg-item.me{justify-content:flex-end}
-.msg-wrap{max-width:75%;display:flex;flex-direction:column}
-.name-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-.msg-item.me .name-row{flex-direction:row-reverse}
-.avatar{width:32px;height:32px;background:#444;border-radius:50%;flex-shrink:0}
-.username{font-size:13px;color:rgba(255,255,255,.75)}
-.bubble{
-  padding:10px 14px;border-radius:18px;background:rgba(255,255,255,.07);color:#fff;
-  white-space:pre-wrap;word-break:break-all;width:fit-content;
+.login-pop {
+  background: #1a1c25;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 360px;
+  border: 1px solid rgba(255,255,255,.15);
 }
-.msg-item.me .bubble{background:rgba(60,120,255,.25);margin-left:auto}
-.uid{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px}
-.msg-item.me .uid{text-align:right}
-.admin-tag{
-  font-size:11px;color:#ff4444;background:rgba(255,68,68,.15);
-  padding:2px 6px;border-radius:6px;margin-left:6px;
+.login-pop input {
+  width:100%;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #262833;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 12px;
+  color: #fff;
+  outline: none;
 }
-.footer-admin{
-  position:absolute;left:16px;bottom:26px;
-  font-size:12px;color:#ff4444;
-  padding:4px 8px;background:rgba(255,68,68,.1);
-  border-radius:8px;display:none;
+.login-pop button {
+  width: 100%;
+  padding: 12px;
+  background: #4080ff;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  margin-bottom: 8px;
+  cursor: pointer;
 }
-.input-box{
-  position:absolute;left:140px;bottom:0;width:calc(100% - 140px);height:70px;
-  display:flex;align-items:center;padding:0 16px;gap:10px;
-  border-top:1px solid rgba(255,255,255,.08);background:#0f1419;z-index:10;
-}
-#msgInput{
-  flex:1;height:44px;border-radius:24px;padding:0 16px;
-  background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;outline:none;
-}
-.input-box button{
-  width:70px;height:44px;border-radius:24px;background:#4080ff;color:#fff;border:none;cursor:pointer;
-}
-.admin-btn{
-  background:rgba(255,80,80,.3);border:none;padding:6px 10px;border-radius:12px;color:#fff;margin-left:6px;
-  cursor:pointer;
-}
-.logout-btn{
-  background:rgba(80,180,255,.2);border:none;padding:6px 10px;border-radius:12px;color:#88b8ff;
-  cursor:pointer;margin-left:8px;
-}
-.version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
 </style>
 </head>
 <body>
-<div class="container">
-<div class="sidebar">
-<div class="item active">聊天室</div>
-<div class="item" onclick="window.location.href='/forum.html'">论坛</div>
-<div class="item" onclick="window.location.href='/history.html'">更新日志</div>
-<div class="item" onclick="window.location.href='/plan.html'">开发计划</div>
+<div class="top-bar">
+  <div class="title">公共聊天室</div>
+  <div class="nav">
+    <a href="index.html" class="active">聊天</a>
+    <a href="forum.html">论坛</a>
+    <a href="history.html">更新日志</a>
+    <a href="plan.html">开发规划</a>
+  </div>
 </div>
-<div class="main">
-<div class="top"><span>聊天室</span></div>
-<div class="login" id="loginPage" style="flex:1;padding:30px;overflow-y:auto">
-<input id="user" placeholder="账号" style="width:100%;padding:12px;border-radius:16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
-<input id="pwd" placeholder="密码" type="password" style="width:100%;padding:12px;border-radius:16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
-<div class="auto-login" style="color:#fff;font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><input type="checkbox" id="autoLogin"> 10天自动登录</div>
-<button class="login-reg" onclick="reg()" style="width:100%;padding:12px;border-radius:16px;background:#4080ff;color:#fff;border:none;margin-bottom:10px;cursor:pointer">注册</button>
-<button class="login-reg" onclick="login()" style="width:100%;padding:12px;border-radius:16px;background:#4080ff;color:#fff;border:none;cursor:pointer">登录</button>
+
+<div id="msgBox"></div>
+
+<div class="input-wrap">
+  <input type="text" id="msgInput" placeholder="输入消息..." autocomplete="off">
+  <button id="sendBtn">发送</button>
 </div>
-<div class="chat" id="chatPage" style="display:none;flex-direction:column;height:100%">
-<div class="user-info">
-<span id="userInfoText"></span>
-<div>
-<button class="admin-btn" id="clearBtn" style="display:none;" onclick="clearAllMsg()">清空</button>
-<button class="admin-btn" id="delBtn" style="display:none;" onclick="deleteLastMsg()">撤回</button>
-<button class="logout-btn" onclick="logout()">退出登录</button>
-</div>
-</div>
-<div class="msg-box" id="msgBox"></div>
-</div>
-<div class="footer-admin" id="footerAdmin">管理员账号</div>
-<div class="version version-text"></div>
-</div>
-<div class="input-box">
-<input id="msgInput" placeholder="Shift+Enter换行">
-<button onclick="sendMsg()">发送</button>
-</div>
+
+<!-- 登录弹窗 -->
+<div class="login-mask" id="loginMask">
+  <div class="login-pop">
+    <input id="userName" placeholder="用户名">
+    <input id="userPwd" placeholder="密码" type="password">
+    <button onclick="login()">登录</button>
+    <button onclick="reg()">注册</button>
+  </div>
 </div>
 
 <script>
-// ==============================
-// 版本配置中心（一处修改全站生效）
-// ==============================
-const VERSION_CONFIG = {
-  current: "V1.3.4",
-  date: "2026.5.4",
-  history: [
-    { ver: "V1.3.4", desc: "修复论坛发帖问题，优化接口逻辑，版本号统一", date: "2026.5.4" },
-    { ver: "V1.3.3", desc: "管理员系统支持多UID", date: "2026.5.4" },
-    { ver: "V1.3.2", desc: "正式新增完整论坛功能，包含发帖、列表、详情、点赞", date: "2026.5.3" },
-    { ver: "V1.3.1", desc: "重制版添加新页面，修复BUG，稳定性优化", date: "2026.5.3" },
-    { ver: "V1.3.0", desc: "全部转移，基于cloudflare重新开发", date: "2026.5.3" },
-    { ver: "V1.2.3", desc: "新增开发规划页面，全菜单统一", date: "未知" },
-    { ver: "V1.2.2", desc: "全页面UI统一，修复头像/UID布局，滚动优化", date: "未知" },
-    { ver: "V1.2.1", desc: "修复消息显示、清空功能、数据持久化", date: "未知" },
-    { ver: "V1.2.0", desc: "新增论坛系统、发帖按钮、点赞功能、三页面独立切换", date: "未知" },
-    { ver: "V1.1.4", desc: "管理员标识、清空消息", date: "未知" },
-    { ver: "V1.1.3", desc: "自动登录、圆角统一", date: "未知" },
-    { ver: "V1.0.1~V1.1.2", desc: "完善UI、修复布局、独立日志页面", date: "未知" },
-    { ver: "V1.0.0", desc: "基础聊天、注册登录系统", date: "2026.4.1" }
-  ]
-};
-
-// 自动注入版本号
-window.onload = function () {
-  document.querySelectorAll(".version-text").forEach(el => {
-    el.innerText = VERSION_CONFIG.current;
-  });
-};
-
-// ==============================
-// 聊天主逻辑
-// ==============================
-let username = "", uid = "", isAdmin = false;
 const API = "/api";
+let myUid = localStorage.getItem('uid') || "";
+let myName = localStorage.getItem('username') || "";
+const ADMIN_UID = 1;
 
-window.onloadExtra = () => {
-  let u = localStorage.getItem("username");
-  let id = localStorage.getItem("uid");
-  if (u && id) { username = u; uid = id; loginSuccess(); }
-};
-setTimeout(window.onloadExtra, 10);
-
-function logout() {
-  localStorage.clear();
-  username = ""; uid = ""; isAdmin = false;
-  document.getElementById("chatPage").style.display = "none";
-  document.getElementById("loginPage").style.display = "block";
-  document.getElementById("footerAdmin").style.display = "none";
+// 未登录弹出登录框
+function checkLogin() {
+  if(!myUid || !myName) {
+    document.getElementById('loginMask').style.display = 'flex';
+  } else {
+    document.getElementById('loginMask').style.display = 'none';
+    loadMsg();
+  }
 }
 
+// 登录
 async function login() {
-  const user = document.getElementById("user").value;
-  const pwd = document.getElementById("pwd").value;
-  const r = await fetch(`${API}/login?user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
-  const t = await r.text();
-  if (!t) { alert("账号或密码错误"); return; }
-  localStorage.setItem("username", user);
-  localStorage.setItem("uid", t);
-  username = user; uid = t;
-  loginSuccess();
+  let user = document.getElementById('userName').value.trim();
+  let pwd = document.getElementById('userPwd').value.trim();
+  if(!user||!pwd) return alert('请填写账号密码');
+  let res = await fetch(`${API}/api/login?user=${user}&pwd=${pwd}`);
+  let uid = await res.text();
+  if(!uid) return alert('账号密码错误');
+  localStorage.setItem('username',user);
+  localStorage.setItem('uid',uid);
+  myUid = uid;
+  myName = user;
+  location.reload();
 }
 
+// 注册
 async function reg() {
-  const user = document.getElementById("user").value;
-  const pwd = document.getElementById("pwd").value;
-  const r = await fetch(`${API}/reg?user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
-  const t = await r.text();
-  alert(t === "ok" ? "注册成功" : "用户名已存在");
+  let user = document.getElementById('userName').value.trim();
+  let pwd = document.getElementById('userPwd').value.trim();
+  if(!user||!pwd) return alert('请填写账号密码');
+  let res = await fetch(`${API}/api/reg?user=${user}&pwd=${pwd}`);
+  let txt = await res.text();
+  if(txt === 'no') return alert('用户名已存在');
+  alert('注册成功，请登录');
 }
 
-function loginSuccess() {
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("chatPage").style.display = "flex";
-  document.getElementById("userInfoText").innerText = username + " (" + uid + ")";
-  loadMsg();
-  setInterval(loadMsg, 2000);
+// 加载消息
+async function loadMsg() {
+  let res = await fetch(`${API}/api/msg?_=${Date.now()}`);
+  let list = await res.json();
+  let box = document.getElementById('msgBox');
+  box.innerHTML = '';
+
+  list.forEach((item, idx) => {
+    let canDel = (Number(myUid) === item.uid) || (Number(myUid) === ADMIN_UID);
+    let html = `
+    <div class="msg ${item.isAdmin?'admin':''}">
+      <div class="name">${item.user} ${item.isAdmin?'【管理员】':''}</div>
+      <div class="content">${item.msg}
+        ${canDel ? `<button class="del-btn" onclick="delMsg(${idx})">撤回</button>` : ''}
+      </div>
+    </div>
+    `;
+    box.innerHTML += html;
+  });
+  box.scrollTop = box.scrollHeight;
 }
+
+// 撤回指定消息
+async function delMsg(idx) {
+  if(!confirm('确定撤回这条消息？')) return;
+  let res = await fetch(`${API}?act=deleteMsg&uid=${myUid}&targetId=${idx}`);
+  let txt = await res.text();
+  if(txt === 'ok') {
+    loadMsg();
+  } else {
+    alert('无权撤回');
+  }
+}
+
+// 发送消息
+document.getElementById('sendBtn').onclick = sendMsg;
+document.getElementById('msgInput').onkeydown = e => {
+  if(e.key === 'Enter') sendMsg();
+};
 
 async function sendMsg() {
-  const txt = document.getElementById("msgInput").value.trim();
-  if (!txt) return;
-  await fetch(`${API}/send?uid=${uid}&msg=${encodeURIComponent(txt)}`);
-  document.getElementById("msgInput").value = "";
+  let val = document.getElementById('msgInput').value.trim();
+  if(!val) return;
+  await fetch(`${API}/api/send?uid=${myUid}&msg=${encodeURIComponent(val)}`);
+  document.getElementById('msgInput').value = '';
   loadMsg();
 }
 
-async function loadMsg() {
-  try {
-    const r = await fetch(`${API}/msg?_=${Date.now()}`);
-    const list = await r.json();
-    const box = document.getElementById("msgBox");
-    box.innerHTML = "";
-
-    const isAdminNow = list.some(m => m.uid == uid && m.isAdmin);
-    if (isAdminNow) {
-      document.getElementById("footerAdmin").style.display = "block";
-      document.getElementById("clearBtn").style.display = "inline-block";
-      document.getElementById("delBtn").style.display = "inline-block";
-    }
-
-    list.forEach(m => {
-      const div = document.createElement("div");
-      div.className = "msg-item " + (m.uid == uid ? "me" : "");
-      const adminTag = m.isAdmin ? '<span class="admin-tag">管理员</span>' : "";
-      div.innerHTML = `
-        <div class="msg-wrap">
-          <div class="name-row">
-            <div class="avatar"></div>
-            <div class="username">${m.user}${adminTag}</div>
-          </div>
-          <div class="bubble">${m.msg}</div>
-          <div class="uid">UID:${m.uid}</div>
-        </div>`;
-      box.appendChild(div);
-    });
-    box.scrollTop = box.scrollHeight;
-  } catch (e) {}
-}
-
-async function clearAllMsg() {
-  await fetch(`${API}/clear?uid=${uid}`);
-  loadMsg();
-}
-
-async function deleteLastMsg() {
-  await fetch(`${API}/delete?uid=${uid}`);
-  loadMsg();
-}
+// 轮询刷新
+setInterval(loadMsg,2000);
+checkLogin();
 </script>
 </body>
 </html>
