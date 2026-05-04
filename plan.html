@@ -3,58 +3,205 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>开发计划</title>
+<title>开发规划 - RatStudio的小站</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{background:#f5f5f5;display:flex;align-items:center;justify-content:center;height:100vh}
-.container{width:680px;height:750px;background:#fff;border-radius:20px;display:flex;overflow:hidden}
-.sidebar{width:150px;background:#fafafa;border-right:1px solid #eee;padding:20px 10px}
-.item{padding:12px;border-radius:12px;margin-bottom:8px;text-align:center;color:#666}
-.main{flex:1;padding:30px;overflow-y:auto}
-h2{margin-bottom:20px}
-.plan-item{
-  padding:12px 16px;background:#f9f9f9;border-radius:12px;margin-bottom:10px;
-  display:flex;align-items:center;gap:10px;
-}
-.plan-item.done{color:#999}
-.plan-item .check{color:#00b42a;font-size:16px}
-.old-ui-btn{position:absolute;top:20px;right:20px;padding:6px 12px;background:#eee;border:none;border-radius:8px}
+/* ========== 新版：B站/CSDN 全屏方块无圆角UI ========== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
-/* 旧版 */
-.old-ui body{background:linear-gradient(135deg,#0f1419,#0a0c12);color:#fff}
-.old-ui .container{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)}
-.old-ui .sidebar{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
+.container{
+  width:100%;height:100%;display:flex;
+  background:#f1f2f3;
+}
+.sidebar{
+  width:180px;height:100%;background:#fff;
+  border-right:1px solid #e5e6eb;
+  display:flex;flex-direction:column;
+}
+.sidebar .item{
+  width:100%;padding:16px 20px;
+  font-size:15px;color:#61666d;
+  cursor:pointer;border:none;background:none;
+  text-align:left;
+}
+.sidebar .item.active{
+  background:#f1f2f3;color:#0066cc;font-weight:bold;
+}
+.sidebar .item:hover{background:#f8f9fa}
+
+.main{
+  flex:1;height:100%;display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.top-bar{
+  width:100%;height:56px;background:#fff;
+  border-bottom:1px solid #e5e6eb;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+}
+.top-bar h2{font-size:18px;font-weight:500}
+.old-ui-btn{
+  padding:6px 12px;background:#f1f2f3;border:1px solid #e5e6eb;
+  font-size:13px;cursor:pointer;color:#333;
+  border-radius:0;
+}
+.content{
+  padding:30px;
+  color:#333;
+}
+.plan-box{
+  background:#fff;
+  border:1px solid #e5e6eb;
+  padding:20px;
+  margin-bottom:16px;
+}
+.plan-box h3{
+  color:#0066cc;
+  margin-bottom:12px;
+  font-size:16px;
+}
+.plan-box li{
+  margin-left:20px;
+  line-height:1.6;
+  margin-bottom:6px;
+}
+
+/* ========== 旧版UI：直接 100% 套用你原版的旧版样式 ========== */
+body.old-ui{
+  background:linear-gradient(135deg,#0f1419,#0a0c12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+}
+body.old-ui .container{
+  display:flex;
+  width:680px;
+  height:750px;
+  border-radius:44px;
+  overflow:hidden;
+  background:rgba(255,255,255,.04);
+  backdrop-filter:blur(30px);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 0 50px rgba(60,120,255,0.25);
+}
+body.old-ui .sidebar{
+  width:140px;
+  background:rgba(255,255,255,.05);
+  padding:30px 10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+body.old-ui .item{
+  padding:14px;
+  border-radius:16px;
+  color:rgba(255,255,255,.8);
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.2s;
+  border:1px solid transparent;
+}
+body.old-ui .item:hover,
+body.old-ui .item.active{
+  background:rgba(60,130,255,.25);
+  color:#fff;
+  border-color:rgba(100,160,255,0.4);
+  box-shadow:0 0 12px rgba(80,140,255,0.35);
+}
+body.old-ui .main{
+  flex:1;
+  position:relative;
+}
+body.old-ui .top-bar{
+  background:rgba(255,255,255,.05);
+  padding:20px;
+  color:#fff;
+  font-weight:600;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+body.old-ui .content{
+  padding:30px;
+  color:#fff;
+}
+body.old-ui .plan-box{
+  background:rgba(255,255,255,.07);
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:16px;
+  border:1px solid rgba(255,255,255,.12);
+}
+body.old-ui .plan-box h3{
+  color:#6cf;
+  margin-bottom:12px;
+  font-size:16px;
+}
+.version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="sidebar">
-    <div class="item" onclick="location='index.html'">聊天室</div>
-    <div class="item" onclick="location='forum.html'">论坛</div>
-    <div class="item" onclick="location='history.html'">更新日志</div>
-    <div class="item active">开发计划</div>
-  </div>
-  <div class="main">
-    <button class="old-ui-btn" onclick="toggleOldUI()">旧版UI</button>
-    <h2>开发计划</h2>
-    <div class="plan-item done"><span class="check">✅</span> 注册登录系统</div>
-    <div class="plan-item done"><span class="check">✅</span> 聊天功能</div>
-    <div class="plan-item done"><span class="check">✅</span> 撤回消息（自己/管理员）</div>
-    <div class="plan-item done"><span class="check">✅</span> 论坛发帖</div>
-    <div class="plan-item done"><span class="check">✅</span> 删除帖子（自己/管理员）</div>
-    <div class="plan-item done"><span class="check">✅</span> 点赞功能（防刷）</div>
-    <div class="plan-item done"><span class="check">✅</span> 全新贴吧风格UI</div>
-    <div class="plan-item done"><span class="check">✅</span> 一键切换旧版UI</div>
-  </div>
+<div class="sidebar">
+<div class="item" onclick="location.href='index.html'">聊天室</div>
+<div class="item" onclick="location.href='forum.html'">论坛</div>
+<div class="item" onclick="location.href='history.html'">更新日志</div>
+<div class="item active">开发规划</div>
 </div>
+<div class="main">
+<div class="top-bar">
+<h2>开发规划</h2>
+<button class="old-ui-btn" onclick="toggleOldUI()">旧版UI</button>
+</div>
+<div class="content">
+
+<!-- ========== 你的内容 100% 完全原样 没动一个字 ========== -->
+<div class="plan-box">
+<h3>📌 近期规划</h3>
+<ul>
+<li>网页化：修改UI，使其看起来更像大型论坛网站页面</li>
+<li>论坛功能完善，增加评论，显示详细内容等功能</li>
+<li>用户主页：增加用户主页，显示其发帖，点赞数</li>
+<li>时间显示：显示发帖时间，记录点赞、注册、登录时间等</li>
+</ul>
+</div>
+
+<div class="plan-box">
+<h3>🚀 中期规划</h3>
+<ul>
+<li>通知：在网页右上角添加通知按钮，显示系统提示、收到点赞、评论等信息</li>
+<li>关注：关注某用户，在其发送帖子时通过通知提醒你</li>
+<li>主页：添加主页功能，在主页增加公告等功能，并随机推荐内容</li>
+<li>UI：增加亮色暗色模式切换，添加按钮点击弹性动画</li>
+</ul>
+</div>
+
+<div class="plan-box">
+<h3>🔮 远期 / 超远期规划</h3>
+<ul>
+<li>待定</li>
+</ul>
+</div>
+
+<div class="version">V1.3.4</div>
+</div>
+</div>
+</div>
+
 <script>
+// 旧版UI切换（本地记忆）
 function toggleOldUI(){
   document.body.classList.toggle("old-ui");
-  localStorage.setItem("oldUI", document.body.classList.contains("old-ui"));
+  localStorage.setItem("planOldUI", document.body.classList.contains("old-ui"));
 }
-window.onload=()=>{
-  if(localStorage.getItem("oldUI")==="true") document.body.classList.add("old-ui");
-}
+window.onload = () => {
+  if(localStorage.getItem("planOldUI") === "true"){
+    document.body.classList.add("old-ui");
+  }
+};
 </script>
 </body>
 </html>
