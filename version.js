@@ -1,9 +1,9 @@
 // 版本配置中心 —— 只在这里修改，全站自动同步
 const VERSION_CONFIG = {
-  current: "V1.3.4",          // 当前最新版本
-  date: "2026.5.4",          // 版本日期
+  current: "V1.3.4",
+  date: "2026.5.4",
   history: [
-    { ver: "V1.3.4", desc: "修复论坛发帖问题，接口统一兼容，稳定性优化", date: "2026.5.4" },
+    { ver: "V1.3.4", desc: "修复论坛发布功能，接口统一兼容，自动版本同步", date: "2026.5.4" },
     { ver: "V1.3.3", desc: "多管理员 UID 支持，管理员标签自动识别", date: "2026.5.4" },
     { ver: "V1.3.2", desc: "正式新增完整论坛功能，包含发帖、列表、详情、点赞", date: "2026.5.3" },
     { ver: "V1.3.1", desc: "重制版添加新页面，修复BUG，稳定性优化", date: "2026.5.3" },
@@ -19,10 +19,27 @@ const VERSION_CONFIG = {
   ]
 };
 
-// 自动给所有页面设置版本号
-window.onload = function () {
-  let versionElements = document.querySelectorAll(".version-text");
-  versionElements.forEach(el => {
-    el.innerText = VERSION_CONFIG.current;
+// 自动加载版本号
+window.addEventListener('load', () => {
+  // 自动设置所有 .version-text 版本号
+  document.querySelectorAll('.version-text').forEach(el => {
+    el.textContent = VERSION_CONFIG.current;
   });
-};
+
+  // 自动渲染更新日志（如果当前页面是 history.html）
+  if (location.pathname.includes('history.html')) {
+    const logBox = document.getElementById('historyList');
+    if (logBox) {
+      let html = '';
+      VERSION_CONFIG.history.forEach(item => {
+        html += `
+          <div class="item-log">
+            <span class="ver">${item.ver}</span> ${item.desc}
+            <span class="date">${item.date}</span>
+          </div>
+        `;
+      });
+      logBox.innerHTML = html;
+    }
+  }
+});
