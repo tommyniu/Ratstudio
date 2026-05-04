@@ -65,6 +65,11 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 }
 .admin-btn{
   background:rgba(255,80,80,.3);border:none;padding:6px 10px;border-radius:12px;color:#fff;margin-left:6px;
+  cursor:pointer;
+}
+.logout-btn{
+  background:rgba(80,180,255,.2);border:none;padding:6px 10px;border-radius:12px;color:#88b8ff;
+  cursor:pointer;margin-left:8px;
 }
 .version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
 </style>
@@ -81,7 +86,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <div class="top"><span>聊天室</span></div>
 <div class="login" id="loginPage" style="flex:1;padding:30px;overflow-y:auto">
 <input id="user" placeholder="账号" style="width:100%;padding:12px;border-radius:16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
-<input id="pwd" placeholder="密码" type="password" style="width:100%;padding:12px;border-radius:16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
+<input id="pwd" placeholder="密码" type="password" style="width:100%;padding:12px;border-radius:16px;background:#255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
 <div class="auto-login" style="color:#fff;font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><input type="checkbox" id="autoLogin"> 10天自动登录</div>
 <button class="login-reg" onclick="reg()" style="width:100%;padding:12px;border-radius:16px;background:#4080ff;color:#fff;border:none;margin-bottom:10px;cursor:pointer">注册</button>
 <button class="login-reg" onclick="login()" style="width:100%;padding:12px;border-radius:16px;background:#4080ff;color:#fff;border:none;cursor:pointer">登录</button>
@@ -92,6 +97,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <div>
 <button class="admin-btn" id="clearBtn" style="display:none;" onclick="clearAllMsg()">清空</button>
 <button class="admin-btn" id="delBtn" style="display:none;" onclick="deleteLastMsg()">撤回</button>
+<button class="logout-btn" onclick="logout()">退出登录</button>
 </div>
 </div>
 <div class="msg-box" id="msgBox"></div>
@@ -106,13 +112,24 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 
 <script>
 let username="",uid="";
-const API = "/api"; // 接口根路径
+const API = "/api";
 
 window.onload=()=>{
   let u=localStorage.getItem("username");
   let id=localStorage.getItem("uid");
   if(u&&id){username=u;uid=id;loginSuccess();}
 };
+
+// 退出登录
+function logout(){
+  localStorage.removeItem("username");
+  localStorage.removeItem("uid");
+  localStorage.removeItem("autoLogin");
+  username="";
+  uid="";
+  document.getElementById("chatPage").style.display="none";
+  document.getElementById("loginPage").style.display="block";
+}
 
 async function login(){
   let user=document.getElementById("user").value;
@@ -142,7 +159,7 @@ function loginSuccess(){
     document.getElementById("delBtn").style.display="inline-block";
   }
   loadMsg();
-  setInterval(loadMsg, 2000); // 2秒自动刷新消息
+  setInterval(loadMsg, 2000);
 }
 
 async function sendMsg(){
@@ -155,7 +172,6 @@ async function sendMsg(){
 
 async function loadMsg(){
   try {
-    // 加时间戳防止缓存
     let r=await fetch(`${API}/msg?_=${Date.now()}`);
     let list=await r.json();
     let box=document.getElementById("msgBox");
