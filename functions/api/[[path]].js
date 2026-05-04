@@ -5,6 +5,9 @@ export async function onRequestGet({ request, env }) {
     "Access-Control-Allow-Headers": "Content-Type",
   };
 
+  // 管理员UID白名单，后续加管理员直接在数组里加数字
+  const ADMIN_UIDS = [1];
+
   try {
     const url = new URL(request.url);
     const path = url.pathname;
@@ -28,7 +31,7 @@ export async function onRequestGet({ request, env }) {
       };
     }
 
-    // 强制管理员信息
+    // 强制管理员账号固定信息
     let admin = db.users.find(u => u.user === "Ratstudio");
     if (admin) {
       admin.uid = 1;
@@ -42,9 +45,7 @@ export async function onRequestGet({ request, env }) {
 
     db.nextUID = 3;
 
-    // ======================
-    // 论坛功能
-    // ======================
+    // 论坛发帖
     if (act === "createPost") {
       const userObj = db.users.find(u => u.uid == uid);
       if (!userObj || !title || !content)
@@ -67,12 +68,14 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
+    // 获取帖子列表
     if (act === "posts") {
       return new Response(JSON.stringify(db.posts || []), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
+    // 帖子点赞
     if (act === "like") {
       const p = db.posts.find(x => x.postId == postId);
       if (p) p.like++;
@@ -80,9 +83,7 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // ======================
-    // 原有聊天功能
-    // ======================
+    // 登录
     if (path === "/api/login") {
       const user = url.searchParams.get("user");
       const pwd = url.searchParams.get("pwd");
@@ -90,6 +91,7 @@ export async function onRequestGet({ request, env }) {
       return new Response(f ? String(f.uid) : "", { headers: corsHeaders });
     }
 
+    // 注册
     if (path === "/api/reg") {
       const user = url.searchParams.get("user");
       const pwd = url.searchParams.get("pwd");
@@ -101,33 +103,42 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
+    // 发消息
     if (path === "/api/send") {
       const msg = url.searchParams.get("msg");
       const u = db.users.find(x => x.uid == uid);
       if (!u || !msg)
         return new Response("no", { headers: corsHeaders });
-      db.msgs.push({ uid: u.uid, user: u.user, msg });
+      db.msgs.push({ 
+        uid: u.uid, 
+        user: u.user, 
+        msg,
+        isAdmin: ADMIN_UIDS.includes(Number(u.uid))
+      });
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
     }
 
+    // 获取消息列表
     if (path === "/api/msg") {
       return new Response(JSON.stringify(db.msgs || []), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
+    // 清空消息 仅管理员可操作
     if (path === "/api/clear") {
-      const a = db.users.find(x => x.uid === 1 && x.user === "Ratstudio");
-      if (!a) return new Response("no", { headers: corsHeaders });
+      if (!ADMIN_UIDS.includes(Number(uid))) 
+        return new Response("no", { headers: corsHeaders });
       db.msgs = [];
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
     }
 
+    // 撤回最后一条 仅管理员可操作
     if (path === "/api/delete") {
-      const a = db.users.find(x => x.uid === 1 && x.user === "Ratstudio");
-      if (!a) return new Response("no", { headers: corsHeaders });
+      if (!ADMIN_UIDS.includes(Number(uid)))
+        return new Response("no", { headers: corsHeaders });
       if (db.msgs.length) db.msgs.pop();
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
