@@ -35,7 +35,10 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 }
 .user-info{padding:12px 20px;color:#ccc;display:flex;justify-content:space-between;align-items:center}
 .msg-box{
-  flex:1;padding:10px 20px;overflow-y:auto;padding-bottom:90px;
+  flex:1;
+  padding:10px 20px;
+  padding-bottom: 80px;
+  overflow-y:auto;
 }
 .msg-item{display:flex;width:100%;margin-bottom:16px}
 .msg-item.me{justify-content:flex-end}
@@ -86,7 +89,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <div class="top"><span>聊天室</span></div>
 <div class="login" id="loginPage" style="flex:1;padding:30px;overflow-y:auto">
 <input id="user" placeholder="账号" style="width:100%;padding:12px;border-radius:16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
-<input id="pwd" placeholder="密码" type="password" style="width:100%;padding:12px;border-radius:16px;background:#255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
+<input id="pwd" placeholder="密码" type="password" style="width:100%;padding:12px;border-radius:16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
 <div class="auto-login" style="color:#fff;font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><input type="checkbox" id="autoLogin"> 10天自动登录</div>
 <button class="login-reg" onclick="reg()" style="width:100%;padding:12px;border-radius:16px;background:#4080ff;color:#fff;border:none;margin-bottom:10px;cursor:pointer">注册</button>
 <button class="login-reg" onclick="login()" style="width:100%;padding:12px;border-radius:16px;background:#4080ff;color:#fff;border:none;cursor:pointer">登录</button>
@@ -187,6 +190,7 @@ async function loadMsg(){
         </div>`;
       box.appendChild(div);
     });
+    // 自动滚到底部
     box.scrollTop = box.scrollHeight;
   } catch (e) {
     console.error("加载消息失败:", e);
