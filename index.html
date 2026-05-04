@@ -91,7 +91,6 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 }
 .version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
 
-/* 只加了这一行样式，不影响任何布局 */
 .revoke-btn {
   font-size:11px;
   color:#ff6666;
@@ -246,7 +245,6 @@ async function loadMsg() {
       div.className = "msg-item " + (m.uid == uid ? "me" : "");
       const adminTag = m.isAdmin ? '<span class="admin-tag">管理员</span>' : "";
       
-      // 权限判断：自己 / 管理员 显示撤回按钮
       let showRevoke = (m.uid == uid || isAdminNow);
       let revokeBtn = showRevoke ? `<button class="revoke-btn" onclick="revokeMsg(${index})">撤回</button>` : "";
 
@@ -261,11 +259,15 @@ async function loadMsg() {
         </div>`;
       box.appendChild(div);
     });
-    box.scrollTop = box.scrollHeight;
+
+    // ✅ 修复：延迟滚动，保证渲染完成
+    setTimeout(() => {
+      box.scrollTop = box.scrollHeight;
+    }, 0);
+
   } catch (e) {}
 }
 
-// 新增：撤回指定消息（只加这一个函数）
 async function revokeMsg(index) {
   if (!confirm("确定要撤回这条消息吗？")) return;
   const res = await fetch(`${API}?act=deleteMsg&uid=${uid}&targetId=${index}`);
