@@ -8,13 +8,14 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const path = url.pathname;
 
+  // 这里！！！用 env.KV 不是 env.CHAT_DB！！！
   const getDB = async () => {
-    const raw = await env.CHAT_DB.get("db");
+    const raw = await env.KV.get("db");
     return raw ? JSON.parse(raw) : { users: [], msgs: [], nextUID: 1 };
   };
 
   const saveDB = async (db) => {
-    await env.CHAT_DB.put("db", JSON.stringify(db));
+    await env.KV.put("db", JSON.stringify(db));
   };
 
   const db = await getDB();
