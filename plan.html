@@ -9,7 +9,8 @@
 body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items:center;justify-content:center;height:100vh}
 .container{
   display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;
-  background:rgba(255,255,255,.04);backdrop-filter:blur(30px);
+  background:rgba(255,255,255,.04);
+  backdrop-filter:blur(30px);
   border:1px solid rgba(255,255,255,.1);
   box-shadow:0 0 50px rgba(60,120,255,0.25);
 }
@@ -20,29 +21,45 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 }
 .item{
   padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;
-  cursor:pointer;transition:all 0.2s;border:1px solid transparent;
+  cursor:pointer;transition:all 0.2s;
+  border:1px solid transparent;
 }
 .item:hover,.item.active{
   background:rgba(60,130,255,.25);color:#fff;
-  border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35);
+  border-color:rgba(100,160,255,0.4);
+  box-shadow:0 0 12px rgba(80,140,255,0.35);
 }
-.main{flex:1;position:relative;overflow:auto;}
+.main{flex:1;position:relative}
 .top{
   background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;
   display:flex;justify-content:space-between;align-items:center;
   border-bottom:1px solid rgba(255,255,255,.08);
 }
-.content{padding:30px;color:#fff;line-height:1.7}
+.content{
+  padding:30px;
+  color:#fff;
+}
 .plan-box{
-  background:rgba(255,255,255,.07);border-radius:18px;padding:20px;margin-bottom:16px;
+  background:rgba(255,255,255,.07);
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:16px;
   border:1px solid rgba(255,255,255,.12);
 }
-.plan-box h3{color:#6ccff;margin-bottom:10px}
+.plan-box h3{
+  color:#6cf;
+  margin-bottom:12px;
+  font-size:16px;
+}
+.plan-box li{
+  margin-left:20px;
+  line-height:1.6;
+  margin-bottom:6px;
+}
 .version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
 </style>
 </head>
 <body>
-
 <div class="container">
 <div class="sidebar">
 <div class="item" onclick="location.href='index.html'">聊天室</div>
@@ -50,30 +67,41 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <div class="item" onclick="location.href='history.html'">更新日志</div>
 <div class="item active">开发规划</div>
 </div>
-
 <div class="main">
-<div class="top"><span>开发规划</span></div>
+<div class="top">
+<span>开发规划</span>
+</div>
 <div class="content">
+
 <div class="plan-box">
-<h3>📌 近期</h3>
-<li>网页化UI优化</li>
-<li>论坛完善</li>
-<li>用户主页</li>
-<li>时间显示</li>
+<h3>📌 近期规划</h3>
+<ul>
+<li>网页化：修改UI，使其看起来更像大型论坛网站页面</li>
+<li>论坛功能完善，增加评论，显示详细内容等功能</li>
+<li>用户主页：增加用户主页，显示其发帖，点赞数</li>
+<li>时间显示：显示发帖时间，记录点赞、注册、登录时间等</li>
+</ul>
 </div>
+
 <div class="plan-box">
-<h3>🚀 中期</h3>
-<li>通知系统</li>
-<li>关注功能</li>
-<li>首页推荐</li>
-<li>深色/浅色模式</li>
+<h3>🚀 中期规划</h3>
+<ul>
+<li>通知：在网页右上角添加通知按钮，显示系统提示、收到点赞、评论等信息</li>
+<li>关注：关注某用户，在其发送帖子时通过通知提醒你</li>
+<li>主页：添加主页功能，在主页增加公告等功能，并随机推荐内容</li>
+<li>UI：增加亮色暗色模式切换，添加按钮点击弹性动画</li>
+</ul>
 </div>
+
 <div class="plan-box">
-<h3>🔮 远期</h3>
+<h3>🔮 远期 / 超远期规划</h3>
+<ul>
 <li>待定</li>
+</ul>
 </div>
+
 </div>
-<div class="version version-text"></div> <!-- 自动版本 -->
+<div class="version version-text"></div>
 </div>
 </div>
 
