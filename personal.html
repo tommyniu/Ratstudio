@@ -8,7 +8,6 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
-/* 手机端导航不挤压 */
 .top-nav{
   width:100%;height:56px;background:#fff;
   border-bottom:1px solid #e5e6eb;
@@ -59,7 +58,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 .profile-name{font-size:18px;font-weight:bold;margin-bottom:6px;}
 .profile-uid{color:#888;margin-bottom:18px;font-size:14px;}
 
-/* 手机端统计卡片正常 */
 .profile-stats{
   display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;
 }
@@ -79,7 +77,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 <body>
 <div class="top-nav">
   <div class="nav-left" id="userHead">
-    <div class="avatar" id="topAvatar" onclick="goMyHome()">U</div>
+    <div class="avatar" id="topAvatar">U</div>
     <div class="user-info-mini">
       <div class="name" id="miniName">用户名</div>
       <div>UID: <span id="miniUid">1</span></div>
@@ -96,7 +94,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 <div class="container">
   <div class="profile">
     <div class="profile-avatar" id="avatarLetter">U</div>
-    <div class="profile-name" id="username">Loading...</div>
+    <div class="profile-name" id="username">加载中...</div>
     <div class="profile-uid" id="uid">UID：-</div>
 
     <div class="profile-stats">
@@ -116,49 +114,57 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
 <script>
 const API = '/api';
-function getAvatarChar(n){ return n?n[0].toUpperCase():'U' }
+function getAvatarChar(n){ return n ? n[0].toUpperCase() : 'U'; }
 
 window.onload = async function(){
+  // 1. 优先取URL里的uid，没有就取本地存储（自己）
   const urlParams = new URLSearchParams(window.location.search);
-  const uid = urlParams.get('uid') || localStorage.getItem('uid');
-  if(!uid){ alert('请先登录'); location.href='index.html' }
+  const targetUid = urlParams.get('uid') || localStorage.getItem('uid');
 
-  // 加载当前登录信息
-  const me = localStorage.getItem('username');
-  const myUid = localStorage.getItem('uid');
-  if(me && myUid){
-    document.getElementById('topAvatar').innerText = getAvatarChar(me);
-    document.getElementById('miniName').innerText = me;
+  if(!targetUid){
+    alert('未找到用户，返回聊天页');
+    location.href = 'index.html';
+    return;
+  }
+
+  // 2. 顶部显示当前登录用户（不是被查看的）
+  const myName = localStorage.getItem('username') || '';
+  const myUid = localStorage.getItem('uid') || '';
+  if(myName && myUid){
+    document.getElementById('topAvatar').innerText = getAvatarChar(myName);
+    document.getElementById('miniName').innerText = myName;
     document.getElementById('miniUid').innerText = myUid;
   }
 
-  // 加载用户信息
-  let userName = "未知用户";
+  // 3. 加载目标用户信息（重点：兜底，不再未知用户）
+  let userName = '';
   try {
-    let userRes = await fetch(`${API}/getUser?uid=${uid}`);
+    let userRes = await fetch(`${API}/getUser?uid=${targetUid}`);
     let userData = await userRes.json();
-    if(userData && userData.username) userName = userData.username;
+    if(userData && userData.username){
+      userName = userData.username;
+    }
   }catch(e){}
 
-  // 加载真实统计
+  // 兜底：如果接口没返回，用本地存储（自己）
+  if(!userName) userName = myName || '未知用户';
+
+  // 4. 加载统计（仍失败就显示0）
   let like = 0, post = 0;
   try {
-    let statRes = await fetch(`${API}/userStat?uid=${uid}`);
+    let statRes = await fetch(`${API}/userStat?uid=${targetUid}`);
     let stat = await statRes.json();
     like = stat.like || 0;
     post = stat.post || 0;
   }catch(e){}
 
+  // 5. 渲染页面
   document.getElementById('avatarLetter').innerText = getAvatarChar(userName);
   document.getElementById('username').innerText = userName;
-  document.getElementById('uid').innerText = 'UID：'+uid;
+  document.getElementById('uid').innerText = 'UID：' + targetUid;
   document.getElementById('likeCount').innerText = like;
   document.getElementById('postCount').innerText = post;
-}
-
-function goMyHome(){
-  location.href='personal.html?uid='+localStorage.getItem('uid');
-}
+};
 </script>
 </body>
 </html>
