@@ -5,170 +5,155 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>论坛 - RatStudio的小站</title>
 <style>
-/* ========== 全局重置：全屏、无圆角、无边框 ========== */
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
-/* ========== 新版：B站/CSDN 全屏方块UI ========== */
-.container{
-  width:100%;height:100%;display:flex;
-  background:#f1f2f3;
-}
-/* 左侧导航：窄竖条、方块、无圆角 */
-.sidebar{
-  width:180px;height:100%;background:#fff;
-  border-right:1px solid #e5e6eb;
-  display:flex;flex-direction:column;
-}
-.sidebar .item{
-  width:100%;padding:16px 20px;
-  font-size:15px;color:#61666d;
-  cursor:pointer;border:none;background:none;
-  text-align:left;
-}
-.sidebar .item.active{
-  background:#f1f2f3;color:#fb7299;font-weight:bold;
-}
-.sidebar .item:hover{background:#f8f9fa}
-
-/* 右侧主内容：全屏铺满、无圆角 */
-.main{
-  flex:1;height:100%;display:flex;flex-direction:column;
-  overflow:hidden;
-}
-/* 顶部栏：全屏宽、白色、无圆角 */
-.top-bar{
+.top-nav{
   width:100%;height:56px;background:#fff;
   border-bottom:1px solid #e5e6eb;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;
+  padding:0 24px;position:fixed;top:0;left:0;z-index:999;
 }
-.top-bar h2{font-size:18px;font-weight:500}
-/* 旧版UI按钮：右上角，浅色方形 */
-.old-ui-btn{
-  padding:6px 12px;background:#f1f2f3;border:1px solid #e5e6eb;
-  font-size:13px;cursor:pointer;color:#333;
-  border-radius:0;
-}
-.add-btn{
-  width:32px;height:32px;background:#fb7299;color:#fff;
-  border:none;cursor:pointer;font-size:20px;
+.nav-left{display:flex;align-items:center;gap:12px;}
+.avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:#0066cc;color:#fff;
   display:flex;align-items:center;justify-content:center;
-  border-radius:0;
+  font-weight:bold;font-size:16px;
+}
+.user-info-mini{
+  display:flex;flex-direction:column;
+  font-size:13px;color:#666;line-height:1.2;
+}
+.user-info-mini .name{font-weight:bold;color:#333;font-size:14px;}
+
+.nav-right{display:flex;gap:24px;align-items:center;}
+.nav-item{
+  font:14px/1 sans-serif;color:#666;cursor:pointer;
+  padding:8px 12px;border-radius:8px;transition:0.2s;
+}
+.nav-item.active{color:#0066cc;background:#e8f0fe;}
+.nav-item:hover{background:#f1f5ff;}
+
+.container{
+  width:100%;height:calc(100% - 56px);
+  margin-top:56px;display:flex;flex-direction:column;
 }
 
-/* 帖子列表：全屏宽度、方块卡片、无圆角 */
-.page{flex:1;overflow-y:auto;padding:20px;display:none}
+.page{flex:1;overflow-y:auto;padding:24px;display:none}
 .page.active{display:block}
+
 .post{
   width:100%;background:#fff;border:1px solid #e5e6eb;
-  padding:16px;margin-bottom:12px;cursor:pointer;
-  border-radius:0;
+  padding:20px;margin-bottom:16px;cursor:pointer;
+  border-radius:12px;transition:0.2s;
 }
-.post h3{font-size:16px;color:#232527;margin-bottom:8px}
-.post .info{font-size:12px;color:#9499a0;margin-bottom:10px}
-.post .content{font-size:14px;color:#61666d;margin-bottom:10px}
+.post:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.post h3{font-size:17px;color:#232527;margin-bottom:10px}
+.post .info{font-size:12px;color:#9499a0;margin-bottom:12px}
+.post .content{font-size:14px;color:#61666d;margin-bottom:12px}
 .like,.del-post{
-  padding:4px 10px;border:none;font-size:12px;cursor:pointer;
-  border-radius:0;
+  padding:5px 12px;border:none;font-size:12px;cursor:pointer;
+  border-radius:8px;
 }
 .like{background:#f1f2f3;color:#61666d}
-.del-post{background:#ffebeb;color:#ed2633;margin-left:8px}
+.del-post{background:#ffebeb;color:#ed2633;margin-left:10px}
 
-/* 弹窗：全屏居中、方块、无圆角 */
 .mask{
-  position:absolute;inset:0;background:rgba(0,0,0,.5);
-  display:none;align-items:center;justify-content:center;
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  display:none;align-items:center;justify-content:center;z-index:1000
 }
 .pop{
-  width:90%;max-width:500px;background:#fff;border:1px solid #e5e6eb;
-  padding:24px;border-radius:0;
+  width:90%;max-width:520px;background:#fff;border:1px solid #e5e6eb;
+  padding:28px;border-radius:12px;
 }
 .pop input,.pop textarea{
-  width:100%;padding:12px;margin-bottom:12px;border:1px solid #e5e6eb;
-  background:#f1f2f3;color:#333;border-radius:0;
+  width:100%;padding:14px;margin-bottom:16px;border:1px solid #e5e6eb;
+  background:#fafafa;color:#333;border-radius:10px;
+  outline:none;font-size:14px;resize:none;
 }
 .pop button{
-  width:100%;padding:12px;background:#fb7299;color:#fff;border:none;
-  cursor:pointer;border-radius:0;
+  width:100%;padding:13px;background:#0066cc;color:#fff;border:none;
+  cursor:pointer;border-radius:10px;font-size:14px;
+}
+.back-btn{
+  padding:6px 14px;background:#f1f2f3;border:1px solid #e5e6eb;
+  cursor:pointer;border-radius:8px;margin-bottom:20px;font-size:13px;
+}
+.add-btn{
+  width:36px;height:36px;background:#0066cc;color:#fff;
+  border:none;cursor:pointer;font-size:22px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:8px;
 }
 
-/* ========== 旧版UI：你最早的暗黑磨砂风格（严格还原） ========== */
-body.old-ui{
-  background:linear-gradient(135deg,#0f1419,#0a0c12);color:#eee;
-}
-body.old-ui .container{background:rgba(255,255,255,.04);backdrop-filter:blur(20px)}
-body.old-ui .sidebar{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
-body.old-ui .item{color:rgba(255,255,255,.8)}
-body.old-ui .item.active{background:rgba(255,255,255,.08);color:#fff}
-body.old-ui .top-bar{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
-body.old-ui .old-ui-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#eee}
-body.old-ui .post{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15)}
-body.old-ui .pop{background:#1a1c25;border-color:rgba(255,255,255,.2)}
-body.old-ui .pop input,
-body.old-ui .pop textarea{background:#262833;border-color:rgba(255,255,255,.2);color:#fff}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#dcdcdc;border-radius:3px}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="sidebar">
-    <div class="item" onclick="location.href='index.html'">聊天室</div>
-    <div class="item active">论坛</div>
-    <div class="item" onclick="location.href='history.html'">更新日志</div>
-    <div class="item" onclick="location.href='plan.html'">开发计划</div>
+<div class="top-nav">
+  <div class="nav-left" id="userHead" style="display:none">
+    <div class="avatar" id="topAvatar">U</div>
+    <div class="user-info-mini">
+      <div class="name" id="miniName">用户名</div>
+      <div>UID: <span id="miniUid">1</span></div>
+    </div>
   </div>
-  <div class="main">
-    <div class="top-bar">
-      <h2>论坛</h2>
-      <div style="display:flex;gap:10px;align-items:center">
-        <button class="old-ui-btn" onclick="toggleOldUI()">旧版UI</button>
-        <button class="add-btn" onclick="showPost()">+</button>
-      </div>
-    </div>
-    <div class="page active" id="listPage">
-      <div id="list"></div>
-    </div>
-    <div class="page" id="detailPage">
-      <div style="padding:20px">
-        <button onclick="goBack()" style="margin-bottom:16px;padding:6px 12px;background:#f1f2f3;border:none;cursor:pointer">← 返回</button>
-        <h2 id="detailTitle"></h2>
-        <div class="info" id="detailInfo"></div>
-        <div class="content" id="detailContent"></div>
-      </div>
-    </div>
-    <div class="mask" id="mask">
-      <div class="pop">
-        <input id="title" placeholder="标题">
-        <textarea id="content" placeholder="内容"></textarea>
-        <button onclick="createPost()">发布</button>
-      </div>
-    </div>
+  <div class="nav-right">
+    <div class="nav-item" onclick="location.href='index.html'">聊天室</div>
+    <div class="nav-item active">论坛</div>
+    <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
+    <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
+    <button class="add-btn" onclick="showPost()">+</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page active" id="listPage">
+    <div id="list"></div>
+  </div>
+  <div class="page" id="detailPage">
+    <button class="back-btn" onclick="goBack()">← 返回</button>
+    <h2 id="detailTitle" style="margin-bottom:10px"></h2>
+    <div class="info" id="detailInfo" style="margin-bottom:16px;color:#888"></div>
+    <div class="content" id="detailContent" style="line-height:1.6"></div>
+  </div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="pop">
+    <input id="title" placeholder="帖子标题">
+    <textarea id="content" rows="6" placeholder="帖子内容"></textarea>
+    <button onclick="createPost()">发布帖子</button>
   </div>
 </div>
 
 <script>
-// ========== UI切换：严格区分新版（B站/CSDN）与旧版（暗黑磨砂） ==========
-function toggleOldUI(){
-  document.body.classList.toggle("old-ui");
-  localStorage.setItem("forumOldUI", document.body.classList.contains("old-ui"));
+let username = "", uid = "";
+const API = "/api";
+const ADMIN_UID = 1;
+let postsData = [];
+let likedPosts = JSON.parse(localStorage.getItem('likedPosts')||'[]');
+
+function getAvatarChar(name){
+  if(!name) return 'U';
+  return name.charAt(0).toUpperCase();
 }
-window.onload=()=>{
-  if(localStorage.getItem("forumOldUI")==="true"){
-    document.body.classList.add("old-ui");
-  }
+
+window.onload = () => {
+  let u = localStorage.getItem('username');
+  let id = localStorage.getItem('uid');
+  if(!u||!id){alert('请先登录');location.href='index.html'}
+  username = u; uid = id;
+  document.getElementById('topAvatar').innerText = getAvatarChar(username);
+  document.getElementById('miniName').innerText = username;
+  document.getElementById('miniUid').innerText = uid;
+  document.getElementById('userHead').style.display = 'flex';
+  loadPosts();
 };
 
-// ========== 原有功能（点赞防刷、发帖、删帖）全部保留 ==========
-const API="/api";
-const user=localStorage.getItem('username');
-const uid=localStorage.getItem('uid');
-const ADMIN_UID=1;
-let postsData=[];
-let likedPosts=JSON.parse(localStorage.getItem('likedPosts')||'[]');
-
-if(!user||!uid){alert('请先登录');location.href='index.html'}
-
-function showPost(){document.getElementById('mask').style.display='grid'}
+function showPost(){document.getElementById('mask').style.display='flex'}
 function hidePost(){document.getElementById('mask').style.display='none'}
 
 async function createPost(){
@@ -178,7 +163,7 @@ async function createPost(){
   const res=await fetch(`${API}?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
   const txt=await res.text();
   if(txt==="ok"){hidePost();loadPosts();document.getElementById('title').value='';document.getElementById('content').value=''}
-  else{alert('发布失败：'+txt)}
+  else alert('发布失败：'+txt);
 }
 
 async function loadPosts(){
@@ -191,17 +176,17 @@ async function loadPosts(){
 function renderList(){
   const box=document.getElementById('list');
   box.innerHTML='';
-  if(!postsData||postsData.length===0){box.innerHTML="<div style='text-align:center;padding:30px;color:#9499a0'>暂无帖子</div>";return}
+  if(!postsData||postsData.length===0){box.innerHTML="<div style='text-align:center;padding:60px;color:#999'>暂无帖子</div>";return}
   postsData.forEach(p=>{
     const div=document.createElement('div');
     div.className='post';
     const canDel=(Number(uid)===p.uid)||(Number(uid)===ADMIN_UID);
     div.innerHTML=`
       <h3>${p.title}</h3>
-      <div class="info">${p.user} (${p.uid}) • ${p.time}</div>
+      <div class="info">${p.user} (${p.uid}) · ${p.time}</div>
       <div class="content">${p.content}</div>
       <div>
-        <button class="like" onclick="event.stopPropagation();like(${p.postId})">点赞 ${p.like}</button>
+        <button class="like" onclick="event.stopPropagation();likePost(${p.postId})">点赞 ${p.like}</button>
         ${canDel?`<button class="del-post" onclick="event.stopPropagation();delPost(${p.postId})">删除</button>`:''}
       </div>
     `;
@@ -210,7 +195,7 @@ function renderList(){
   });
 }
 
-async function like(postId){
+async function likePost(postId){
   if(likedPosts.includes(postId)){alert("你已经点过赞了");return}
   likedPosts.push(postId);
   localStorage.setItem('likedPosts',JSON.stringify(likedPosts));
@@ -220,7 +205,7 @@ async function like(postId){
 
 async function delPost(postId){
   if(!confirm('确定删除该帖子？'))return;
-  const res=await fetch(`${API}?act=deletePost&uid=${uid}&targetId=${postId}`);
+  const res=await fetch(`${API}?act=delPost&uid=${uid}&postId=${postId}`);
   const txt=await res.text();
   if(txt==='ok')loadPosts();
   else alert('无权删除');
@@ -236,13 +221,11 @@ function route(){
     const p=postsData.find(x=>x.postId==hash.replace('/',''));
     if(p){
       document.getElementById('detailTitle').textContent=p.title;
-      document.getElementById('detailInfo').textContent=`${p.user} (${p.uid}) • ${p.time}`;
+      document.getElementById('detailInfo').textContent=`${p.user} (${p.uid}) · ${p.time}`;
       document.getElementById('detailContent').textContent=p.content;
     }else goBack();
   }
 }
-
-loadPosts();
 </script>
 </body>
 </html>
