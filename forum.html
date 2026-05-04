@@ -16,10 +16,37 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 .add{width:32px;height:32px;background:rgba(60,130,255,.3);border:none;border-radius:50%;color:#fff;font-size:18px;cursor:pointer}
 .page{display:none;height:630px;overflow-y:auto;padding:20px}
 .page.active{display:block}
-.post{background:rgba(255,255,255,.07);border-radius:18px;padding:16px;margin-bottom:12px;color:#fff;border:1px solid rgba(255,255,255,.12);cursor:pointer}
-.post h3{margin-bottom:8px}
-.post .info{color:#aaa;font-size:12px;margin-bottom:8px}
-.post .content{margin-bottom:10px;line-height:1.5}
+
+/* ========== 修复 1：排版整齐 ========== */
+.post{
+  background:rgba(255,255,255,.07);
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:12px;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.12);
+  cursor:pointer;
+  line-height:1.6;
+}
+.post h3{
+  margin-bottom:8px;
+  font-size:16px;
+}
+.post .info{
+  color:#aaa;
+  font-size:12px;
+  margin-bottom:8px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+/* ========== 修复 2：去掉省略号，完整显示预览文字 ========== */
+.post .content-preview{
+  margin-bottom:10px;
+  line-height:1.6;
+  color:#eee;
+  font-size:14px;
+}
+
 .like{background:rgba(255,80,80,.25);color:#fff;border:none;padding:6px 12px;border-radius:12px;cursor:pointer}
 .detail{padding:20px;color:#fff}
 .detail h2{margin-bottom:12px}
@@ -90,7 +117,6 @@ async function createPost() {
   if (!title || !content) { alert('标题和内容不能为空'); return; }
 
   try {
-    // 直接拼接参数，避免URL对象异常
     const url = `${API}?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`;
     const res = await fetch(url);
     const txt = await res.text();
@@ -126,10 +152,11 @@ function renderList() {
   postsData.forEach(p => {
     const div = document.createElement('div');
     div.className = 'post';
+    // ========== 修复 3：日期正常显示 + 无省略号 ==========
     div.innerHTML = `
       <h3>${p.title}</h3>
-      <div class="info">${p.user} (${p.uid}) ${p.time}</div>
-      <div class="content">${p.content.substring(0,80)}...</div>
+      <div class="info">${p.user} (${p.uid}) • ${p.time}</div>
+      <div class="content-preview">${p.content}</div>
       <button class="like" onclick="event.stopPropagation();like(${p.postId})">点赞 ${p.like}</button>
     `;
     div.onclick = () => goDetail(p.postId);
@@ -162,7 +189,7 @@ function route() {
       listPage.classList.remove('active');
       detailPage.classList.add('active');
       detailTitle.textContent = p.title;
-      detailInfo.textContent = `${p.user} (${p.uid}) ${p.time}`;
+      detailInfo.textContent = `${p.user} (${p.uid}) • ${p.time}`;
       detailContent.textContent = p.content;
       detailLikeBtn.textContent = `点赞 ${p.like}`;
     } else {
