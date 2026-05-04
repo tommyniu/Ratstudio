@@ -14,38 +14,42 @@ export async function onRequestGet({ request, env }) {
     const targetId = url.searchParams.get("targetId");
 
     let db = await env.CHAT_DB.get("db").then(r => r ? JSON.parse(r) : {
-      users: [], msgs: [], nextUID: 3, posts: [], postIdCounter: 1
+      users: [], msgs: [], nextUID: 2, posts: [], postIdCounter: 1
     });
 
     if (!db.msgs) db.msgs = [];
     if (!db.posts) db.posts = [];
+    if (!db.users) db.users = [];
 
-    // 管理员固定
-    let admin = db.users.find(u => u.user === "Ratstudio");
-    if (!admin) db.users.unshift({ uid: 1, user: "Ratstudio", pwd: "LTC505666" });
+    // 强制初始化管理员
+    let admin = db.users.find(u => u.uid === 1);
+    if (!admin) {
+      db.users.unshift({ uid: 1, user: "Ratstudio", pwd: "LTC505666" });
+    }
 
-    // ==============================================
-    // ✅ 精准删除消息（管理员可删任何人，用户只能删自己）
-    // ==============================================
+    // ==========================================
+    // 撤回消息
+    // ==========================================
     if (act === "deleteMsg") {
-      const isAdmin = ADMIN_UIDS.includes(Number(uid));
-      const idx = Number(targetId);
+      const msgIdx = Number(targetId);
+      const userUid = Number(uid);
 
-      if (isNaN(idx) || idx < 0 || idx >= db.msgs.length)
+      if (isNaN(msgIdx) || msgIdx < 0 || msgIdx >= db.msgs.length)
         return new Response("no", { headers: corsHeaders });
 
-      const msg = db.msgs[idx];
-      if (!isAdmin && msg.uid != uid)
+      const msg = db.msgs[msgIdx];
+      const isAdmin = ADMIN_UIDS.includes(userUid);
+      if (!isAdmin && msg.uid !== userUid)
         return new Response("no", { headers: corsHeaders });
 
-      db.msgs.splice(idx, 1);
+      db.msgs.splice(msgIdx, 1);
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // ==============================================
-    // ✅ 精准删除帖子（管理员可删任何人，用户只能删自己）
-    // ==============================================
+    // ==========================================
+    // 删除帖子
+    // ==========================================
     if (act === "deletePost") {
       const isAdmin = ADMIN_UIDS.includes(Number(uid));
       const postId = Number(targetId);
@@ -62,9 +66,9 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // ====================
+    // ==========================================
     // 发帖
-    // ====================
+    // ==========================================
     if (act === "createPost") {
       const title = url.searchParams.get("title");
       const content = url.searchParams.get("content");
@@ -72,7 +76,7 @@ export async function onRequestGet({ request, env }) {
       if (!userObj || !title || !content) return new Response("error", { headers: corsHeaders });
 
       const now = new Date();
-      const time = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,0)}/${String(now.getDate()).padStart(2,0)} ${String(now.getHours()).padStart(2,0)}:${String(now.getMinutes()).padStart(2,0)}:${String(now.getSeconds()).padStart(2,0)}`;
+      const time = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,0)}/${String(now.getDate()).padStart(2,0)} ${String(now.getHours()).padStart(2,0)}:${String(now.getMinutes()).padStart(2,0)}`;
 
       db.posts.push({
         postId: db.postIdCounter++,
@@ -84,9 +88,15 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
+    // ==========================================
+    // 获取帖子列表
+    // ==========================================
     if (act === "posts")
       return new Response(JSON.stringify(db.posts), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+    // ==========================================
+    // 点赞
+    // ==========================================
     if (act === "like") {
       const p = db.posts.find(x => x.postId == url.searchParams.get("postId"));
       if (p) p.like++;
@@ -94,25 +104,60 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // ====================
-    // 登录/注册/发消息
-    // ====================
+    // ==========================================
+    // 获取用户信息（个人主页用）
+    // ==========================================
+    if (url.pathname === "/api/getUser") {
+      const targetUid = url.searchParams.get("uid");
+      const user = db.users.find(u => u.uid == targetUid);
+      return new Response(JSON.stringify({
+        username: user ? user.user : "未知用户"
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ==========================================
+    // 获取用户统计：发帖数 + 获赞数
+    // ==========================================
+    if (url.pathname === "/api/userStat") {
+      const targetUid = url.searchParams.get("uid");
+      const posts = db.posts.filter(p => p.uid == targetUid);
+      const postCount = posts.length;
+      const likeCount = posts.reduce((sum, p) => sum + (p.like || 0), 0);
+
+      return new Response(JSON.stringify({
+        post: postCount,
+        like: likeCount
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ==========================================
+    // 登录（修复：返回正确 UID）
+    // ==========================================
     if (url.pathname === "/api/login") {
       const user = url.searchParams.get("user");
       const pwd = url.searchParams.get("pwd");
-      const f = db.users.find(x => x.user === user && x.pwd === pwd);
-      return new Response(f ? String(f.uid) : "", { headers: corsHeaders });
+      const found = db.users.find(x => x.user === user && x.pwd === pwd);
+      return new Response(found ? String(found.uid) : "fail", { headers: corsHeaders });
     }
 
+    // ==========================================
+    // 注册（修复：返回 uid:xxx）
+    // ==========================================
     if (url.pathname === "/api/reg") {
       const user = url.searchParams.get("user");
       const pwd = url.searchParams.get("pwd");
       if (db.users.some(x => x.user === user)) return new Response("no", { headers: corsHeaders });
-      db.users.push({ uid: db.nextUID++, user, pwd });
+
+      const newUID = db.nextUID++;
+      db.users.push({ uid: newUID, user, pwd });
+
       await env.CHAT_DB.put("db", JSON.stringify(db));
-      return new Response("ok", { headers: corsHeaders });
+      return new Response(`uid:${newUID}`, { headers: corsHeaders });
     }
 
+    // ==========================================
+    // 发送消息
+    // ==========================================
     if (url.pathname === "/api/send") {
       const msg = url.searchParams.get("msg");
       const u = db.users.find(x => x.uid == uid);
@@ -122,6 +167,9 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
+    // ==========================================
+    // 获取消息列表
+    // ==========================================
     if (url.pathname === "/api/msg")
       return new Response(JSON.stringify(db.msgs || []), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
