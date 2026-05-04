@@ -8,7 +8,6 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  // 从 KV 读取
   const getDB = async () => {
     const raw = await env.CHAT_DB.get("db");
     return raw ? JSON.parse(raw) : { users: [], msgs: [], nextUID: 1 };
@@ -20,7 +19,6 @@ export async function onRequestGet({ request, env }) {
 
   const db = await getDB();
 
-  // ============== 登录 ==============
   if (path === "/api/login") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
@@ -28,7 +26,6 @@ export async function onRequestGet({ request, env }) {
     return new Response(u ? String(u.uid) : "", { headers: corsHeaders });
   }
 
-  // ============== 注册 ==============
   if (path === "/api/reg") {
     const user = url.searchParams.get("user");
     const pwd = url.searchParams.get("pwd");
@@ -39,7 +36,6 @@ export async function onRequestGet({ request, env }) {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // ============== 发送消息 ==============
   if (path === "/api/send") {
     const uid = url.searchParams.get("uid");
     const msg = url.searchParams.get("msg");
@@ -50,14 +46,12 @@ export async function onRequestGet({ request, env }) {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // ============== 获取消息 ==============
   if (path === "/api/msg") {
     return new Response(JSON.stringify(db.msgs || []), {
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 
-  // ============== 清空 ==============
   if (path === "/api/clear") {
     const admin = db.users.find(x => x.user === "Ratstudio");
     if (!admin) return new Response("no", { headers: corsHeaders });
@@ -66,7 +60,6 @@ export async function onRequestGet({ request, env }) {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // ============== 删除 ==============
   if (path === "/api/delete") {
     const admin = db.users.find(x => x.user === "Ratstudio");
     if (!admin) return new Response("no", { headers: corsHeaders });
