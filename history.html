@@ -37,15 +37,30 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
 .container{
   width:100%;height:calc(100% - 56px);
-  margin-top:56px;padding:30px;overflow-y:auto;
+  margin-top:56px;padding:24px;overflow-y:auto;
 }
-.log-card{
+.log-box{
   background:#fff;border:1px solid #e5e6eb;
-  border-radius:12px;padding:24px;margin-bottom:20px;
+  border-radius:12px;padding:20px;
 }
-.log-card h3{color:#0066cc;margin-bottom:12px;font-size:16px;}
-.log-card li{
-  margin-left:20px;line-height:1.7;margin-bottom:6px;color:#555;
+.log-box h2{
+  font-size:16px;color:#0066cc;margin-bottom:16px;
+}
+.item-log{
+  padding: 10px 0;
+  border-bottom:1px solid #f1f1f1;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.item-log:last-child{border-bottom:none;}
+.item-log .ver{
+  font-weight:bold;color:#0066cc;
+  min-width:80px;
+}
+.item-log .date{
+  margin-left:auto;color:#999;font-size:12px;
 }
 
 ::-webkit-scrollbar{width:6px}
@@ -53,6 +68,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </style>
 </head>
 <body>
+
 <div class="top-nav">
   <div class="nav-left" id="userHead" style="display:none">
     <div class="avatar" id="topAvatar">U</div>
@@ -70,26 +86,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </div>
 
 <div class="container">
-  <div class="log-card">
-    <h3>V1.3.4 界面改版</h3>
-    <ul>
-      <li>全站改为顶部导航布局，移除左侧旧侧边栏</li>
-      <li>左上角增加用户头像（昵称首字母）、昵称、UID</li>
-      <li>整体采用B站风格小圆角，界面更简洁美观</li>
-      <li>修复聊天室消息尾部多余空白问题</li>
-      <li>移除旧版UI切换，统一新版现代界面</li>
-    </ul>
-  </div>
-  <div class="log-card">
-    <h3>V1.2.3 功能完善</h3>
-    <ul>
-      <li>新增论坛发帖、删除、点赞功能</li>
-      <li>完善登录注册数据存储</li>
-      <li>优化聊天自动滚动</li>
-    </ul>
+  <div class="log-box">
+    <h2>更新日志 | 当前版本：<span class="version-text">V1.3.4</span></h2>
+    <div id="historyList"></div>
   </div>
 </div>
 
+<script src="version.js"></script>
 <script>
 function getAvatarChar(name){
   if(!name) return 'U';
