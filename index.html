@@ -140,7 +140,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 
 <script>
 // ==============================
-// 版本配置中心（一处修改全站生效）
+// 版本配置中心
 // ==============================
 const VERSION_CONFIG = {
   current: "V1.3.4",
@@ -162,7 +162,6 @@ const VERSION_CONFIG = {
   ]
 };
 
-// 自动注入版本号
 window.onload = function () {
   document.querySelectorAll(".version-text").forEach(el => {
     el.innerText = VERSION_CONFIG.current;
@@ -170,9 +169,10 @@ window.onload = function () {
 };
 
 // ==============================
-// 聊天主逻辑
+// 聊天主逻辑（修复刷新&滚动）
 // ==============================
 let username = "", uid = "", isAdmin = false;
+let lastMsgCount = 0; // 记录上次消息数量，用于增量更新
 const API = "/api";
 
 window.onloadExtra = () => {
@@ -188,6 +188,7 @@ function logout() {
   document.getElementById("chatPage").style.display = "none";
   document.getElementById("loginPage").style.display = "block";
   document.getElementById("footerAdmin").style.display = "none";
+  lastMsgCount = 0;
 }
 
 async function login() {
@@ -214,6 +215,7 @@ function loginSuccess() {
   document.getElementById("loginPage").style.display = "none";
   document.getElementById("chatPage").style.display = "flex";
   document.getElementById("userInfoText").innerText = username + " (" + uid + ")";
+  lastMsgCount = 0;
   loadMsg();
   setInterval(loadMsg, 2000);
 }
@@ -226,12 +228,12 @@ async function sendMsg() {
   loadMsg();
 }
 
+// ✅ 核心修复：增量更新 + 智能滚动
 async function loadMsg() {
   try {
     const r = await fetch(`${API}/msg?_=${Date.now()}`);
     const list = await r.json();
     const box = document.getElementById("msgBox");
-    box.innerHTML = "";
 
     const isAdminNow = list.some(m => m.uid == uid && m.isAdmin);
     if (isAdminNow) {
@@ -240,32 +242,44 @@ async function loadMsg() {
       document.getElementById("delBtn").style.display = "inline-block";
     }
 
-    list.forEach((m, index) => {
-      const div = document.createElement("div");
-      div.className = "msg-item " + (m.uid == uid ? "me" : "");
-      const adminTag = m.isAdmin ? '<span class="admin-tag">管理员</span>' : "";
-      
-      let showRevoke = (m.uid == uid || isAdminNow);
-      let revokeBtn = showRevoke ? `<button class="revoke-btn" onclick="revokeMsg(${index})">撤回</button>` : "";
+    // 记录当前滚动位置
+    const { scrollTop, scrollHeight, clientHeight } = box;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight <= 5; // 容错5px
 
-      div.innerHTML = `
-        <div class="msg-wrap">
-          <div class="name-row">
-            <div class="avatar"></div>
-            <div class="username">${m.user}${adminTag} ${revokeBtn}</div>
-          </div>
-          <div class="bubble">${m.msg}</div>
-          <div class="uid">UID:${m.uid}</div>
-        </div>`;
-      box.appendChild(div);
-    });
+    // 只有消息数量变化才更新DOM
+    if (list.length !== lastMsgCount) {
+      box.innerHTML = ""; // 全量清空一次（首次/清空后）
+      list.forEach((m, index) => {
+        const div = document.createElement("div");
+        div.className = "msg-item " + (m.uid == uid ? "me" : "");
+        const adminTag = m.isAdmin ? '<span class="admin-tag">管理员</span>' : "";
+        let showRevoke = (m.uid == uid || isAdminNow);
+        let revokeBtn = showRevoke ? `<button class="revoke-btn" onclick="revokeMsg(${index})">撤回</button>` : "";
 
-    // ✅ 修复：延迟滚动，保证渲染完成
-    setTimeout(() => {
-      box.scrollTop = box.scrollHeight;
-    }, 0);
+        div.innerHTML = `
+          <div class="msg-wrap">
+            <div class="name-row">
+              <div class="avatar"></div>
+              <div class="username">${m.user}${adminTag} ${revokeBtn}</div>
+            </div>
+            <div class="bubble">${m.msg}</div>
+            <div class="uid">UID:${m.uid}</div>
+          </div>`;
+        box.appendChild(div);
+      });
+      lastMsgCount = list.length;
+    }
 
-  } catch (e) {}
+    // 只在“用户本来就在底部”时自动滚动，且等渲染完成
+    if (isAtBottom) {
+      requestAnimationFrame(() => {
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+
+  } catch (e) {
+    console.error("loadMsg error:", e);
+  }
 }
 
 async function revokeMsg(index) {
@@ -273,6 +287,7 @@ async function revokeMsg(index) {
   const res = await fetch(`${API}?act=deleteMsg&uid=${uid}&targetId=${index}`);
   const text = await res.text();
   if (text === "ok") {
+    lastMsgCount = 0; // 重置，强制刷新
     loadMsg();
   } else {
     alert("你无权撤回该消息");
@@ -281,11 +296,13 @@ async function revokeMsg(index) {
 
 async function clearAllMsg() {
   await fetch(`${API}/clear?uid=${uid}`);
+  lastMsgCount = 0; // 重置
   loadMsg();
 }
 
 async function deleteLastMsg() {
   await fetch(`${API}/delete?uid=${uid}`);
+  lastMsgCount = 0; // 重置
   loadMsg();
 }
 </script>
