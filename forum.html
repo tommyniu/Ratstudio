@@ -34,7 +34,6 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 </style>
 </head>
 <body>
-
 <div class="container">
 <div class="sidebar">
 <div class="item" onclick="location.href='index.html'">聊天室</div>
@@ -42,17 +41,14 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <div class="item" onclick="location.href='history.html'">更新日志</div>
 <div class="item" onclick="location.href='plan.html'">开发规划</div>
 </div>
-
 <div class="main">
 <div class="top">
 <span>论坛</span>
 <button class="add" onclick="showPost()">+</button>
 </div>
-
 <div class="page active" id="listPage">
 <div class="posts" id="list"></div>
 </div>
-
 <div class="page" id="detailPage">
 <div class="detail">
 <button class="back" onclick="goBack()">← 返回</button>
@@ -62,7 +58,6 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <button class="like" id="detailLikeBtn" onclick="likeDetail()"></button>
 </div>
 </div>
-
 <div class="mask" id="mask">
 <div class="pop">
 <input id="title" placeholder="标题">
@@ -70,11 +65,9 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 <button onclick="createPost()">发布</button>
 </div>
 </div>
-
 <div class="version version-text"></div>
 </div>
 </div>
-
 <script src="version.js"></script>
 <script>
 const API = "/api";
@@ -91,62 +84,39 @@ if (!user || !uid) {
 function showPost() { document.getElementById('mask').style.display = 'grid' }
 function hidePost() { document.getElementById('mask').style.display = 'none' }
 
-// ======================
-// 修复发布接口（完全按照聊天成功逻辑）
-// ======================
 async function createPost() {
   const title = document.getElementById('title').value.trim();
   const content = document.getElementById('content').value.trim();
-  if (!title || !content) {
-    alert('标题和内容不能为空');
-    return;
-  }
+  if (!title || !content) { alert('标题和内容不能为空'); return; }
 
   try {
-    const url = new URL(API, window.location.origin);
-    url.searchParams.append("act", "createPost");
-    url.searchParams.append("uid", uid);
-    url.searchParams.append("title", title);
-    url.searchParams.append("content", content);
-
-    const res = await fetch(url.toString());
-    const text = await res.text();
-
-    if (text === "ok") {
-      console.log("发布成功");
+    let res = await fetch(`${API}?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
+    let txt = await res.text();
+    if (txt === "ok") {
       hidePost();
       loadPosts();
       document.getElementById('title').value = '';
       document.getElementById('content').value = '';
     } else {
-      alert("发布失败：" + text);
+      alert('发布失败：' + txt);
     }
-  } catch (err) {
-    console.error(err);
-    alert("发布异常");
+  } catch(e) {
+    alert('发布异常，请重试');
   }
 }
 
 async function loadPosts() {
-  try {
-    const url = new URL(API, window.location.origin);
-    url.searchParams.append("act", "posts");
-    url.searchParams.append("_", Date.now());
-
-    const r = await fetch(url.toString());
-    postsData = await r.json();
-    renderList();
-    route();
-  } catch (e) {
-    console.error("加载帖子失败", e);
-  }
+  let r = await fetch(`${API}?act=posts&_=${Date.now()}`);
+  postsData = await r.json();
+  renderList();
+  route();
 }
 
 function renderList() {
   const box = document.getElementById('list');
   box.innerHTML = '';
   if (!postsData || postsData.length === 0) {
-    box.innerHTML = "<div style='color:#aaa; text-align:center; padding:20px;'>暂无帖子</div>";
+    box.innerHTML = "<div style='color:#aaa;text-align:center;padding:30px'>暂无帖子</div>";
     return;
   }
   postsData.forEach(p => {
@@ -154,9 +124,9 @@ function renderList() {
     div.className = 'post';
     div.innerHTML = `
       <h3>${p.title}</h3>
-      <div class="info">${p.user} (${p.uid}) • ${p.time}</div>
-      <div class="content">${p.content.substring(0, 80)}...</div>
-      <button class="like" onclick="event.stopPropagation();like(${p.postId})">❤️ 点赞 ${p.like}</button>
+      <div class="info">${p.user} (${p.uid}) ${p.time}</div>
+      <div class="content">${p.content.substring(0,80)}...</div>
+      <button class="like" onclick="event.stopPropagation();like(${p.postId})">点赞 ${p.like}</button>
     `;
     div.onclick = () => goDetail(p.postId);
     box.appendChild(div);
@@ -188,9 +158,9 @@ function route() {
       listPage.classList.remove('active');
       detailPage.classList.add('active');
       detailTitle.textContent = p.title;
-      detailInfo.textContent = `${p.user} (${p.uid}) • ${p.time}`;
+      detailInfo.textContent = `${p.user} (${p.uid}) ${p.time}`;
       detailContent.textContent = p.content;
-      detailLikeBtn.textContent = `❤️ 点赞 ${p.like}`;
+      detailLikeBtn.textContent = `点赞 ${p.like}`;
     } else {
       goBack();
     }
@@ -198,14 +168,8 @@ function route() {
 }
 
 async function like(id) {
-  try {
-    const url = new URL(API, window.location.origin);
-    url.searchParams.append("act", "like");
-    url.searchParams.append("uid", uid);
-    url.searchParams.append("postId", id);
-    await fetch(url.toString());
-    loadPosts();
-  } catch (e) {}
+  await fetch(`${API}?act=like&uid=${uid}&postId=${id}`);
+  loadPosts();
 }
 
 function likeDetail() {
