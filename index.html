@@ -59,6 +59,16 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 .msg-item.me .bubble{background:rgba(60,120,255,.25);margin-left:auto}
 .uid{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px}
 .msg-item.me .uid{text-align:right}
+.admin-tag{
+  font-size:11px;color:#ff4444;background:rgba(255,68,68,.15);
+  padding:2px 6px;border-radius:6px;margin-left:6px;
+}
+.footer-admin{
+  position:absolute;left:16px;bottom:26px;
+  font-size:12px;color:#ff4444;
+  padding:4px 8px;background:rgba(255,68,68,.1);
+  border-radius:8px;display:none;
+}
 .input-box{
   position:absolute;left:140px;bottom:0;width:calc(100% - 140px);height:70px;
   display:flex;align-items:center;padding:0 16px;gap:10px;
@@ -110,6 +120,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 </div>
 <div class="msg-box" id="msgBox"></div>
 </div>
+<div class="footer-admin" id="footerAdmin">管理员账号</div>
 <div class="version version-text"></div>
 </div>
 <div class="input-box">
@@ -119,7 +130,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 </div>
 
 <script>
-let username="",uid="";
+let username="",uid="",isAdmin=false;
 const API = "/api";
 
 window.onload=()=>{
@@ -128,15 +139,16 @@ window.onload=()=>{
   if(u&&id){username=u;uid=id;loginSuccess();}
 };
 
-// 退出登录
 function logout(){
   localStorage.removeItem("username");
   localStorage.removeItem("uid");
   localStorage.removeItem("autoLogin");
-  username="";
-  uid="";
+  username="";uid="";isAdmin=false;
   document.getElementById("chatPage").style.display="none";
   document.getElementById("loginPage").style.display="block";
+  document.getElementById("footerAdmin").style.display = "none";
+  document.getElementById("clearBtn").style.display="none";
+  document.getElementById("delBtn").style.display="none";
 }
 
 async function login(){
@@ -161,11 +173,13 @@ async function reg(){
 function loginSuccess(){
   document.getElementById("loginPage").style.display="none";
   document.getElementById("chatPage").style.display="flex";
-  document.getElementById("userInfoText").innerText=username+" ("+uid+")";
-  if(username==="Ratstudio"){
-    document.getElementById("clearBtn").style.display="inline-block";
-    document.getElementById("delBtn").style.display="inline-block";
-  }
+  document.getElementById("userInfoText").innerText = username + " (" + uid + ")";
+
+  // 先隐藏管理员按钮和标识
+  document.getElementById("footerAdmin").style.display = "none";
+  document.getElementById("clearBtn").style.display="none";
+  document.getElementById("delBtn").style.display="none";
+
   loadMsg();
   setInterval(loadMsg, 2000);
 }
@@ -184,12 +198,26 @@ async function loadMsg(){
     let list=await r.json();
     let box=document.getElementById("msgBox");
     box.innerHTML="";
+
+    // 检测当前登录账号是否管理员
+    isAdmin = list.some(m => m.uid == uid && m.isAdmin);
+    if(isAdmin){
+      document.getElementById("footerAdmin").style.display = "block";
+      document.getElementById("clearBtn").style.display="inline-block";
+      document.getElementById("delBtn").style.display="inline-block";
+    }
+
     list.forEach(m=>{
       let div=document.createElement("div");
       div.className="msg-item "+(m.uid==uid?"me":"");
+      let adminLabel = m.isAdmin ? '<span class="admin-tag">管理员</span>' : '';
+
       div.innerHTML=`
         <div class="msg-wrap">
-          <div class="name-row"><div class="avatar"></div><div class="username">${m.user}</div></div>
+          <div class="name-row">
+            <div class="avatar"></div>
+            <div class="username">${m.user}${adminLabel}</div>
+          </div>
           <div class="bubble">${m.msg}</div>
           <div class="uid">UID:${m.uid}</div>
         </div>`;
