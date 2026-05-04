@@ -36,7 +36,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 .nav-item.active{color:#0066cc;background:#e8f0fe;}
 .nav-item:hover{background:#f1f5ff;}
 
-/* 主容器 —— 永久修复输入框被顶飞 */
+/* 主容器布局固定 */
 #app{
   position:fixed;
   top:56px;
@@ -54,11 +54,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   overflow-y:auto;
   background:#f9f9f9;
 }
+
+/* 消息外层容器 */
 .message{
-  display:flex;gap:10px;margin-bottom:16px;
-  max-width:68%;align-items:flex-start;
+  display:flex;
+  gap:10px;
+  margin-bottom:16px;
+  max-width:68%;
+  align-items:flex-start;
 }
-.message.me{margin-left:auto;flex-direction:row-reverse;}
+/* 自己消息：靠右 + 倒序 */
+.message.me{
+  margin-left:auto;
+  flex-direction:row-reverse;
+}
+
 .msg-avatar{
   width:34px;height:34px;border-radius:50%;
   background:#0066cc;color:#fff;
@@ -66,29 +76,56 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   font-size:14px;font-weight:bold;
   flex-shrink:0;
 }
-.msg-content{display:flex;flex-direction:column;}
-.msg-name{
-  font-size:12px;color:#888;margin-bottom:4px;
-  display:flex;align-items:center;gap:6px;
+
+.msg-content{
+  display:flex;
+  flex-direction:column;
+  /* 关键：限制最大宽度，不让气泡无限拉长 */
+  max-width:calc(100% - 50px);
 }
+
+/* 别人消息：名字居左 */
+.msg-name{
+  font-size:12px;
+  color:#888;
+  margin-bottom:4px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+/* 自己消息：名字整行居右 */
+.message.me .msg-name{
+  justify-content:flex-end;
+}
+
 .admin-tag{
   background:#ff4d4f;color:#fff;
   font-size:10px;padding:1px 4px;
   border-radius:3px;
 }
+
+/* 气泡关键修复：宽度自适应，不被名字撑长 */
 .msg-bubble{
-  padding:10px 14px;background:#fff;border:1px solid #e5e6eb;
-  border-radius:12px;font-size:14px;line-height:1.5;
-  white-space:normal;word-break:break-all;
+  padding:10px 14px;
+  background:#fff;
+  border:1px solid #e5e6eb;
+  border-radius:12px;
+  font-size:14px;
+  line-height:1.5;
+  white-space:normal;
+  word-break:break-all;
+  width:fit-content;
+  max-width:100%;
 }
 .message.me .msg-bubble{
   background:#0066cc;color:#fff;border-color:#0066cc;
 }
+
 .withdraw-btn{
   font-size:12px;color:#ff4d4f;background:none;border:none;cursor:pointer;
 }
 
-/* 输入框区域 —— 固定在底部，永不消失 */
+/* 输入栏固定底部 */
 #inputBar{
   height:72px;
   background:#fff;
@@ -127,8 +164,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </head>
 
 <body>
-
-<!-- 顶部导航 -->
 <div class="top-nav">
   <div class="nav-left" id="userHead" style="display:none">
     <div class="avatar" id="topAvatar">U</div>
@@ -145,7 +180,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   </div>
 </div>
 
-<!-- 主界面 → 彻底修复布局 -->
 <div id="app">
   <div id="loginPage" class="login-box">
     <input id="user" placeholder="账号">
@@ -164,22 +198,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </div>
 
 <script>
-// ==================== 配置 ====================
-const ADMIN_UIDS = [1]; // 管理员UID
+const ADMIN_UIDS = [1];
 const API = '/api';
 let username = '', uid = '';
 
-// 头像首字母
 function getAvatarChar(name){
   return name ? name.charAt(0).toUpperCase() : 'U';
 }
-
-// 是否管理员
 function isAdmin(uid){
   return ADMIN_UIDS.includes(Number(uid));
 }
 
-// ==================== 初始化 ====================
 window.onload = () => {
   let u = localStorage.getItem('username');
   let id = localStorage.getItem('uid');
@@ -191,7 +220,6 @@ window.onload = () => {
   setInterval(loadMsg, 2000);
 };
 
-// 显示聊天
 function showChat(){
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('chatPage').style.display = 'flex';
@@ -202,7 +230,6 @@ function showChat(){
   loadMsg();
 }
 
-// ==================== 登录注册 ====================
 async function login(){
   let u = document.getElementById('user').value.trim();
   let p = document.getElementById('pwd').value.trim();
@@ -220,7 +247,6 @@ async function reg(){
   alert(await res.text() === 'ok' ? '成功' : '失败');
 }
 
-// ==================== 发送消息 ====================
 async function sendMsg(){
   let txt = document.getElementById('msgInput').value.trim();
   if(!txt)return;
@@ -229,7 +255,6 @@ async function sendMsg(){
   loadMsg();
 }
 
-// ==================== 加载消息（带管理员+撤回） ====================
 async function loadMsg(){
   let res = await fetch(`${API}/msg`);
   let list = await res.json();
@@ -257,7 +282,6 @@ async function loadMsg(){
   if(auto) box.scrollTop = box.scrollHeight;
 }
 
-// ==================== 撤回消息 ====================
 async function withdraw(id){
   if(!confirm('确定撤回？')) return;
   await fetch(`${API}?act=deleteMsg&uid=${uid}&targetId=${id}`);
