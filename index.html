@@ -8,7 +8,7 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
-/* 顶部导航 —— 手机端彻底修复不竖排 */
+/* 顶部导航 —— 手机端不挤压 */
 .top-nav{
   width:100%;height:56px;background:#fff;
   border-bottom:1px solid #e5e6eb;
@@ -30,14 +30,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 }
 .user-info-mini .name{font-weight:bold;color:#333;font-size:13px;}
 
+/* 导航文字不换行 */
 .nav-right{
   display:flex;gap:6px;align-items:center;
-  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
+  flex-wrap:nowrap;overflow-x:auto;
+  scrollbar-width:none;
 }
 .nav-right::-webkit-scrollbar{display:none}
 .nav-item{
   font-size:13px;color:#666;cursor:pointer;
-  padding:6px 8px;border-radius:8px;transition:0.2s;
+  padding:6px 8px;border-radius:6px;transition:0.2s;
   white-space:nowrap;flex-shrink:0;
 }
 .nav-item.active{color:#0066cc;background:#e8f0fe;}
@@ -49,11 +51,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 }
 
 #msgBox{
-  flex:1;padding:20px 16px;overflow-y:auto;background:#f9f9f9;
+  flex:1;padding:16px;overflow-y:auto;background:#f9f9f9;
 }
 
 .message{
-  display:flex;gap:8px;margin-bottom:14px;
+  display:flex;gap:8px;margin-bottom:12px;
   max-width:75%;align-items:flex-start;
 }
 .message.me{
@@ -74,16 +76,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 }
 
 .msg-name{
-  font-size:12px;color:#888;margin-bottom:4px;
-  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:#888;margin-bottom:3px;
+  display:flex;align-items:center;gap:4px;
 }
 .message.me .msg-name{
   justify-content:flex-end;
 }
 
 .msg-bubble{
-  padding:9px 12px;background:#fff;border:1px solid #e5e6eb;
-  border-radius:12px;font-size:14px;line-height:1.5;
+  padding:8px 12px;background:#fff;border:1px solid #e5e6eb;
+  border-radius:10px;font-size:14px;line-height:1.4;
   width:fit-content;max-width:100%;word-break:break-all;
 }
 .message.me .msg-bubble{
@@ -91,11 +93,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   margin-left:auto;
 }
 
-.admin-tag{background:#ff4d4f;color:#fff;font-size:10px;padding:1px 4px;border-radius:3px}
-.withdraw-btn{font-size:12px;color:#ff4d4f;background:none;border:none;cursor:pointer}
+.admin-tag{background:#ff4d4f;color:#fff;font-size:9px;padding:1px 3px;border-radius:2px}
+.withdraw-btn{font-size:11px;color:#ff4d4f;background:none;border:none;cursor:pointer}
 
 #inputBar{
-  height:70px;background:#fff;border-top:1px solid #e5e6eb;
+  height:68px;background:#fff;border-top:1px solid #e5e6eb;
   display:flex;align-items:center;gap:10px;padding:0 16px;flex-shrink:0;
 }
 #msgInput{
@@ -109,7 +111,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 }
 
 .login-box{
-  width:90%;max-width:360px;margin:60px auto;padding:24px;
+  width:90%;max-width:360px;margin:40px auto;padding:24px;
   background:#fff;border:1px solid #e5e6eb;border-radius:12px;
 }
 .login-box input{
@@ -118,12 +120,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 }
 .login-box button{
   width:100%;height:42px;background:#0066cc;color:#fff;
-  border:none;border-radius:10px;cursor:pointer;margin-top:8px;font-size:14px;
+  border:none;border-radius:10px;cursor:pointer;margin-top:6px;font-size:14px;
 }
 .login-box button:last-of-type{background:#f1f2f3;color:#333;}
-
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-thumb{background:#dcdcdc;border-radius:3px}
 </style>
 </head>
 
@@ -139,8 +138,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   <div class="nav-right">
     <div class="nav-item active">聊天室</div>
     <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
-    <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
-    <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
+    <div class="nav-item" onclick="location.href='history.html'">日志</div>
+    <div class="nav-item" onclick="location.href='plan.html'">规划</div>
   </div>
 </div>
 
@@ -187,29 +186,32 @@ function showChat(){
   loadMsg();
 }
 
-// 登录
-async function login(){
-  let u=user.value,p=pwd.value;
-  if(!u||!p)return alert('请输入账号密码');
-  let res=await fetch(`${API}/login?user=${u}&pwd=${p}`);
-  let t=await res.text();
-  if(!t||t==='fail')return alert('登录失败');
-  localStorage.setItem('username',u);
-  localStorage.setItem('uid',t);
-  location.reload();
-}
-
-// 注册 —— 修复：自动生成唯一UID，不再都是3
+// 修复注册UID重复
 async function reg(){
   let u=user.value.trim(), p=pwd.value.trim();
   if(!u||!p)return alert('请输入账号密码');
-  let res=await fetch(`${API}/reg?user=${u}&pwd=${p}`);
-  let text=await res.text();
-  if(text==='ok'){
-    alert('注册成功，请登录');
-  }else{
-    alert('注册失败：'+text);
-  }
+  try {
+    let res = await fetch(`${API}/reg?user=${u}&pwd=${p}`);
+    let text = await res.text();
+    if(text.startsWith('uid:')){
+      localStorage.setItem('username', u);
+      localStorage.setItem('uid', text.replace('uid:',''));
+      alert('注册成功');
+      location.reload();
+    }else{
+      alert('注册失败：'+text);
+    }
+  }catch(e){alert('网络错误')}
+}
+
+async function login(){
+  let u=user.value.trim(), p=pwd.value.trim();
+  let res = await fetch(`${API}/login?user=${u}&pwd=${p}`);
+  let t = await res.text();
+  if(!t || t==='fail')return alert('登录失败');
+  localStorage.setItem('username',u);
+  localStorage.setItem('uid',t);
+  location.reload();
 }
 
 async function sendMsg(){
