@@ -79,35 +79,27 @@ const API = "/api/chat";
 window.onload = function () {
   let u = localStorage.getItem("username");
   let id = localStorage.getItem("uid");
-  if (u && id) {
-    username = u;
-    uid = id;
-    loginSuccess();
-  }
+  if (u && id) { username = u; uid = id; loginSuccess(); }
 };
 
 async function login() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  let res = await fetch(API + "?act=login&user=" + encodeURIComponent(user) + "&pwd=" + encodeURIComponent(pwd));
-  let t = await res.text();
-  if (!t) {
-    alert("登录失败");
-    return;
-  }
+  let r = await fetch(`${API}?act=login&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
+  let t = await r.text();
+  if (!t) { alert("登录失败"); return; }
   localStorage.setItem("username", user);
   localStorage.setItem("uid", t);
-  username = user;
-  uid = t;
+  username = user; uid = t;
   loginSuccess();
 }
 
 async function reg() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  let res = await fetch(API + "?act=reg&user=" + encodeURIComponent(user) + "&pwd=" + encodeURIComponent(pwd));
-  let t = await res.text();
-  alert(t === "ok" ? "注册成功" : "账号已存在");
+  let r = await fetch(`${API}?act=reg&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
+  let t = await r.text();
+  alert(t==="ok" ? "注册成功" : "已存在");
 }
 
 function loginSuccess() {
@@ -120,46 +112,41 @@ function loginSuccess() {
     document.getElementById("bottomAdminTip").style.display = "block";
   }
   loadMsg();
-  setInterval(loadMsg, 2500);
+  setInterval(loadMsg, 2000);
 }
 
 async function sendMsg() {
   let txt = document.getElementById("msgInput").value;
-  if (!txt.trim()) return;
-  await fetch(API + "?act=send&uid=" + uid + "&msg=" + encodeURIComponent(txt));
+  if (!txt) return;
+  await fetch(`${API}?act=send&uid=${uid}&msg=${encodeURIComponent(txt)}`);
   document.getElementById("msgInput").value = "";
   loadMsg();
 }
 
 async function loadMsg() {
-  let res = await fetch(API + "?act=msg&_t=" + Date.now());
-  let list = await res.json();
-  let box = document.getElementById("msgBox");
-  box.innerHTML = "";
-  list.forEach(m => {
-    let div = document.createElement("div");
-    div.className = "msg-item " + (m.uid == uid ? "me" : "");
-    let adminBadge = m.user === ADMIN ? '<span class="admin-tag">管理员</span>' : "";
-    div.innerHTML = `
-      <div class="msg-wrap">
-        <div class="name-row"><div class="avatar"></div><div class="username">${m.user}</div>${adminBadge}</div>
-        <div class="bubble">${m.msg}</div>
-        <div class="uid">UID:${m.uid}</div>
-      </div>`;
-    box.appendChild(div);
-  });
-  box.scrollTop = box.scrollHeight;
+  try {
+    let r = await fetch(`${API}?act=msg&_=${Date.now()}`);
+    let list = await r.json();
+    let box = document.getElementById("msgBox");
+    box.innerHTML = "";
+    list.forEach(m => {
+      let div = document.createElement("div");
+      div.className = "msg-item " + (m.uid == uid ? "me" : "");
+      let adminBadge = m.user === ADMIN ? '<span class="admin-tag">管理员</span>' : "";
+      div.innerHTML = `
+        <div class="msg-wrap">
+          <div class="name-row"><div class="avatar"></div><div class="username">${m.user}</div>${adminBadge}</div>
+          <div class="bubble">${m.msg}</div>
+          <div class="uid">UID:${m.uid}</div>
+        </div>`;
+      box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+  } catch(e){}
 }
 
-async function clearAllMsg() {
-  await fetch(API + "?act=clear&uid=" + uid);
-  loadMsg();
-}
-
-async function deleteLastMsg() {
-  await fetch(API + "?act=delete&uid=" + uid);
-  loadMsg();
-}
+async function clearAllMsg() { await fetch(`${API}?act=clear&uid=${uid}`); loadMsg(); }
+async function deleteLastMsg() { await fetch(`${API}?act=delete&uid=${uid}`); loadMsg(); }
 </script>
 </body>
 </html>
