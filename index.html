@@ -89,8 +89,8 @@ window.onload = function () {
 async function login() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  let r = await fetch(API + "?act=login&user=" + encodeURIComponent(user) + "&pwd=" + encodeURIComponent(pwd));
-  let t = await r.text();
+  let res = await fetch(API + "?act=login&user=" + encodeURIComponent(user) + "&pwd=" + encodeURIComponent(pwd));
+  let t = await res.text();
   if (!t) {
     alert("登录失败");
     return;
@@ -105,9 +105,9 @@ async function login() {
 async function reg() {
   let user = document.getElementById("user").value;
   let pwd = document.getElementById("pwd").value;
-  let r = await fetch(API + "?act=reg&user=" + encodeURIComponent(user) + "&pwd=" + encodeURIComponent(pwd));
-  let t = await r.text();
-  alert(t === "ok" ? "注册成功" : "已存在");
+  let res = await fetch(API + "?act=reg&user=" + encodeURIComponent(user) + "&pwd=" + encodeURIComponent(pwd));
+  let t = await res.text();
+  alert(t === "ok" ? "注册成功" : "账号已存在");
 }
 
 function loginSuccess() {
@@ -120,19 +120,20 @@ function loginSuccess() {
     document.getElementById("bottomAdminTip").style.display = "block";
   }
   loadMsg();
+  setInterval(loadMsg, 2500);
 }
 
 async function sendMsg() {
   let txt = document.getElementById("msgInput").value;
-  if (!txt) return;
+  if (!txt.trim()) return;
   await fetch(API + "?act=send&uid=" + uid + "&msg=" + encodeURIComponent(txt));
   document.getElementById("msgInput").value = "";
   loadMsg();
 }
 
 async function loadMsg() {
-  let r = await fetch(API + "?act=msg&_=" + Date.now());
-  let list = await r.json();
+  let res = await fetch(API + "?act=msg&_t=" + Date.now());
+  let list = await res.json();
   let box = document.getElementById("msgBox");
   box.innerHTML = "";
   list.forEach(m => {
