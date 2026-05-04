@@ -19,11 +19,11 @@ const VERSION_CONFIG = {
   ]
 };
 
-// 自动加载版本 + 自动渲染日志
-document.addEventListener('DOMContentLoaded', () => {
+// 自动加载版本 + 日志
+document.addEventListener('DOMContentLoaded', function () {
   // 自动更新版本号
   document.querySelectorAll('.version-text').forEach(el => {
-    el.textContent = VERSION_CONFIG.current;
+    el.innerText = VERSION_CONFIG.current;
   });
 
   // 自动渲染更新日志
