@@ -13,7 +13,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 .item:hover,.item.active{background:rgba(60,130,255,.25);color:#fff;border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35)}
 .main{flex:1;position:relative}
 .top{background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)}
-.add{width:32px;height:32px;background:rgba(60,120,255,.3);border:none;border-radius:50%;color:#fff;font-size:18px;cursor:pointer}
+.add{width:32px;height:32px;background:rgba(60,130,255,.3);border:none;border-radius:50%;color:#fff;font-size:18px;cursor:pointer}
 .page{display:none;height:630px;overflow-y:auto;padding:20px}
 .page.active{display:block}
 .post{background:rgba(255,255,255,.07);border-radius:18px;padding:16px;margin-bottom:12px;color:#fff;border:1px solid rgba(255,255,255,.12);cursor:pointer}
@@ -75,9 +75,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 </div>
 </div>
 
-<!-- 自动加载版本号 -->
 <script src="version.js"></script>
-
 <script>
 const API = "/api";
 const user = localStorage.getItem('username');
@@ -93,34 +91,72 @@ if (!user || !uid) {
 function showPost() { document.getElementById('mask').style.display = 'grid' }
 function hidePost() { document.getElementById('mask').style.display = 'none' }
 
+// ======================
+// 修复发布接口（完全按照聊天成功逻辑）
+// ======================
 async function createPost() {
-  const title = document.getElementById('title').value;
-  const content = document.getElementById('content').value;
-  if (!title || !content) { alert('不能为空'); return; }
-  await fetch(API + "?act=createPost&uid=" + uid + "&title=" + encodeURIComponent(title) + "&content=" + encodeURIComponent(content));
-  hidePost();
-  loadPosts();
+  const title = document.getElementById('title').value.trim();
+  const content = document.getElementById('content').value.trim();
+  if (!title || !content) {
+    alert('标题和内容不能为空');
+    return;
+  }
+
+  try {
+    const url = new URL(API, window.location.origin);
+    url.searchParams.append("act", "createPost");
+    url.searchParams.append("uid", uid);
+    url.searchParams.append("title", title);
+    url.searchParams.append("content", content);
+
+    const res = await fetch(url.toString());
+    const text = await res.text();
+
+    if (text === "ok") {
+      console.log("发布成功");
+      hidePost();
+      loadPosts();
+      document.getElementById('title').value = '';
+      document.getElementById('content').value = '';
+    } else {
+      alert("发布失败：" + text);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("发布异常");
+  }
 }
 
 async function loadPosts() {
-  let r = await fetch(API + "?act=posts&_=" + Date.now());
-  let list = await r.json();
-  postsData = list;
-  renderList();
-  route();
+  try {
+    const url = new URL(API, window.location.origin);
+    url.searchParams.append("act", "posts");
+    url.searchParams.append("_", Date.now());
+
+    const r = await fetch(url.toString());
+    postsData = await r.json();
+    renderList();
+    route();
+  } catch (e) {
+    console.error("加载帖子失败", e);
+  }
 }
 
 function renderList() {
   const box = document.getElementById('list');
   box.innerHTML = '';
+  if (!postsData || postsData.length === 0) {
+    box.innerHTML = "<div style='color:#aaa; text-align:center; padding:20px;'>暂无帖子</div>";
+    return;
+  }
   postsData.forEach(p => {
     const div = document.createElement('div');
     div.className = 'post';
     div.innerHTML = `
       <h3>${p.title}</h3>
-      <div class="info">${p.user} (${p.uid}) ${p.time}</div>
-      <div class="content">${p.content.substring(0,80)}...</div>
-      <button class="like" onclick="event.stopPropagation();like(${p.postId})">点赞 ${p.like}</button>
+      <div class="info">${p.user} (${p.uid}) • ${p.time}</div>
+      <div class="content">${p.content.substring(0, 80)}...</div>
+      <button class="like" onclick="event.stopPropagation();like(${p.postId})">❤️ 点赞 ${p.like}</button>
     `;
     div.onclick = () => goDetail(p.postId);
     box.appendChild(div);
@@ -152,9 +188,9 @@ function route() {
       listPage.classList.remove('active');
       detailPage.classList.add('active');
       detailTitle.textContent = p.title;
-      detailInfo.textContent = `${p.user} (${p.uid}) ${p.time}`;
+      detailInfo.textContent = `${p.user} (${p.uid}) • ${p.time}`;
       detailContent.textContent = p.content;
-      detailLikeBtn.textContent = `点赞 ${p.like}`;
+      detailLikeBtn.textContent = `❤️ 点赞 ${p.like}`;
     } else {
       goBack();
     }
@@ -162,8 +198,14 @@ function route() {
 }
 
 async function like(id) {
-  await fetch(API + "?act=like&uid=" + uid + "&postId=" + id);
-  loadPosts();
+  try {
+    const url = new URL(API, window.location.origin);
+    url.searchParams.append("act", "like");
+    url.searchParams.append("uid", uid);
+    url.searchParams.append("postId", id);
+    await fetch(url.toString());
+    loadPosts();
+  } catch (e) {}
 }
 
 function likeDetail() {
