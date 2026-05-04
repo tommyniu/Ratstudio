@@ -165,10 +165,10 @@ let uid = '';
 function ava(n){ return n ? n[0].toUpperCase() : 'U'; }
 function admin(id){ return ADMIN.includes(Number(id)); }
 
-// 【关键修复】打开自己主页（用相对路径，不跨域）
+// 【修复】绝对路径跳转，PC/手机都有效
 function goMyHome(){
   if(!uid) return alert('请先登录');
-  location.href = 'personal.html?uid=' + uid;
+  window.location.href = '/personal.html?uid=' + uid;
 }
 
 window.onload = function(){
@@ -176,7 +176,7 @@ window.onload = function(){
   uid = localStorage.getItem('uid') || '';
   if(me && uid){
     showChat();
-    // 头像绑定点击事件（这里绑定，而不是onclick写死）
+    // 正确绑定点击事件
     document.getElementById('topAvatar').onclick = goMyHome;
   }
   setInterval(loadMsg, 2000);
@@ -240,7 +240,7 @@ async function loadMsg(){
     let isMe = o.uid == uid;
     b.innerHTML += `
     <div class="message ${isMe ? 'me' : ''}">
-      <div class="msg-avatar" onclick="location.href='personal.html?uid=${o.uid}'">${ava(o.user)}</div>
+      <div class="msg-avatar" onclick="window.location.href='/personal.html?uid=${o.uid}'">${ava(o.user)}</div>
       <div class="msg-content">
         <div class="msg-name">${o.user} ${admin(o.uid) ? '<span class=admin-tag>管理员</span>' : ''} ${(isMe || admin(uid)) ? `<button onclick="withdraw(${o.id})" class="withdraw-btn">撤回</button>` : ''}</div>
         <div class="msg-bubble">${o.msg}</div>
