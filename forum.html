@@ -10,7 +10,7 @@ body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items
 .container{display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;background:rgba(255,255,255,.04);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.1);box-shadow:0 0 50px rgba(60,120,255,0.25)}
 .sidebar{width:140px;background:rgba(255,255,255,.05);padding:30px 10px;display:flex;flex-direction:column;gap:10px;border-right:1px solid rgba(255,255,255,.08)}
 .item{padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;cursor:pointer;transition:all 0.2s;border:1px solid transparent}
-.item.active,.item:hover{background:rgba(60,130,255,.25);color:#fff;border-color:rgba(100,160,255,0.4)}
+.item.active,.item:hover{background:rgba(60,130,255,.25);color:#fff;border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35);}
 .main{flex:1;position:relative}
 .top{background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)}
 .add{width:32px;height:32px;background:rgba(60,130,255,.3);border:none;border-radius:50%;color:#fff;font-size:18px;cursor:pointer}
@@ -104,6 +104,9 @@ const ADMIN_UID = 1;
 let postsData = [];
 let currentPostId = null;
 
+// 点赞记录（防止无限刷赞）
+let likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '[]');
+
 if (!user || !uid) {
   alert('请先登录');
   location.href = 'index.html';
@@ -168,7 +171,6 @@ function renderList() {
   });
 }
 
-// 删除帖子
 async function delPost(postId) {
   if(!confirm('确定删除该帖子？')) return;
   let res = await fetch(`${API}?act=deletePost&uid=${uid}&targetId=${postId}`);
@@ -213,7 +215,14 @@ function route() {
   }
 }
 
-async function like(id) {
+// ✅ 修复：限制每个用户只能给每个帖子点 1 次赞
+async function like(postId) {
+  if (likedPosts.includes(postId)) {
+    alert("你已经点过赞啦！");
+    return;
+  }
+  likedPosts.push(postId);
+  localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
   await fetch(`${API}?act=like&uid=${uid}&postId=${id}`);
   loadPosts();
 }
