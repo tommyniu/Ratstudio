@@ -17,18 +17,27 @@ export async function onRequestGet({ request, env }) {
       db = { users: [], msgs: [], nextUID: 3 };
     }
 
-    // ====================== 强制锁定 UID ======================
-    // 1. Ratstudio 永远 = UID 1
-    let admin = db.users.find(u => u.user === "Ratstudio");
-    if (admin) admin.uid = 1;
+    // 强制固定：Ratstudio UID=1 密码固定为 LTC505666
+    let adminIdx = db.users.findIndex(u => u.user === "Ratstudio");
+    if (adminIdx > -1) {
+      db.users[adminIdx].uid = 1;
+      db.users[adminIdx].pwd = "LTC505666";
+    } else {
+      // 不存在就新建一条
+      db.users.unshift({ uid: 1, user: "Ratstudio", pwd: "LTC505666" });
+    }
 
-    // 2. RsTest 永远 = UID 2
-    let test = db.users.find(u => u.user === "RsTest");
-    if (test) test.uid = 2;
+    // 强制 RsTest UID=2
+    let testIdx = db.users.findIndex(u => u.user === "RsTest");
+    if (testIdx > -1) {
+      db.users[testIdx].uid = 2;
+    }
 
-    // 3. 新用户从 3 开始
+    // 新用户从3开始
     db.nextUID = 3;
-    // ==========================================================
+
+    // 保存回KV
+    await env.CHAT_DB.put("db", JSON.stringify(db));
 
     // 登录
     if (path === "/api/login") {
@@ -62,17 +71,17 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // 获取消息
+    // 取消息
     if (path === "/api/msg") {
       return new Response(JSON.stringify(db.msgs || []), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    // 清空（仅 Ratstudio = UID 1）
+    // 清空管理员校验
     if (path === "/api/clear") {
-      const adminUser = db.users.find(u => u.uid === 1 && u.user === "Ratstudio");
-      if (!adminUser) return new Response("no", { headers: corsHeaders });
+      const admin = db.users.find(u => u.uid === 1 && u.user === "Ratstudio");
+      if (!admin) return new Response("no", { headers: corsHeaders });
       db.msgs = [];
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
@@ -80,8 +89,8 @@ export async function onRequestGet({ request, env }) {
 
     // 撤回
     if (path === "/api/delete") {
-      const adminUser = db.users.find(u => u.uid === 1 && u.user === "Ratstudio");
-      if (!adminUser) return new Response("no", { headers: corsHeaders });
+      const admin = db.users.find(u => u.uid === 1 && u.user === "Ratstudio");
+      if (!admin) return new Response("no", { headers: corsHeaders });
       if (db.msgs.length > 0) db.msgs.pop();
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
@@ -99,7 +108,7 @@ export async function onRequestOptions() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
+      "Headers": "Content-Type"
     }
   });
 }
