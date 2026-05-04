@@ -1,3 +1,5 @@
+import { KVNamespace } from "@cloudflare/workers-types";
+
 export async function onRequestGet({ request, env }) {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -5,12 +7,16 @@ export async function onRequestGet({ request, env }) {
     "Access-Control-Allow-Headers": "Content-Type",
   };
 
+  // 直接写死你的 KV ID
+  const KV_ID = "9cddec80df2d4d05805953784093a7bf";
+  const dbKV = env[KV_ID];
+
   try {
     const url = new URL(request.url);
     const act = url.searchParams.get("act");
 
     async function getDB() {
-      const val = await env.CHAT_DB.get("data");
+      const val = await dbKV.get("data");
       if (!val) {
         return {
           users: [],
@@ -24,7 +30,7 @@ export async function onRequestGet({ request, env }) {
     }
 
     async function setDB(db) {
-      await env.CHAT_DB.put("data", JSON.stringify(db));
+      await dbKV.put("data", JSON.stringify(db));
     }
 
     const db = await getDB();
