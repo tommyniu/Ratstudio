@@ -71,6 +71,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   background:#0066cc;color:#fff;border:none;border-radius:10px;
   padding:12px 18px;cursor:pointer;font-size:14px;width:100%;
 }
+/* 调试用，正式可删 */
+.debug{margin-top:10px;font-size:10px;color:red;word-break:break-all;}
 </style>
 </head>
 
@@ -109,6 +111,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
     </div>
 
     <button class="back-btn" onclick="history.back()">← 返回</button>
+    <div class="debug" id="debug"></div>
   </div>
 </div>
 
@@ -117,17 +120,17 @@ const API = '/api';
 function getAvatarChar(n){ return n ? n[0].toUpperCase() : 'U'; }
 
 window.onload = async function(){
-  // 1. 取URL里的uid（核心：看谁的主页就拿谁的uid）
   const urlParams = new URLSearchParams(window.location.search);
   const targetUid = urlParams.get('uid');
+  const debugEl = document.getElementById('debug');
 
   if(!targetUid){
-    alert('参数错误，返回聊天页');
+    debugEl.innerText = "错误：无uid参数";
     window.location.href = '/index.html';
     return;
   }
 
-  // 2. 顶部显示当前登录用户（不变）
+  // 顶部当前用户
   const myName = localStorage.getItem('username') || '';
   const myUid = localStorage.getItem('uid') || '';
   if(myName && myUid){
@@ -136,28 +139,46 @@ window.onload = async function(){
     document.getElementById('miniUid').innerText = myUid;
   }
 
-  // 3. 【关键】纯动态获取目标用户信息，绝不写死
+  // 1. 调试：打印请求地址
+  const reqUrl = `${API}/getUser?uid=${targetUid}`;
+  debugEl.innerText = "请求：" + reqUrl;
+
   let userName = '';
   try {
-    let res = await fetch(`${API}/getUser?uid=${targetUid}`);
-    let data = await res.json();
-    if(data && data.username){
-      userName = data.username;
+    // 2. 发请求
+    const res = await fetch(reqUrl);
+    const text = await res.text(); // 先拿原始响应，别直接json
+    debugEl.innerText += "\n响应原始：" + text;
+
+    let data;
+    try{
+      data = JSON.parse(text);
+      debugEl.innerText += "\n解析后：" + JSON.stringify(data);
+    }catch(e){
+      debugEl.innerText += "\n解析JSON失败";
+    }
+
+    // 3. 尝试多种常见字段名（后端可能写错）
+    if(data){
+      userName = data.username || data.user || data.name || data.nickname || '';
     }
   }catch(e){
-    userName = '未知用户';
+    debugEl.innerText += "\n请求异常：" + e.message;
   }
 
-  // 4. 获取统计
+  // 4. 兜底
+  if(!userName) userName = '未知用户';
+
+  // 5. 统计
   let like = 0, post = 0;
   try {
-    let res = await fetch(`${API}/userStat?uid=${targetUid}`);
-    let stat = await res.json();
+    const res = await fetch(`${API}/userStat?uid=${targetUid}`);
+    const stat = await res.json();
     like = stat.like || 0;
     post = stat.post || 0;
   }catch(e){}
 
-  // 5. 渲染（完全动态）
+  // 6. 渲染
   document.getElementById('avatarLetter').innerText = getAvatarChar(userName);
   document.getElementById('username').innerText = userName;
   document.getElementById('uid').innerText = 'UID：' + targetUid;
