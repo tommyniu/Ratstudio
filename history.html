@@ -5,75 +5,106 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>更新日志 - RatStudio的小站</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items:center;justify-content:center;height:100vh}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
+
+.top-nav{
+  width:100%;height:56px;background:#fff;
+  border-bottom:1px solid #e5e6eb;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;position:fixed;top:0;left:0;z-index:999;
+}
+.nav-left{display:flex;align-items:center;gap:12px;}
+.avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:#0066cc;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:bold;font-size:16px;
+}
+.user-info-mini{
+  display:flex;flex-direction:column;
+  font-size:13px;color:#666;line-height:1.2;
+}
+.user-info-mini .name{font-weight:bold;color:#333;font-size:14px;}
+
+.nav-right{display:flex;gap:24px;align-items:center;}
+.nav-item{
+  font:14px/1 sans-serif;color:#666;cursor:pointer;
+  padding:8px 12px;border-radius:8px;transition:0.2s;
+}
+.nav-item.active{color:#0066cc;background:#e8f0fe;}
+.nav-item:hover{background:#f1f5ff;}
+
 .container{
-  display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;
-  background:rgba(255,255,255,.04);backdrop-filter:blur(30px);
-  border:1px solid rgba(255,255,255,.1);
-  box-shadow:0 0 50px rgba(60,120,255,0.25);
+  width:100%;height:calc(100% - 56px);
+  margin-top:56px;padding:30px;overflow-y:auto;
 }
-.sidebar{
-  width:140px;background:rgba(255,255,255,.05);padding:30px 10px;
-  display:flex;flex-direction:column;gap:10px;
-  border-right:1px solid rgba(255,255,255,.08);
+.log-card{
+  background:#fff;border:1px solid #e5e6eb;
+  border-radius:12px;padding:24px;margin-bottom:20px;
 }
-.item{
-  padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;
-  cursor:pointer;transition:all 0.2s;border:1px solid transparent;
+.log-card h3{color:#0066cc;margin-bottom:12px;font-size:16px;}
+.log-card li{
+  margin-left:20px;line-height:1.7;margin-bottom:6px;color:#555;
 }
-.item:hover,.item.active{
-  background:rgba(60,130,255,.25);color:#fff;
-  border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35);
-}
-.main{flex:1;position:relative;overflow:auto;}
-.top{
-  background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;
-  display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px solid rgba(255,255,255,.08);
-}
-.content{
-  padding:30px;
-  color:#fff;
-  height:100%;
-  overflow-y:auto;
-}
-h2{
-  margin-bottom:20px;
-}
-.item-log{
-  margin-bottom:12px;
-  line-height:1.5;
-}
-.ver{
-  color:#8cf;
-  font-weight:600;
-}
-.date{
-  color:#aaa;
-  font-size:12px;
-  margin-left:10px;
-}
-.version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#dcdcdc;border-radius:3px}
 </style>
 </head>
 <body>
+<div class="top-nav">
+  <div class="nav-left" id="userHead" style="display:none">
+    <div class="avatar" id="topAvatar">U</div>
+    <div class="user-info-mini">
+      <div class="name" id="miniName">用户名</div>
+      <div>UID: <span id="miniUid">1</span></div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-item" onclick="location.href='index.html'">聊天室</div>
+    <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
+    <div class="nav-item active">更新日志</div>
+    <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
+  </div>
+</div>
+
 <div class="container">
-<div class="sidebar">
-<div class="item" onclick="location.href='index.html'">聊天室</div>
-<div class="item" onclick="location.href='forum.html'">论坛</div>
-<div class="item active">更新日志</div>
-<div class="item" onclick="location.href='plan.html'">开发规划</div>
+  <div class="log-card">
+    <h3>V1.3.4 界面改版</h3>
+    <ul>
+      <li>全站改为顶部导航布局，移除左侧旧侧边栏</li>
+      <li>左上角增加用户头像（昵称首字母）、昵称、UID</li>
+      <li>整体采用B站风格小圆角，界面更简洁美观</li>
+      <li>修复聊天室消息尾部多余空白问题</li>
+      <li>移除旧版UI切换，统一新版现代界面</li>
+    </ul>
+  </div>
+  <div class="log-card">
+    <h3>V1.2.3 功能完善</h3>
+    <ul>
+      <li>新增论坛发帖、删除、点赞功能</li>
+      <li>完善登录注册数据存储</li>
+      <li>优化聊天自动滚动</li>
+    </ul>
+  </div>
 </div>
-<div class="main">
-<div class="top"><span>更新日志</span></div>
-<div class="content">
-<h2>更新日志</h2>
-<div id="historyList"></div>
-</div>
-<div class="version version-text"></div>
-</div>
-</div>
-<script src="version.js"></script>
+
+<script>
+function getAvatarChar(name){
+  if(!name) return 'U';
+  return name.charAt(0).toUpperCase();
+}
+window.onload = () => {
+  let u = localStorage.getItem('username');
+  let id = localStorage.getItem('uid');
+  if(u && id){
+    document.getElementById('userHead').style.display = 'flex';
+    document.getElementById('miniName').innerText = u;
+    document.getElementById('miniUid').innerText = id;
+    document.getElementById('topAvatar').innerText = getAvatarChar(u);
+  }
+};
+</script>
 </body>
 </html>
