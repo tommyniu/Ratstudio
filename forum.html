@@ -90,8 +90,11 @@ async function createPost() {
   if (!title || !content) { alert('标题和内容不能为空'); return; }
 
   try {
-    let res = await fetch(`${API}?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
-    let txt = await res.text();
+    // 直接拼接参数，避免URL对象异常
+    const url = `${API}?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`;
+    const res = await fetch(url);
+    const txt = await res.text();
+
     if (txt === "ok") {
       hidePost();
       loadPosts();
@@ -101,12 +104,13 @@ async function createPost() {
       alert('发布失败：' + txt);
     }
   } catch(e) {
-    alert('发布异常，请重试');
+    console.error(e);
+    alert('发布异常：' + e.message);
   }
 }
 
 async function loadPosts() {
-  let r = await fetch(`${API}?act=posts&_=${Date.now()}`);
+  const r = await fetch(`${API}?act=posts&_=${Date.now()}`);
   postsData = await r.json();
   renderList();
   route();
