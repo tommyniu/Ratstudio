@@ -5,304 +5,212 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>聊天室 - RatStudio的小站</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:linear-gradient(135deg,#0f1419,#0a0c12);display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
+/* 全局重置 */
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Robintosh, sans-serif}
+body{background:#f5f5f5;color:#333;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
+
+/* 新版贴吧风格UI */
 .container{
-  display:flex;width:680px;height:750px;border-radius:44px;overflow:hidden;
-  background:rgba(255,255,255,.04);backdrop-filter:blur(30px);
-  border:1px solid rgba(255,255,255,.1);
-  box-shadow:0 0 50px rgba(60,120,255,0.25);
-  position:relative;
+  width:680px;height:750px;border-radius:20px;overflow:hidden;
+  background:#fff;box-shadow:0 10px 40px rgba(0,0,0,0.1);
+  display:flex;position:relative;
 }
 .sidebar{
-  width:140px;background:rgba(255,255,255,.05);padding:30px 10px;
-  display:flex;flex-direction:column;gap:10px;
-  border-right:1px solid rgba(255,255,255,.08);
+  width:150px;background:#fafafa;border-right:1px solid #eee;
+  display:flex;flex-direction:column;padding:20px 10px;gap:8px;
 }
 .item{
-  padding:14px;border-radius:16px;color:rgba(255,255,255,.8);text-align:center;
-  cursor:pointer;transition:all 0.2s;border:1px solid transparent;
+  padding:12px 14px;border-radius:12px;text-align:center;
+  font-size:14px;color:#666;cursor:pointer;
 }
-.item:hover,.item.active{
-  background:rgba(60,130,255,.25);color:#fff;
-  border-color:rgba(100,160,255,0.4);box-shadow:0 0 12px rgba(80,140,255,0.35);
-}
-.main{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  height:100%;
-  padding-bottom:120px;
-}
-.top{
-  background:rgba(255,255,255,.05);padding:20px;color:#fff;font-weight:600;
+.item.active{background:#e8f3ff;color:#0066cc;font-weight:500}
+.main{flex:1;display:flex;flex-direction:column}
+.top-bar{
+  padding:16px 20px;background:#fff;border-bottom:1px solid #eee;
   display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px solid rgba(255,255,255,.08);
 }
-.user-info{padding:12px 20px;color:#ccc;display:flex;justify-content:space-between;align-items:center}
-.msg-box{
-  flex:1;
-  padding:10px 20px;
-  overflow-y:auto;
+.top-bar h2{font-size:18px;font-weight:600}
+.old-ui-btn{
+  padding:6px 12px;background:#eee;border:none;border-radius:8px;
+  font-size:13px;cursor:pointer;color:#555;
 }
-.msg-item{display:flex;width:100%;margin-bottom:16px}
-.msg-item.me{justify-content:flex-end}
-.msg-wrap{max-width:75%;display:flex;flex-direction:column}
-.name-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-.msg-item.me .name-row{flex-direction:row-reverse}
-.avatar{width:32px;height:32px;background:#444;border-radius:50%;flex-shrink:0}
-.username{font-size:13px;color:rgba(255,255,255,.75)}
+
+/* 消息气泡 - 贴吧简洁风 */
+.msg-box{flex:1;padding:16px 20px;overflow-y:auto;background:#f9f9f9}
+.msg-item{margin-bottom:12px;max-width:80%}
+.msg-item.me{margin-left:auto}
 .bubble{
-  padding:10px 14px;border-radius:18px;background:rgba(255,255,255,.07);color:#fff;
-  white-space:pre-wrap;word-break:break-all;width:fit-content;
+  padding:10px 14px;border-radius:16px;background:#fff;border:1px solid #eee;
+  font-size:14px;line-height:1.5
 }
-.msg-item.me .bubble{background:rgba(60,120,255,.25);margin-left:auto}
-.uid{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px}
-.msg-item.me .uid{text-align:right}
-.admin-tag{
-  font-size:11px;color:#ff4444;background:rgba(255,68,68,.15);
-  padding:2px 6px;border-radius:6px;margin-left:6px;
-}
-.footer-admin{
-  position:absolute;left:16px;bottom:26px;
-  font-size:12px;color:#ff4444;
-  padding:4px 8px;background:rgba(255,68,68,.1);
-  border-radius:8px;display:none;
-}
+.msg-item.me .bubble{background:#0066cc;color:#fff;border:none}
+.name{font-size:12px;color:#999;margin-bottom:4px}
+.uid{font-size:11px;color:#ccc;margin-top:4px}
+.revoke-btn{font-size:12px;color:#ff4d4f;background:none;border:none;cursor:pointer;margin-left:6px}
+
+/* 输入框 */
 .input-box{
-  position:absolute;left:140px;bottom:0;width:calc(100% - 140px);height:70px;
-  display:flex;align-items:center;padding:0 16px;gap:10px;
-  border-top:1px solid rgba(255,255,255,.08);background:#0f1419;z-index:10;
+  padding:10px 16px;border-top:1px solid #eee;display:flex;gap:10px;
+  background:#fff;
 }
 #msgInput{
-  flex:1;height:44px;border-radius:24px;padding:0 16px;
-  background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;outline:none;
+  flex:1;height:40px;border-radius:20px;padding:0 16px;
+  border:1px solid #eee;background:#fafafa;outline:none;
 }
 .input-box button{
-  width:70px;height:44px;border-radius:24px;background:#4080ff;color:#fff;border:none;cursor:pointer;
+  width:60px;border-radius:20px;background:#0066cc;color:#fff;border:none;cursor:pointer;
 }
-.admin-btn{
-  background:rgba(255,80,80,.3);border:none;padding:6px 10px;border-radius:12px;color:#fff;margin-left:6px;
-  cursor:pointer;
-}
-.logout-btn{
-  background:rgba(80,180,255,.2);border:none;padding:6px 10px;border-radius:12px;color:#88b8ff;
-  cursor:pointer;margin-left:8px;
-}
-.version{position:absolute;right:18px;bottom:12px;color:#888;font-size:12px}
 
-.revoke-btn {
-  font-size:11px;
-  color:#ff6666;
-  background:transparent;
-  border:none;
-  cursor:pointer;
-  margin-left:6px;
+/* 旧版UI覆盖样式 */
+.old-ui .container{
+  background:rgba(255,255,255,.04);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.1);
 }
+.old-ui body{background:linear-gradient(135deg,#0f1419,#0a0c12);color:#fff}
+.old-ui .sidebar{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
+.old-ui .item{color:rgba(255,255,255,.8)}
+.old-ui .top-bar{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
+.old-ui .msg-box{background:transparent}
+.old-ui .bubble{background:rgba(255,255,255,.07);color:#fff;border-color:rgba(255,255,255,.1)}
+.old-ui .input-box{background:#0f1419;border-color:rgba(255,255,255,.08)}
+.old-ui #msgInput{background:#262833;border-color:rgba(255,255,255,.15);color:#fff}
+
+/* 其他原有样式保留 */
+.login{padding:30px}
+.login input{width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:1px solid #eee;outline:none}
+.old-ui .login input{background:#262833;border-color:rgba(255,255,255,.15);color:#fff}
+.user-info{padding:12px 20px;color:#666;display:flex;justify-content:space-between}
+.old-ui .user-info{color:#ccc}
 </style>
 </head>
 <body>
 <div class="container">
-<div class="sidebar">
-<div class="item active">聊天室</div>
-<div class="item" onclick="window.location.href='/forum.html'">论坛</div>
-<div class="item" onclick="window.location.href='/history.html'">更新日志</div>
-<div class="item" onclick="window.location.href='/plan.html'">开发计划</div>
-</div>
-<div class="main">
-<div class="top"><span>聊天室</span></div>
-<div class="login" id="loginPage" style="flex:1;padding:30px;overflow-y:auto">
-<input id="user" placeholder="账号" style="width:100%;padding:12px;border-radius:16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
-<input id="pwd" placeholder="密码" type="password" style="width:100%;padding:12px;border-radius:16px;background:#262833;border:1px solid rgba(255,255,255,.15);color:#fff;margin-bottom:10px;outline:none">
-<div class="auto-login" style="color:#fff;font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><input type="checkbox" id="autoLogin"> 10天自动登录</div>
-<button class="login-reg" onclick="reg()" style="width:100%;padding:12px;border-radius:16px;background:#4080ff;color:#fff;border:none;margin-bottom:10px;cursor:pointer">注册</button>
-<button class="login-reg" onclick="login()" style="width:100%;padding:12px;border-radius:16px;background:#4080ff;color:#fff;border:none;cursor:pointer">登录</button>
-</div>
-<div class="chat" id="chatPage" style="display:none;flex-direction:column;height:100%">
-<div class="user-info">
-<span id="userInfoText"></span>
-<div>
-<button class="admin-btn" id="clearBtn" style="display:none;" onclick="clearAllMsg()">清空</button>
-<button class="admin-btn" id="delBtn" style="display:none;" onclick="deleteLastMsg()">撤回</button>
-<button class="logout-btn" onclick="logout()">退出登录</button>
-</div>
-</div>
-<div class="msg-box" id="msgBox"></div>
-</div>
-<div class="footer-admin" id="footerAdmin">管理员账号</div>
-<div class="version version-text"></div>
-</div>
-<div class="input-box">
-<input id="msgInput" placeholder="Shift+Enter换行">
-<button onclick="sendMsg()">发送</button>
-</div>
+  <div class="sidebar">
+    <div class="item active">聊天室</div>
+    <div class="item" onclick="location.href='forum.html'">论坛</div>
+    <div class="item" onclick="location.href='history.html'">更新日志</div>
+    <div class="item" onclick="location.href='plan.html'">开发计划</div>
+  </div>
+  <div class="main">
+    <div class="top-bar">
+      <h2>聊天室</h2>
+      <button class="old-ui-btn" onclick="toggleOldUI()">旧版UI</button>
+    </div>
+    <div id="loginPage" style="flex:1;padding:30px;display:none">
+      <input id="user" placeholder="账号">
+      <input id="pwd" placeholder="密码" type="password">
+      <button onclick="login()" style="width:100%;padding:12px;background:#0066cc;color:#fff;border:none;border-radius:12px;margin-top:10px">登录</button>
+      <button onclick="reg()" style="width:100%;padding:12px;background:#eee;border:none;border-radius:12px;margin-top:10px">注册</button>
+    </div>
+    <div id="chatPage" style="display:none;flex-direction:column;flex:1">
+      <div class="user-info">
+        <span id="userInfoText"></span>
+        <div>
+          <button onclick="clearAllMsg()" style="padding:6px 10px;background:#eee;border:none;border-radius:8px">清空</button>
+          <button onclick="logout()" style="padding:6px 10px;background:#eee;border:none;border-radius:8px;margin-left:6px">退出</button>
+        </div>
+      </div>
+      <div class="msg-box" id="msgBox"></div>
+      <div class="input-box">
+        <input id="msgInput" placeholder="输入消息...">
+        <button onclick="sendMsg()">发送</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-// ==============================
-// 版本配置中心
-// ==============================
-const VERSION_CONFIG = {
-  current: "V1.3.4",
-  date: "2026.5.4",
-  history: [
-    { ver: "V1.3.4", desc: "修复论坛发帖问题，优化接口逻辑，版本号统一", date: "2026.5.4" },
-    { ver: "V1.3.3", desc: "管理员系统支持多UID", date: "2026.5.4" },
-    { ver: "V1.3.2", desc: "正式新增完整论坛功能，包含发帖、列表、详情、点赞", date: "2026.5.3" },
-    { ver: "V1.3.1", desc: "重制版添加新页面，修复BUG，稳定性优化", date: "2026.5.3" },
-    { ver: "V1.3.0", desc: "全部转移，基于cloudflare重新开发", date: "2026.5.3" },
-    { ver: "V1.2.3", desc: "新增开发规划页面，全菜单统一", date: "未知" },
-    { ver: "V1.2.2", desc: "全页面UI统一，修复头像/UID布局，滚动优化", date: "未知" },
-    { ver: "V1.2.1", desc: "修复消息显示、清空功能、数据持久化", date: "未知" },
-    { ver: "V1.2.0", desc: "新增论坛系统、发帖按钮、点赞功能、三页面独立切换", date: "未知" },
-    { ver: "V1.1.4", desc: "管理员标识、清空消息", date: "未知" },
-    { ver: "V1.1.3", desc: "自动登录、圆角统一", date: "未知" },
-    { ver: "V1.0.1~V1.1.2", desc: "完善UI、修复布局、独立日志页面", date: "未知" },
-    { ver: "V1.0.0", desc: "基础聊天、注册登录系统", date: "2026.4.1" }
-  ]
-};
+// UI切换
+function toggleOldUI(){
+  document.body.classList.toggle("old-ui");
+  localStorage.setItem("oldUI", document.body.classList.contains("old-ui"));
+}
+window.onload = () => {
+  if(localStorage.getItem("oldUI") === "true"){
+    document.body.classList.add("old-ui");
+  }
+}
 
-window.onload = function () {
-  document.querySelectorAll(".version-text").forEach(el => {
-    el.innerText = VERSION_CONFIG.current;
-  });
-};
-
-// ==============================
-// 聊天主逻辑（修复刷新&滚动）
-// ==============================
-let username = "", uid = "", isAdmin = false;
-let lastMsgCount = 0; // 记录上次消息数量，用于增量更新
+// 原有逻辑
+let username = "", uid = "";
 const API = "/api";
 
 window.onloadExtra = () => {
   let u = localStorage.getItem("username");
   let id = localStorage.getItem("uid");
-  if (u && id) { username = u; uid = id; loginSuccess(); }
+  if(u&&id){ username=u; uid=id; loginSuccess(); }
 };
-setTimeout(window.onloadExtra, 10);
+setTimeout(window.onloadExtra,10);
 
-function logout() {
+function logout(){
   localStorage.clear();
-  username = ""; uid = ""; isAdmin = false;
-  document.getElementById("chatPage").style.display = "none";
-  document.getElementById("loginPage").style.display = "block";
-  document.getElementById("footerAdmin").style.display = "none";
-  lastMsgCount = 0;
+  username="";uid="";
+  document.getElementById("chatPage").style.display="none";
+  document.getElementById("loginPage").style.display="block";
 }
 
-async function login() {
-  const user = document.getElementById("user").value;
-  const pwd = document.getElementById("pwd").value;
-  const r = await fetch(`${API}/login?user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
-  const t = await r.text();
-  if (!t) { alert("账号或密码错误"); return; }
-  localStorage.setItem("username", user);
-  localStorage.setItem("uid", t);
-  username = user; uid = t;
+async function login(){
+  let user = document.getElementById("user").value;
+  let pwd = document.getElementById("pwd").value;
+  let r = await fetch(`${API}/login?user=${user}&pwd=${pwd}`);
+  let t = await r.text();
+  if(!t){alert("错误");return;}
+  localStorage.setItem("username",user);
+  localStorage.setItem("uid",t);
+  username=user;uid=t;
   loginSuccess();
 }
 
-async function reg() {
-  const user = document.getElementById("user").value;
-  const pwd = document.getElementById("pwd").value;
-  const r = await fetch(`${API}/reg?user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`);
-  const t = await r.text();
-  alert(t === "ok" ? "注册成功" : "用户名已存在");
+async function reg(){
+  let user = document.getElementById("user").value;
+  let pwd = document.getElementById("pwd").value;
+  let r = await fetch(`${API}/reg?user=${user}&pwd=${pwd}`);
+  let t = await r.text();
+  alert(t==="ok"?"成功":"已存在");
 }
 
-function loginSuccess() {
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("chatPage").style.display = "flex";
-  document.getElementById("userInfoText").innerText = username + " (" + uid + ")";
-  lastMsgCount = 0;
+function loginSuccess(){
+  document.getElementById("loginPage").style.display="none";
+  document.getElementById("chatPage").style.display="flex";
+  document.getElementById("userInfoText").innerText=username+" ("+uid+")";
   loadMsg();
-  setInterval(loadMsg, 2000);
+  setInterval(loadMsg,2000);
 }
 
-async function sendMsg() {
-  const txt = document.getElementById("msgInput").value.trim();
-  if (!txt) return;
-  await fetch(`${API}/send?uid=${uid}&msg=${encodeURIComponent(txt)}`);
-  document.getElementById("msgInput").value = "";
+async function sendMsg(){
+  let txt = document.getElementById("msgInput").value.trim();
+  if(!txt)return;
+  await fetch(`${API}/send?uid=${uid}&msg=${txt}`);
+  document.getElementById("msgInput").value="";
   loadMsg();
 }
 
-// ✅ 核心修复：增量更新 + 智能滚动
-async function loadMsg() {
-  try {
-    const r = await fetch(`${API}/msg?_=${Date.now()}`);
-    const list = await r.json();
-    const box = document.getElementById("msgBox");
-
-    const isAdminNow = list.some(m => m.uid == uid && m.isAdmin);
-    if (isAdminNow) {
-      document.getElementById("footerAdmin").style.display = "block";
-      document.getElementById("clearBtn").style.display = "inline-block";
-      document.getElementById("delBtn").style.display = "inline-block";
-    }
-
-    // 记录当前滚动位置
-    const { scrollTop, scrollHeight, clientHeight } = box;
-    const isAtBottom = scrollHeight - scrollTop - clientHeight <= 5; // 容错5px
-
-    // 只有消息数量变化才更新DOM
-    if (list.length !== lastMsgCount) {
-      box.innerHTML = ""; // 全量清空一次（首次/清空后）
-      list.forEach((m, index) => {
-        const div = document.createElement("div");
-        div.className = "msg-item " + (m.uid == uid ? "me" : "");
-        const adminTag = m.isAdmin ? '<span class="admin-tag">管理员</span>' : "";
-        let showRevoke = (m.uid == uid || isAdminNow);
-        let revokeBtn = showRevoke ? `<button class="revoke-btn" onclick="revokeMsg(${index})">撤回</button>` : "";
-
-        div.innerHTML = `
-          <div class="msg-wrap">
-            <div class="name-row">
-              <div class="avatar"></div>
-              <div class="username">${m.user}${adminTag} ${revokeBtn}</div>
-            </div>
-            <div class="bubble">${m.msg}</div>
-            <div class="uid">UID:${m.uid}</div>
-          </div>`;
-        box.appendChild(div);
-      });
-      lastMsgCount = list.length;
-    }
-
-    // 只在“用户本来就在底部”时自动滚动，且等渲染完成
-    if (isAtBottom) {
-      requestAnimationFrame(() => {
-        box.scrollTop = box.scrollHeight;
-      });
-    }
-
-  } catch (e) {
-    console.error("loadMsg error:", e);
-  }
+async function loadMsg(){
+  let r = await fetch(`${API}/msg`);
+  let list = await r.json();
+  let box = document.getElementById("msgBox");
+  box.innerHTML = "";
+  list.forEach((m,i)=>{
+    let isMe = m.uid==uid;
+    let btn = (isMe || uid==1) ? `<button class="revoke-btn" onclick="revoke(${i})">撤回</button>` : "";
+    box.innerHTML += `
+      <div class="msg-item ${isMe?'me':''}">
+        <div class="name">${m.user} ${btn}</div>
+        <div class="bubble">${m.msg}</div>
+        <div class="uid">UID:${m.uid}</div>
+      </div>
+    `;
+  });
+  setTimeout(()=>box.scrollTop=box.scrollHeight,0);
 }
 
-async function revokeMsg(index) {
-  if (!confirm("确定要撤回这条消息吗？")) return;
-  const res = await fetch(`${API}?act=deleteMsg&uid=${uid}&targetId=${index}`);
-  const text = await res.text();
-  if (text === "ok") {
-    lastMsgCount = 0; // 重置，强制刷新
-    loadMsg();
-  } else {
-    alert("你无权撤回该消息");
-  }
+async function revoke(i){
+  if(!confirm("确定？"))return;
+  await fetch(`${API}?act=deleteMsg&uid=${uid}&targetId=${i}`);
+  loadMsg();
 }
 
-async function clearAllMsg() {
+async function clearAllMsg(){
   await fetch(`${API}/clear?uid=${uid}`);
-  lastMsgCount = 0; // 重置
-  loadMsg();
-}
-
-async function deleteLastMsg() {
-  await fetch(`${API}/delete?uid=${uid}`);
-  lastMsgCount = 0; // 重置
   loadMsg();
 }
 </script>
