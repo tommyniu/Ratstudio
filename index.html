@@ -36,16 +36,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 .nav-item.active{color:#0066cc;background:#e8f0fe;}
 .nav-item:hover{background:#f1f5ff;}
 
-/* 主容器 */
-.container{
-  width:100%;height:calc(100% - 56px);
-  margin-top:56px;display:flex;flex-direction:column;
+/* 主容器 —— 永久修复输入框被顶飞 */
+#app{
+  position:fixed;
+  top:56px;
+  left:0;
+  width:100%;
+  height:calc(100% - 56px);
+  display:flex;
+  flex-direction:column;
 }
 
-/* 聊天区域比例调整 */
-#chatPage{flex:1;display:flex;flex-direction:column;}
-.msg-box{
-  flex:1;padding:20px 24px;overflow-y:auto;background:#f9f9f9;
+/* 消息区域 */
+#msgBox{
+  flex:1;
+  padding:20px 24px;
+  overflow-y:auto;
+  background:#f9f9f9;
 }
 .message{
   display:flex;gap:10px;margin-bottom:16px;
@@ -60,7 +67,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   flex-shrink:0;
 }
 .msg-content{display:flex;flex-direction:column;}
-.msg-name{font-size:12px;color:#888;margin-bottom:4px;padding:0 4px;}
+.msg-name{
+  font-size:12px;color:#888;margin-bottom:4px;
+  display:flex;align-items:center;gap:6px;
+}
+.admin-tag{
+  background:#ff4d4f;color:#fff;
+  font-size:10px;padding:1px 4px;
+  border-radius:3px;
+}
 .msg-bubble{
   padding:10px 14px;background:#fff;border:1px solid #e5e6eb;
   border-radius:12px;font-size:14px;line-height:1.5;
@@ -69,11 +84,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 .message.me .msg-bubble{
   background:#0066cc;color:#fff;border-color:#0066cc;
 }
+.withdraw-btn{
+  font-size:12px;color:#ff4d4f;background:none;border:none;cursor:pointer;
+}
 
-/* 输入栏 恢复正常 */
-.input-wrap{
-  height:72px;background:#fff;border-top:1px solid #e5e6eb;
+/* 输入框区域 —— 固定在底部，永不消失 */
+#inputBar{
+  height:72px;
+  background:#fff;
+  border-top:1px solid #e5e6eb;
   display:flex;align-items:center;gap:12px;padding:0 24px;
+  flex-shrink:0;
 }
 #msgInput{
   flex:1;height:44px;padding:0 18px;
@@ -100,12 +121,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 }
 .login-box button:last-of-type{background:#f1f2f3;color:#333;}
 
-/* 滚动条美化 */
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-thumb{background:#dcdcdc;border-radius:3px}
 </style>
 </head>
+
 <body>
+
+<!-- 顶部导航 -->
 <div class="top-nav">
   <div class="nav-left" id="userHead" style="display:none">
     <div class="avatar" id="topAvatar">U</div>
@@ -122,7 +145,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   </div>
 </div>
 
-<div class="container">
+<!-- 主界面 → 彻底修复布局 -->
+<div id="app">
   <div id="loginPage" class="login-box">
     <input id="user" placeholder="账号">
     <input id="pwd" placeholder="密码" type="password">
@@ -130,9 +154,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
     <button onclick="reg()">注册</button>
   </div>
 
-  <div id="chatPage" style="display:none;flex-direction:column;">
-    <div class="msg-box" id="msgBox"></div>
-    <div class="input-wrap">
+  <div id="chatPage" style="display:none;flex-direction:column;width:100%;height:100%;">
+    <div id="msgBox"></div>
+    <div id="inputBar">
       <input id="msgInput" placeholder="输入消息..." autocomplete="off">
       <button class="send-btn" onclick="sendMsg()">发送</button>
     </div>
@@ -140,21 +164,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </div>
 
 <script>
-let username = '', uid = '';
+// ==================== 配置 ====================
+const ADMIN_UIDS = [1]; // 管理员UID
 const API = '/api';
+let username = '', uid = '';
 
-// 昵称首字母头像
+// 头像首字母
 function getAvatarChar(name){
-  if(!name) return 'U';
-  return name.charAt(0).toUpperCase();
+  return name ? name.charAt(0).toUpperCase() : 'U';
 }
 
-window.onload = () => {
-  checkLogin();
-  setInterval(loadMsg, 2000);
-};
+// 是否管理员
+function isAdmin(uid){
+  return ADMIN_UIDS.includes(Number(uid));
+}
 
-function checkLogin(){
+// ==================== 初始化 ====================
+window.onload = () => {
   let u = localStorage.getItem('username');
   let id = localStorage.getItem('uid');
   if(u && id){
@@ -162,8 +188,10 @@ function checkLogin(){
     uid = id;
     showChat();
   }
-}
+  setInterval(loadMsg, 2000);
+};
 
+// 显示聊天
 function showChat(){
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('chatPage').style.display = 'flex';
@@ -174,11 +202,10 @@ function showChat(){
   loadMsg();
 }
 
-// 登录注册
+// ==================== 登录注册 ====================
 async function login(){
   let u = document.getElementById('user').value.trim();
   let p = document.getElementById('pwd').value.trim();
-  if(!u||!p)return alert('请输入账号密码');
   let res = await fetch(`${API}/login?user=${u}&pwd=${p}`);
   let t = await res.text();
   if(!t)return alert('登录失败');
@@ -190,10 +217,10 @@ async function reg(){
   let u = document.getElementById('user').value.trim();
   let p = document.getElementById('pwd').value.trim();
   let res = await fetch(`${API}/reg?user=${u}&pwd=${p}`);
-  alert(await res.text() === 'ok' ? '注册成功，请登录' : '注册失败');
+  alert(await res.text() === 'ok' ? '成功' : '失败');
 }
 
-// 发消息
+// ==================== 发送消息 ====================
 async function sendMsg(){
   let txt = document.getElementById('msgInput').value.trim();
   if(!txt)return;
@@ -202,30 +229,41 @@ async function sendMsg(){
   loadMsg();
 }
 
-// 加载消息 无尾部空格
+// ==================== 加载消息（带管理员+撤回） ====================
 async function loadMsg(){
-  let res = await fetch(`${API}/msg?_=${Date.now()}`);
+  let res = await fetch(`${API}/msg`);
   let list = await res.json();
   let box = document.getElementById('msgBox');
-  let autoScroll = Math.abs(box.scrollTop + box.clientHeight - box.scrollHeight) < 20;
+  let auto = Math.abs(box.scrollTop + box.clientHeight - box.scrollHeight) < 20;
 
   box.innerHTML = '';
   list.forEach(m => {
     let me = m.uid == uid;
     let char = getAvatarChar(m.user);
+    let adminBadge = isAdmin(m.uid) ? '<span class="admin-tag">管理员</span>' : '';
+    let withdraw = (me || isAdmin(uid)) ? `<button class="withdraw-btn" onclick="withdraw(${m.id})">撤回</button>` : '';
+
     box.innerHTML += `
       <div class="message ${me?'me':''}">
         <div class="msg-avatar">${char}</div>
         <div class="msg-content">
-          <div class="msg-name">${m.user}</div>
+          <div class="msg-name">${m.user} ${adminBadge} ${withdraw}</div>
           <div class="msg-bubble">${m.msg}</div>
         </div>
       </div>
     `;
   });
 
-  if(autoScroll) box.scrollTop = box.scrollHeight;
+  if(auto) box.scrollTop = box.scrollHeight;
+}
+
+// ==================== 撤回消息 ====================
+async function withdraw(id){
+  if(!confirm('确定撤回？')) return;
+  await fetch(`${API}?act=deleteMsg&uid=${uid}&targetId=${id}`);
+  loadMsg();
 }
 </script>
+
 </body>
 </html>
