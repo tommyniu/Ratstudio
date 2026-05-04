@@ -157,7 +157,7 @@ let me, uid;
 
 function ava(n){ return n?n[0].toUpperCase():'U' }
 function admin(id){ return ADMIN.includes(Number(id)) }
-function goHome(){ location.href='/users/'+uid }
+function goHome(){ location.href='personal.html?uid='+uid }
 
 window.onload=()=>{
   me=localStorage.getItem('username');
@@ -208,7 +208,7 @@ async function loadMsg(){
     let isMe=o.uid==uid;
     b.innerHTML+=`
     <div class="message ${isMe?'me':''}">
-      <div class="msg-avatar" onclick="location.href='/users/${o.uid}'">${ava(o.user)}</div>
+      <div class="msg-avatar" onclick="location.href='personal.html?uid=${o.uid}'">${ava(o.user)}</div>
       <div class="msg-content">
         <div class="msg-name">${o.user} ${admin(o.uid)?'<span class=admin-tag>管理员</span>':''} ${isMe||admin(uid)?'<button onclick=withdraw(${o.id}) class=withdraw-btn>撤回</button>':''}</div>
         <div class="msg-bubble">${o.msg}</div>
