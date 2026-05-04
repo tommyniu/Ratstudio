@@ -2,68 +2,75 @@ export async function onRequestGet({ request, env }) {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type"
   };
-
-  const ADMIN_UIDS = [1];
 
   try {
     const url = new URL(request.url);
-    const act = url.searchParams.get("act");
-    const uid = url.searchParams.get("uid");
-    const postId = url.searchParams.get("postId");
-    const title = url.searchParams.get("title");
-    const content = url.searchParams.get("content");
+    const act = url.searchParams.get("act") || "";
+    const uid = url.searchParams.get("uid") || "";
+    const postId = url.searchParams.get("postId") || "";
+    const title = url.searchParams.get("title") || "";
+    const content = url.searchParams.get("content") || "";
 
-    // 读取/初始化数据库
+    // 1. 读取或初始化数据库（绝不崩溃）
     let db;
     try {
-      const stored = await env.CHAT_DB.get("db");
-      db = stored ? JSON.parse(stored) : {
-        users: [], msgs: [], nextUID: 3,
-        posts: [], postIdCounter: 1
-      };
+      const raw = await env.CHAT_DB.get("db");
+      db = raw ? JSON.parse(raw) : null;
     } catch (e) {
-      db = { users: [], msgs: [], nextUID: 3, posts: [], postIdCounter: 1 };
+      db = null;
+    }
+    if (!db || typeof db !== "object") {
+      db = {
+        users: [],
+        msgs: [],
+        nextUID: 3,
+        posts: [],
+        postIdCounter: 1
+      };
     }
 
-    // 强制管理员账号
+    // 2. 固定管理员（强制存在）
+    if (!Array.isArray(db.users)) db.users = [];
     let admin = db.users.find(u => u.user === "Ratstudio");
-    if (admin) {
+    if (!admin) {
+      db.users.unshift({ uid: 1, user: "Ratstudio", pwd: "LTC505666" });
+    } else {
       admin.uid = 1;
       admin.pwd = "LTC505666";
-    } else {
-      db.users.unshift({ uid: 1, user: "Ratstudio", pwd: "LTC505666" });
     }
 
+    // 3. 确保 Test 用户
     let test = db.users.find(u => u.user === "RsTest");
     if (test) test.uid = 2;
     db.nextUID = 3;
 
-    // =====================
-    // 论坛核心接口（已修复）
-    // =====================
+    // ========== 论坛核心（重点：绝不抛错） ==========
     if (act === "createPost") {
-      const userObj = db.users.find(u => u.uid == uid);
-      if (!userObj || !title || !content) {
+      try {
+        const userObj = db.users.find(u => u.uid == uid);
+        if (!userObj || !title || !content) {
+          return new Response("no", { headers: corsHeaders });
+        }
+
+        const time = new Date().toLocaleString();
+        db.posts.push({
+          postId: db.postIdCounter++,
+          uid: Number(uid),
+          user: userObj.user,
+          title,
+          content,
+          time,
+          like: 0
+        });
+
+        await env.CHAT_DB.put("db", JSON.stringify(db));
+        return new Response("ok", { headers: corsHeaders });
+      } catch (e) {
+        console.error("createPost err:", e);
         return new Response("no", { headers: corsHeaders });
       }
-
-      const now = new Date();
-      const time = now.toLocaleString();
-
-      db.posts.push({
-        postId: db.postIdCounter++,
-        uid: Number(uid),
-        user: userObj.user,
-        title,
-        content,
-        time,
-        like: 0
-      });
-
-      await env.CHAT_DB.put("db", JSON.stringify(db));
-      return new Response("ok", { headers: corsHeaders });
     }
 
     if (act === "posts") {
@@ -73,15 +80,17 @@ export async function onRequestGet({ request, env }) {
     }
 
     if (act === "like") {
-      const p = db.posts.find(x => x.postId == postId);
-      if (p) p.like++;
-      await env.CHAT_DB.put("db", JSON.stringify(db));
-      return new Response("ok", { headers: corsHeaders });
+      try {
+        const p = db.posts.find(x => x.postId == postId);
+        if (p) p.like++;
+        await env.CHAT_DB.put("db", JSON.stringify(db));
+        return new Response("ok", { headers: corsHeaders });
+      } catch (e) {
+        return new Response("no", { headers: corsHeaders });
+      }
     }
 
-    // =====================
-    // 聊天功能
-    // =====================
+    // ========== 聊天/登录（保持不变） ==========
     if (url.pathname === "/api/login") {
       const user = url.searchParams.get("user");
       const pwd = url.searchParams.get("pwd");
@@ -108,7 +117,7 @@ export async function onRequestGet({ request, env }) {
         uid: u.uid,
         user: u.user,
         msg,
-        isAdmin: ADMIN_UIDS.includes(Number(u.uid))
+        isAdmin: u.uid === 1
       });
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
@@ -121,24 +130,32 @@ export async function onRequestGet({ request, env }) {
     }
 
     if (url.pathname === "/api/clear") {
-      if (!ADMIN_UIDS.includes(Number(uid))) return new Response("no", { headers: corsHeaders });
+      if (uid !== "1") return new Response("no", { headers: corsHeaders });
       db.msgs = [];
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
     }
 
     if (url.pathname === "/api/delete") {
-      if (!ADMIN_UIDS.includes(Number(uid))) return new Response("no", { headers: corsHeaders });
+      if (uid !== "1") return new Response("no", { headers: corsHeaders });
       if (db.msgs.length) db.msgs.pop();
       await env.CHAT_DB.put("db", JSON.stringify(db));
       return new Response("ok", { headers: corsHeaders });
     }
 
+    // 其他请求返回ok
     return new Response("ok", { headers: corsHeaders });
 
-  } catch (err) {
-    console.error(err);
-    return new Response("error", { headers: corsHeaders });
+  } catch (finalErr) {
+    // 最外层绝对不返回"error"，只返回"no"
+    console.error("FATAL:", finalErr);
+    return new Response("no", {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
+    });
   }
 }
 
