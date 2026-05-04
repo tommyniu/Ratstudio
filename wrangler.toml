@@ -1,6 +1,0 @@
-name = "ratstudio-official"
-compatibility_date = "2024-01-01"
-
-[[kv_namespaces]]
-binding = "CHAT_DB"
-id = "9cddec80df2d4d05805953784093a7bf"
