@@ -27,6 +27,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;
 }
 .post-username{font-size:15px;font-weight:500;cursor:pointer;}
+.post-time{font-size:12px;color:#999;margin-left:auto;}
 .post-title{font-size:17px;font-weight:bold;margin-bottom:8px;}
 .post-content{font-size:14px;color:#333;line-height:1.5;margin-bottom:16px;}
 
@@ -54,6 +55,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;
 }
 .comment-name{font-size:13px;cursor:pointer;}
+.comment-time{font-size:11px;color:#999;margin-left:8px;}
 .comment-text{font-size:13px;color:#333;margin-left:36px;margin-bottom:6px;}
 .comment-like{font-size:12px;color:#666;margin-left:36px;cursor:pointer;}
 
@@ -193,6 +195,7 @@ function renderList(){
       <div class="post-user">
         <div class="post-avatar" onclick="goUser(${p.uid})">${ava(p.user)}</div>
         <div class="post-username" onclick="goUser(${p.uid})">${p.user}</div>
+        <div class="post-time">${p.time||''}</div>
       </div>
       <div class="post-title">${p.title}</div>
       <div class="post-content">${p.content}</div>
@@ -214,6 +217,7 @@ function renderDetail(post){
     <div class="post-user">
       <div class="post-avatar" onclick="goUser(${post.uid})">${ava(post.user)}</div>
       <div class="post-username" onclick="goUser(${post.uid})">${post.user}</div>
+      <div class="post-time">${post.time||''}</div>
     </div>
     <div class="post-title">${post.title}</div>
     <div class="post-content">${post.content}</div>
@@ -236,6 +240,7 @@ function renderComments(){
         <div class="comment-user">
           <div class="comment-avatar" onclick="goUser(${c.uid})">${ava(c.user)}</div>
           <div class="comment-name" onclick="goUser(${c.uid})">${c.user}</div>
+          <div class="comment-time">${c.time||''}</div>
         </div>
         <div class="comment-text">${c.text}</div>
         <div class="comment-like" onclick="likeComment(${c.cid},event)">❤️ 点赞 ${c.like}</div>
