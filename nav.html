@@ -21,12 +21,10 @@
 
 .nav-right{
   display:flex;gap:6px;align-items:center;
-  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
 }
-.nav-right::-webkit-scrollbar{display:none}
 .nav-item{
   font-size:13px;color:#666;cursor:pointer;
-  padding:6px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;
+  padding:6px 8px;border-radius:6px;
   transition:0.2s;
 }
 .nav-item:hover{
@@ -36,12 +34,12 @@
 
 .logout{
   font-size:13px;color:#ff4444;cursor:pointer;
-  padding:6px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;
+  padding:6px 8px;border-radius:6px;
 }
 </style>
 
 <div class="top-nav">
-  <div class="nav-left" id="userHead">
+  <div class="nav-left">
     <div class="avatar" id="topAvatar">U</div>
     <div class="user-info-mini">
       <div class="name" id="miniName">用户名</div>
@@ -60,32 +58,28 @@
 </div>
 
 <script>
-// 完全和你个人主页一样的逻辑
-function getAvatarChar(n){ return n ? n[0].toUpperCase() : 'U'; }
-
+// 最简单、最稳定、绝对能用
 function logout() {
   if(!confirm('确定退出登录？')) return;
   localStorage.clear();
   location.href='home.html';
 }
 
-window.onload = function(){
-  // 从 localStorage 读取当前登录用户
-  const myName = localStorage.getItem('username') || '';
-  const myUid = localStorage.getItem('uid') || '';
-  
-  if(myName && myUid){
-    document.getElementById('topAvatar').innerText = getAvatarChar(myName);
-    document.getElementById('miniName').innerText = myName;
-    document.getElementById('miniUid').innerText = myUid;
+// 立即执行，不等待页面加载
+(function(){
+  let name = localStorage.getItem('username');
+  let uid  = localStorage.getItem('uid');
+
+  if(name && uid){
+    document.getElementById('topAvatar').innerText = name.charAt(0).toUpperCase();
+    document.getElementById('miniName').innerText = name;
+    document.getElementById('miniUid').innerText = uid;
   }
 
-  // 高亮当前页面
-  let page = location.pathname.split('/').pop();
-  document.querySelectorAll('.nav-item').forEach(el=>{
-    if(el.getAttribute('onclick').includes(page)){
-      el.classList.add('active');
-    }
+  // 高亮
+  let now = location.pathname.split('/').pop();
+  document.querySelectorAll('.nav-item').forEach(i=>{
+    if(i.getAttribute('onclick').includes(now)) i.classList.add('active');
   });
-}
+})();
 </script>
