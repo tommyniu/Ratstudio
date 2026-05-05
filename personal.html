@@ -8,37 +8,6 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
-.top-nav{
-  width:100%;height:56px;background:#fff;
-  border-bottom:1px solid #e5e6eb;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 12px;position:fixed;top:0;left:0;z-index:999;
-  gap:8px;
-}
-.nav-left{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.avatar{
-  width:36px;height:36px;border-radius:50%;
-  background:#0066cc;color:#fff;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:bold;font-size:15px;
-}
-.user-info-mini{
-  font-size:12px;color:#666;line-height:1.2;
-  white-space:nowrap;
-}
-.user-info-mini .name{font-weight:bold;color:#333;font-size:13px;}
-
-.nav-right{
-  display:flex;gap:6px;align-items:center;
-  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
-}
-.nav-right::-webkit-scrollbar{display:none}
-.nav-item{
-  font-size:13px;color:#666;cursor:pointer;
-  padding:6px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;
-}
-.nav-item.active{color:#0066cc;background:#e8f0fe;}
-
 .container{
   position:fixed;top:56px;left:0;
   width:100%;height:calc(100% - 56px);
@@ -75,21 +44,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </head>
 
 <body>
-<div class="top-nav">
-  <div class="nav-left" id="userHead">
-    <div class="avatar" id="topAvatar">U</div>
-    <div class="user-info-mini">
-      <div class="name" id="miniName">用户名</div>
-      <div>UID: <span id="miniUid">1</span></div>
-    </div>
-  </div>
-  <div class="nav-right">
-    <div class="nav-item" onclick="location.href='/index.html'">聊天室</div>
-    <div class="nav-item" onclick="location.href='/forum.html'">论坛</div>
-    <div class="nav-item" onclick="location.href='/history.html'">日志</div>
-    <div class="nav-item" onclick="location.href='/plan.html'">规划</div>
-  </div>
-</div>
+
+<!-- 公共导航容器 -->
+<div id="navContainer"></div>
 
 <div class="container">
   <div class="profile">
@@ -113,22 +70,49 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </div>
 
 <script>
+// ==============================================
+// 🔥 统一加载导航栏（和全站完全同步）
+// ==============================================
+function loadNav() {
+  fetch('nav.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('navContainer').innerHTML = html;
+
+    let u = localStorage.getItem('username');
+    let uid = localStorage.getItem('uid');
+
+    if (u && uid) {
+      document.getElementById('miniName').innerText = u;
+      document.getElementById('miniUid').innerText = uid;
+      document.getElementById('logoutBtn').style.display = 'block';
+
+      document.getElementById('logoutBtn').onclick = function () {
+        if (confirm('确定退出登录？')) {
+          localStorage.clear();
+          location.href = 'index.html';
+        }
+      }
+
+      document.getElementById('topAvatar').onclick = function () {
+        location.href = 'personal.html?uid=' + uid;
+      }
+    } else {
+      document.getElementById('logoutBtn').style.display = 'none';
+    }
+  })
+}
+loadNav();
+</script>
+
+<script>
 const API = '/api';
 function getAvatarChar(n){ return n ? n[0].toUpperCase() : 'U'; }
 
 window.onload = async function(){
   const urlParams = new URLSearchParams(window.location.search);
   const targetUid = urlParams.get('uid');
-  if(!targetUid) { location.href='/index.html'; return; }
-
-  // 顶部当前用户
-  const myName = localStorage.getItem('username') || '';
-  const myUid = localStorage.getItem('uid') || '';
-  if(myName && myUid){
-    document.getElementById('topAvatar').innerText = getAvatarChar(myName);
-    document.getElementById('miniName').innerText = myName;
-    document.getElementById('miniUid').innerText = myUid;
-  }
+  if(!targetUid) { location.href='index.html'; return; }
 
   // 读取真实用户名
   let userName = "用户"+targetUid;
@@ -155,5 +139,6 @@ window.onload = async function(){
   document.getElementById('postCount').innerText = post;
 };
 </script>
+
 </body>
 </html>
