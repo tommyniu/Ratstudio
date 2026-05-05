@@ -9,20 +9,8 @@ export async function onRequestGet({ request, env }) {
 
   try {
     const url = new URL(request.url);
-    
-    // ==========================================
-    // 🔥 核心修改：访问根目录自动跳转到主页 home.html
-    // ==========================================
-    if (url.pathname === "/" || url.pathname === "/index.html") {
-      return new Response("", {
-        status: 302,
-        headers: {
-          ...corsHeaders,
-          "Location": "/home.html"
-        }
-      });
-    }
 
+    // 已删除旧的无用跳转代码
     const act = url.searchParams.get("act");
     const uid = url.searchParams.get("uid");
     const targetId = url.searchParams.get("targetId");
@@ -145,7 +133,7 @@ export async function onRequestGet({ request, env }) {
     }
 
     // ==========================================
-    // 登录（修复：返回正确 UID）
+    // 登录
     // ==========================================
     if (url.pathname === "/api/login") {
       const user = url.searchParams.get("user");
@@ -155,7 +143,7 @@ export async function onRequestGet({ request, env }) {
     }
 
     // ==========================================
-    // 注册（修复：返回 uid:xxx）
+    // 注册
     // ==========================================
     if (url.pathname === "/api/reg") {
       const user = url.searchParams.get("user");
