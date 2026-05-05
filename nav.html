@@ -43,3 +43,32 @@
     <div id="logoutBtn" class="logout">退出登录</div>
   </div>
 </div>
+
+<script>
+// 自动加载顶部导航用户信息
+function loadTopNav() {
+  let username = localStorage.getItem('username');
+  let uid = localStorage.getItem('uid');
+  let avatar = document.getElementById('topAvatar');
+  let miniName = document.getElementById('miniName');
+  let miniUid = document.getElementById('miniUid');
+  let logoutBtn = document.getElementById('logoutBtn');
+
+  if (username && uid) {
+    // 显示用户名首字母
+    let firstChar = username.charAt(0).toUpperCase();
+    avatar.innerText = firstChar;
+    miniName.innerText = username;
+    miniUid.innerText = uid;
+    logoutBtn.style.display = 'block';
+  } else {
+    avatar.innerText = 'U';
+    miniName.innerText = '游客';
+    miniUid.innerText = '未登录';
+    logoutBtn.style.display = 'none';
+  }
+}
+
+// 页面加载时运行
+window.addEventListener('load', loadTopNav);
+</script>
