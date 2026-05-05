@@ -17,60 +17,81 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
 .post{
   width:100%;background:#fff;border:1px solid #e5e6eb;
-  padding:20px;margin-bottom:16px;cursor:pointer;
-  border-radius:12px;transition:0.2s;
+  padding:20px;margin-bottom:16px;border-radius:12px;
 }
-.post:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06);}
-.post h3{font-size:17px;color:#232527;margin-bottom:10px}
-.post .info{font-size:12px;color:#9499a0;margin-bottom:12px}
-.post .content{
-  font-size:14px;color:#61666d;margin-bottom:12px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+.post-user{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
 }
-.like,.del-post{
-  padding:5px 12px;border:none;font-size:12px;cursor:pointer;
-  border-radius:8px;
+.post-avatar{
+  width:36px;height:36px;border-radius:50%;background:#0066cc;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;
 }
-.like{background:#f1f2f3;color:#61666d}
-.del-post{background:#ffebeb;color:#ed2633;margin-left:10px}
+.post-username{font-size:15px;font-weight:500;cursor:pointer;}
+.post-title{font-size:17px;font-weight:bold;margin-bottom:8px;}
+.post-content{font-size:14px;color:#333;line-height:1.5;margin-bottom:16px;}
+
+.post-actions{
+  display:flex;gap:10px;margin-bottom:16px;
+}
+.like,.collect,.del-post{
+  padding:6px 14px;border:none;border-radius:8px;font-size:14px;cursor:pointer;
+}
+.like{background:#f0f4ff;color:#0066cc;}
+.collect{background:#f6f7f8;color:#333;}
+.del-post{background:#ffebeb;color:#ed2633;margin-left:auto;}
+
+.comments-title{
+  font-size:14px;font-weight:bold;margin-bottom:10px;color:#555;
+}
+.comment{
+  padding:10px 12px;background:#f9f9f9;border-radius:8px;margin-bottom:8px;
+}
+.comment-user{
+  display:flex;align-items:center;gap:8px;margin-bottom:4px;
+}
+.comment-avatar{
+  width:28px;height:28px;border-radius:50%;background:#0066cc;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;
+}
+.comment-name{font-size:13px;cursor:pointer;}
+.comment-text{font-size:13px;color:#333;margin-left:36px;margin-bottom:6px;}
+.comment-like{font-size:12px;color:#666;margin-left:36px;cursor:pointer;}
+
+.comment-input-bar{
+  display:flex;gap:8px;margin-top:12px;
+}
+.comment-input{
+  flex:1;height:38px;padding:0 12px;border:1px solid #e5e6eb;border-radius:8px;outline:none;
+}
+.comment-send{
+  padding:0 14px;background:#0066cc;color:#fff;border:none;border-radius:8px;cursor:pointer;
+}
 
 .fixed-add-btn{
-  position:fixed;
-  top:66px;
-  right:16px;
-  width:44px;height:44px;
-  background:#0066cc;color:#fff;
-  border:none;cursor:pointer;
-  font-size:26px;
-  display:flex;align-items:center;justify-content:center;
-  border-radius:50%;
-  box-shadow:0 2px 10px rgba(0,0,0,0.15);
-  z-index:998;
+  position:fixed;top:66px;right:16px;width:44px;height:44px;
+  background:#0066cc;color:#fff;border:none;border-radius:50%;
+  font-size:26px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 10px rgba(0,0,0,0.15);z-index:998;cursor:pointer;
 }
 
 .mask{
   position:fixed;inset:0;background:rgba(0,0,0,.5);
-  display:none;align-items:center;justify-content:center;z-index:1000
+  display:none;align-items:center;justify-content:center;z-index:1000;
 }
 .pop{
-  width:90%;max-width:520px;background:#fff;border:1px solid #e5e6eb;
-  padding:28px;border-radius:12px;
+  width:90%;max-width:520px;background:#fff;border-radius:12px;padding:28px;
 }
 .pop input,.pop textarea{
-  width:100%;padding:14px;margin-bottom:16px;border:1px solid #e5e6eb;
-  background:#fafafa;color:#333;border-radius:10px;
-  outline:none;font-size:14px;resize:none;
+  width:100%;padding:14px;margin-bottom:16px;border:1px solid #e5e6eb;border-radius:10px;
+  background:#fafafa;outline:none;font-size:14px;resize:none;
 }
 .pop button{
-  width:100%;padding:13px;background:#0066cc;color:#fff;border:none;
-  cursor:pointer;border-radius:10px;font-size:14px;
+  width:100%;padding:13px;background:#0066cc;color:#fff;border:none;border-radius:10px;cursor:pointer;
 }
 .back-btn{
-  padding:6px 14px;background:#f1f2f3;border:1px solid #e5e6eb;
-  cursor:pointer;border-radius:8px;margin-bottom:20px;font-size:13px;
+  padding:6px 14px;background:#f1f2f3;border:1px solid #e5e6eb;cursor:pointer;border-radius:8px;margin-bottom:20px;
 }
+
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-thumb{background:#dcdcdc;border-radius:3px}
 </style>
@@ -78,18 +99,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
 <body>
 <div id="navContainer"></div>
-
 <button class="fixed-add-btn" onclick="showPost()">+</button>
 
 <div class="container">
   <div class="page active" id="listPage">
     <div id="list"></div>
   </div>
+
   <div class="page" id="detailPage">
     <button class="back-btn" onclick="goBack()">← 返回</button>
-    <h2 id="detailTitle" style="margin-bottom:10px"></h2>
-    <div class="info" id="detailInfo" style="margin-bottom:16px;color:#888"></div>
-    <div class="content" id="detailContent" style="line-height:1.6"></div>
+    <div id="detailPost"></div>
+
+    <div class="comments-title">评论区</div>
+    <div id="commentsList"></div>
+
+    <div class="comment-input-bar">
+      <input class="comment-input" id="commentInput" placeholder="发表评论…">
+      <button class="comment-send" onclick="sendComment()">发送</button>
+    </div>
   </div>
 </div>
 
@@ -102,39 +129,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </div>
 
 <script>
-// ==============================================
-// 🔥 导航自动加载 + 登录状态同步（全站通用）
-// ==============================================
 function loadNav() {
   fetch('nav.html')
   .then(res => res.text())
   .then(html => {
     document.getElementById('navContainer').innerHTML = html;
-
     let u = localStorage.getItem('username');
     let uid = localStorage.getItem('uid');
-
     if (u && uid) {
       document.getElementById('miniName').innerText = u;
       document.getElementById('miniUid').innerText = uid;
       document.getElementById('logoutBtn').style.display = 'block';
-
-      document.getElementById('logoutBtn').onclick = function () {
-        if (confirm('确定退出登录？')) {
-          localStorage.clear();
-          location.href = 'index.html';
-        }
+      document.getElementById('logoutBtn').onclick = function(){
+        if(confirm('确定退出？')){localStorage.clear();location.href='index.html'}
       }
-
-      document.getElementById('topAvatar').onclick = function () {
-        location.href = 'personal.html?uid=' + uid;
+      document.getElementById('topAvatar').onclick = function(){
+        location.href='personal.html?uid='+uid;
       }
-    } else {
+    }else{
       document.getElementById('logoutBtn').style.display = 'none';
     }
   })
 }
-
 loadNav();
 </script>
 
@@ -143,51 +159,47 @@ let username = "", uid = "";
 const API = "/api";
 const ADMIN_UID = 1;
 let postsData = [];
+let commentsData = [];
 let likedPosts = JSON.parse(localStorage.getItem('likedPosts')||'[]');
+let likedComments = JSON.parse(localStorage.getItem('likedComments')||'[]');
+let currentPostId = null;
 
-window.onload = () => {
+window.onload = async () => {
   let u = localStorage.getItem('username');
   let id = localStorage.getItem('uid');
   if(!u||!id){alert('请先登录');location.href='index.html'}
   username = u; uid = id;
-  loadPosts();
+  await loadAll();
+  route();
 };
 
-function showPost(){document.getElementById('mask').style.display='flex'}
-function hidePost(){document.getElementById('mask').style.display='none'}
+function ava(n){ return n?n[0].toUpperCase():'U'; }
+function showPost(){mask.style.display='flex'}
+function hidePost(){mask.style.display='none'}
 
-async function createPost(){
-  const title=document.getElementById('title').value.trim();
-  const content=document.getElementById('content').value.trim();
-  if(!title||!content){alert('标题和内容不能为空');return}
-  const res=await fetch(`${API}?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
-  const txt=await res.text();
-  if(txt==="ok"){hidePost();loadPosts();document.getElementById('title').value='';document.getElementById('content').value=''}
-  else alert('发布失败：'+txt);
-}
-
-async function loadPosts(){
-  const r=await fetch(`${API}?act=posts&_=${Date.now()}`);
-  postsData=await r.json();
-  renderList();
-  route();
+async function loadAll() {
+  postsData = await (await fetch(`${API}?act=posts`)).json();
+  commentsData = await (await fetch(`${API}?act=comments`)).json();
 }
 
 function renderList(){
-  const box=document.getElementById('list');
-  box.innerHTML='';
-  if(!postsData||postsData.length===0){box.innerHTML="<div style='text-align:center;padding:60px;color:#999'>暂无帖子</div>";return}
+  const box = document.getElementById('list');
+  box.innerHTML = '';
+  if(!postsData.length){box.innerHTML="<div style='text-align:center;padding:40px;color:#999'>暂无帖子</div>";return}
   postsData.forEach(p=>{
-    const div=document.createElement('div');
+    const div = document.createElement('div');
     div.className='post';
-    const canDel=(Number(uid)===p.uid)||(Number(uid)===ADMIN_UID);
-    div.innerHTML=`
-      <h3>${p.title}</h3>
-      <div class="info">${p.user} (${p.uid}) · ${p.time}</div>
-      <div class="content">${p.content}</div>
-      <div>
-        <button class="like" onclick="event.stopPropagation();likePost(${p.postId})">点赞 ${p.like}</button>
-        ${canDel?`<button class="del-post" onclick="event.stopPropagation();delPost(${p.postId})">删除</button>`:''}
+    div.innerHTML = `
+      <div class="post-user">
+        <div class="post-avatar" onclick="goUser(${p.uid})">${ava(p.user)}</div>
+        <div class="post-username" onclick="goUser(${p.uid})">${p.user}</div>
+      </div>
+      <div class="post-title">${p.title}</div>
+      <div class="post-content">${p.content}</div>
+      <div class="post-actions">
+        <button class="like" onclick="likePost(${p.postId},event)">点赞 ${p.like}</button>
+        <button class="collect" onclick="showCollectMsg(event)">收藏</button>
+        ${(Number(uid)===p.uid||Number(uid)===ADMIN_UID)?`<button class="del-post" onclick="delPost(${p.postId},event)">删除</button>`:''}
       </div>
     `;
     div.onclick=()=>goDetail(p.postId);
@@ -195,20 +207,97 @@ function renderList(){
   });
 }
 
-async function likePost(postId){
-  if(likedPosts.includes(postId)){alert("你已经点过赞了");return}
-  likedPosts.push(postId);
-  localStorage.setItem('likedPosts',JSON.stringify(likedPosts));
-  await fetch(`${API}?act=like&uid=${uid}&postId=${postId}`);
-  loadPosts();
+function renderDetail(post){
+  currentPostId = post.postId;
+  const d = document.getElementById('detailPost');
+  d.innerHTML = `
+    <div class="post-user">
+      <div class="post-avatar" onclick="goUser(${post.uid})">${ava(post.user)}</div>
+      <div class="post-username" onclick="goUser(${post.uid})">${post.user}</div>
+    </div>
+    <div class="post-title">${post.title}</div>
+    <div class="post-content">${post.content}</div>
+    <div class="post-actions">
+      <button class="like" onclick="likePost(${post.postId},event)">点赞 ${post.like}</button>
+      <button class="collect" onclick="showCollectMsg(event)">收藏</button>
+      ${(Number(uid)===post.uid||Number(uid)===ADMIN_UID)?`<button class="del-post" onclick="delPost(${post.postId},event)">删除</button>`:''}
+    </div>
+  `;
+  renderComments();
 }
 
-async function delPost(postId){
-  if(!confirm('确定删除该帖子？'))return;
-  const res=await fetch(`${API}?act=deletePost&uid=${uid}&targetId=${postId}`);
-  const txt=await res.text();
-  if(txt==='ok')loadPosts();
-  else alert('删除失败');
+function renderComments(){
+  const box = document.getElementById('commentsList');
+  const cs = commentsData.filter(c=>c.postId == currentPostId) || [];
+  box.innerHTML = '';
+  cs.forEach(c=>{
+    box.innerHTML += `
+      <div class="comment">
+        <div class="comment-user">
+          <div class="comment-avatar" onclick="goUser(${c.uid})">${ava(c.user)}</div>
+          <div class="comment-name" onclick="goUser(${c.uid})">${c.user}</div>
+        </div>
+        <div class="comment-text">${c.text}</div>
+        <div class="comment-like" onclick="likeComment(${c.cid},event)">❤️ 点赞 ${c.like}</div>
+      </div>
+    `;
+  });
+}
+
+function showCollectMsg(e){
+  e.stopPropagation();
+  alert('功能开发中，敬请期待');
+}
+
+function goUser(uid){
+  location.href='personal.html?uid='+uid;
+}
+
+async function sendComment(){
+  const text = document.getElementById('commentInput').value.trim();
+  if(!text)return;
+  await fetch(`${API}?act=createComment&uid=${uid}&postId=${currentPostId}&text=${encodeURIComponent(text)}`);
+  document.getElementById('commentInput').value='';
+  await loadAll();
+  renderComments();
+}
+
+async function likeComment(cid,e){
+  e.stopPropagation();
+  if(likedComments.includes(cid))return;
+  likedComments.push(cid);
+  localStorage.setItem('likedComments',JSON.stringify(likedComments));
+  await fetch(`${API}?act=likeComment&cid=${cid}`);
+  await loadAll();
+  renderComments();
+}
+
+async function createPost(){
+  const title=document.getElementById('title').value.trim();
+  const content=document.getElementById('content').value.trim();
+  if(!title||!content){alert('不能为空');return}
+  await fetch(`${API}?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
+  hidePost();
+  await loadAll();
+  renderList();
+}
+
+async function likePost(postId,e){
+  e.stopPropagation();
+  if(likedPosts.includes(postId))return;
+  likedPosts.push(postId);
+  localStorage.setItem('likedPosts',JSON.stringify(likedPosts));
+  await fetch(`${API}?act=like&postId=${postId}`);
+  await loadAll();
+  renderList();
+}
+
+async function delPost(postId,e){
+  e.stopPropagation();
+  if(!confirm('确定删除？'))return;
+  await fetch(`${API}?act=deletePost&uid=${uid}&targetId=${postId}`);
+  await loadAll();
+  renderList();
 }
 
 function goDetail(id){history.pushState(null,null,`#/${id}`);route()}
@@ -219,11 +308,7 @@ function route(){
   document.getElementById('detailPage').classList.toggle('active',hash!=='/');
   if(hash!=='/'){
     const p=postsData.find(x=>x.postId==hash.replace('/',''));
-    if(p){
-      document.getElementById('detailTitle').textContent=p.title;
-      document.getElementById('detailInfo').textContent=`${p.user} (${p.uid}) · ${p.time}`;
-      document.getElementById('detailContent').textContent=p.content;
-    }else goBack();
+    if(p)renderDetail(p);else goBack();
   }
 }
 </script>
