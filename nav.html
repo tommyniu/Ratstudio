@@ -8,7 +8,6 @@
   top: 0;
   left: 0;
   z-index: 999;
-  /* 布局关键：左 + 自动中间留白 + 右 */
   display: flex;
   align-items: center;
   padding: 0 24px;
@@ -16,9 +15,8 @@
   font-family: "Microsoft YaHei", sans-serif;
 }
 
-/* 左侧用户区域：固定宽度，不挤压右边 */
+/* 左侧用户区域 */
 .user-left {
-  width: 200px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -38,7 +36,7 @@
   cursor: pointer;
 }
 
-/* 昵称UID文字 */
+/* 文字信息 */
 .user-info {
   display: flex;
   flex-direction: column;
@@ -54,19 +52,18 @@
   color: #888;
 }
 
-/* 中间空白层：自动占满剩余空间，把右边按钮死死推到最右 */
+/* 中间撑开，把按钮推到最右侧 */
 .mid-fill {
   flex: 1;
 }
 
-/* 右侧菜单：永远钉在右上角，不会左移 */
+/* 右侧按钮 */
 .menu {
   display: flex;
   gap: 20px;
   align-items: center;
 }
 
-/* 按钮动画完全保留你原版 */
 .btn {
   font-size: 14px;
   color: #666;
@@ -84,7 +81,6 @@
   font-weight: bold;
 }
 
-/* 退出登录 */
 .logout {
   color: #ff4444;
   cursor: pointer;
@@ -93,20 +89,20 @@
 </style>
 
 <div class="nav">
-  <!-- 左上角：头像+昵称+UID 固定宽度 -->
-  <div class="user-left" id="userWrap" style="display:none">
+  <!-- 左侧：头像 + 昵称 + UID（已修复显示） -->
+  <div class="user-left" id="userWrap">
     <div class="avatar" id="avatar">U</div>
     <div class="user-info">
-      <div class="user-name" id="username"></div>
-      <div class="user-uid">UID: <span id="uid"></span></div>
+      <div class="user-name" id="username">用户名</div>
+      <div class="user-uid">UID: <span id="uid">0</span></div>
     </div>
   </div>
 
-  <!-- 中间自动撑开 隔离左右 -->
   <div class="mid-fill"></div>
 
-  <!-- 右上角：导航永远钉在最右，不会被挤 -->
+  <!-- 右侧：导航（新增【主页】） -->
   <div class="menu">
+    <div class="btn" onclick="location.href='home.html'">主页</div>
     <div class="btn" onclick="location.href='index.html'">聊天室</div>
     <div class="btn" onclick="location.href='forum.html'">论坛</div>
     <div class="btn" onclick="location.href='history.html'">更新日志</div>
@@ -116,27 +112,32 @@
 </div>
 
 <script>
+// 退出登录
 function logout() {
   if (!confirm("确定退出登录？")) return;
   localStorage.clear();
-  location.href = "index.html";
+  location.href = "home.html";
 }
 
+// 初始化用户信息（已修复）
 window.onload = function() {
   let username = localStorage.getItem("username");
   let uid = localStorage.getItem("uid");
 
   if (username && uid) {
-    document.getElementById("userWrap").style.display = "flex";
-    document.getElementById("avatar").innerText = username.charAt(0).toUpperCase();
     document.getElementById("username").innerText = username;
     document.getElementById("uid").innerText = uid;
-
+    document.getElementById("avatar").innerText = username.charAt(0).toUpperCase();
+    
     document.getElementById("avatar").onclick = function() {
       location.href = "personal.html?uid=" + uid;
     };
+  } else {
+    // 未登录隐藏用户信息
+    document.getElementById("userWrap").style.display = "none";
   }
 
+  // 高亮当前页面
   let page = location.pathname.split("/").pop();
   document.querySelectorAll(".btn").forEach(btn => {
     if (btn.getAttribute("onclick").includes(page)) {
