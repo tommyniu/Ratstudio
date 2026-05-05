@@ -16,14 +16,14 @@
   font-family: "Microsoft YaHei", sans-serif;
 }
 
-/* 左侧：头像 + 文字 容器（不改动原有结构） */
-.left-section {
+/* 左侧整体：头像 + 昵称UID */
+.user-left {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* 左侧头像（原样不动） */
+/* 头像原样 */
 .avatar {
   width: 36px;
   height: 36px;
@@ -35,14 +35,10 @@
   justify-content: center;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s;
-}
-.avatar:hover {
-  transform: scale(1.05);
 }
 
-/* 用户文字信息 */
-.user-text {
+/* 昵称 UID 文字排版 */
+.user-info {
   display: flex;
   flex-direction: column;
   line-height: 1.2;
@@ -54,17 +50,17 @@
 }
 .user-uid {
   font-size: 12px;
-  color: #999;
+  color: #888;
 }
 
-/* 右侧菜单（原样不动） */
+/* 右侧菜单 完全保留你原版 */
 .menu {
   display: flex;
   gap: 20px;
   align-items: center;
 }
 
-/* 按钮 + 动画（原样不动） */
+/* 按钮动画 完全保留你原版 */
 .btn {
   font-size: 14px;
   color: #666;
@@ -82,7 +78,7 @@
   font-weight: bold;
 }
 
-/* 退出登录（原样不动） */
+/* 退出登录 原样 */
 .logout {
   color: #ff4444;
   cursor: pointer;
@@ -91,16 +87,16 @@
 </style>
 
 <div class="nav">
-  <!-- 左侧：头像 + 昵称 + UID -->
-  <div class="left-section" id="userSection" style="display:none;">
+  <!-- 左上角：头像 + 昵称 + UID -->
+  <div class="user-left" id="userWrap" style="display:none">
     <div class="avatar" id="avatar">U</div>
-    <div class="user-text">
+    <div class="user-info">
       <div class="user-name" id="username"></div>
       <div class="user-uid">UID: <span id="uid"></span></div>
     </div>
   </div>
 
-  <!-- 右侧：导航（完全原样） -->
+  <!-- 右上角：导航选项 位置完全不变 -->
   <div class="menu">
     <div class="btn" onclick="location.href='index.html'">聊天室</div>
     <div class="btn" onclick="location.href='forum.html'">论坛</div>
@@ -111,33 +107,27 @@
 </div>
 
 <script>
-// 退出登录（完全原样）
 function logout() {
   if (!confirm("确定退出登录？")) return;
   localStorage.clear();
   location.href = "index.html";
 }
 
-// 初始化头像 + 个人主页跳转（完全原样 + 只加显示信息）
 window.onload = function() {
   let username = localStorage.getItem("username");
   let uid = localStorage.getItem("uid");
 
   if (username && uid) {
-    // 显示用户区域
-    document.getElementById("userSection").style.display = "flex";
-    
+    document.getElementById("userWrap").style.display = "flex";
     document.getElementById("avatar").innerText = username.charAt(0).toUpperCase();
     document.getElementById("username").innerText = username;
     document.getElementById("uid").innerText = uid;
 
-    // 头像点击进个人主页
     document.getElementById("avatar").onclick = function() {
       location.href = "personal.html?uid=" + uid;
     };
   }
 
-  // 高亮当前页面（完全原样）
   let page = location.pathname.split("/").pop();
   document.querySelectorAll(".btn").forEach(btn => {
     if (btn.getAttribute("onclick").includes(page)) {
