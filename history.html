@@ -8,54 +8,7 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
-/* ==================== 统一顶部导航 ==================== */
-.top-nav{
-  width:100%;height:56px;background:#fff;
-  border-bottom:1px solid #e5e6eb;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;position:fixed;top:0;left0;z-index:999;
-  gap:8px;
-}
-.nav-left{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.avatar{
-  width:36px;height:36px;border-radius:50%;
-  background:#0066cc;color:#fff;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:bold;font-size:15px;flex-shrink:0;
-}
-.user-info-mini{
-  display:flex;flex-direction:column;
-  font-size:12px;color:#666;line-height:1.2;
-  white-space:nowrap;
-}
-.user-info-mini .name{font-weight:bold;color:#333;font-size:13px;}
-
-.nav-right{
-  display:flex;gap:6px;align-items:center;
-  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
-  padding-right:4px;
-}
-.nav-right::-webkit-scrollbar{display:none}
-.nav-item{
-  font-size:clamp(12px,1.8vw,14px);
-  color:#666;cursor:pointer;
-  padding:6px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;
-  transition:background 0.2s;
-}
-.nav-item.active{color:#0066cc;background:#e8f0fe;}
-.nav-item:hover{background:#f1f5ff;}
-
-.logout-btn{
-  font-size:clamp(12px,1.8vw,14px);
-  color:#ff4d4f;
-  cursor:pointer;
-  padding:6px 8px;
-  border-radius:6px;
-  white-space:nowrap;
-  flex-shrink:0;
-}
-
-/* ==================== 你原来的页面样式 100% 保留 ==================== */
+/* 页面内容样式（保留你原来的） */
 .container{
   width:100%;height:calc(100% - 56px);
   margin-top:56px;padding:24px;overflow-y:auto;
@@ -88,28 +41,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 ::-webkit-scrollbar-thumb{background:#dcdcdc;border-radius:3px}
 </style>
 </head>
+
 <body>
 
-<!-- ==================== 新版统一顶部栏 ==================== -->
-<div class="top-nav">
-  <div class="nav-left" id="userHead" style="display:none">
-    <div class="avatar" id="topAvatar">U</div>
-    <div class="user-info-mini">
-      <div class="name" id="miniName">用户名</div>
-      <div>UID: <span id="miniUid">1</span></div>
-    </div>
-  </div>
+<!-- 公共顶部导航（自动加载） -->
+<div id="navContainer"></div>
+<script>
+fetch('nav.html')
+.then(res => res.text())
+.then(html => {
+  document.getElementById('navContainer').innerHTML = html;
+});
+</script>
 
-  <div class="nav-right">
-    <div class="nav-item" onclick="location.href='index.html'">聊天室</div>
-    <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
-    <div class="nav-item active">更新日志</div>
-    <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
-    <div class="logout-btn" onclick="logout()">退出</div>
-  </div>
-</div>
-
-<!-- ==================== 你原来的内容 100% 不变 ==================== -->
+<!-- 页面内容（完全不变） -->
 <div class="container">
   <div class="log-box">
     <h2>更新日志 | 当前版本：<span class="version-text">V1.3.4</span></h2>
@@ -118,36 +63,5 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </div>
 
 <script src="version.js"></script>
-<script>
-function getAvatarChar(name){
-  if(!name) return 'U';
-  return name.charAt(0).toUpperCase();
-}
-
-// 去个人主页
-function goMyHome(){
-  location.href = 'personal.html?uid=' + localStorage.getItem('uid');
-}
-
-// 退出登录
-function logout(){
-  if(!confirm('确定退出登录？')) return;
-  localStorage.clear();
-  location.href = 'index.html';
-}
-
-window.onload = () => {
-  let u = localStorage.getItem('username');
-  let id = localStorage.getItem('uid');
-  if(u && id){
-    document.getElementById('userHead').style.display = 'flex';
-    document.getElementById('miniName').innerText = u;
-    document.getElementById('miniUid').innerText = id;
-    document.getElementById('topAvatar').innerText = getAvatarChar(u);
-    // 点击头像进个人主页
-    document.getElementById('topAvatar').onclick = goMyHome;
-  }
-};
-</script>
 </body>
 </html>
