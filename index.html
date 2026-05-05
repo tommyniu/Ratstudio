@@ -12,30 +12,47 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   width:100%;height:56px;background:#fff;
   border-bottom:1px solid #e5e6eb;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 24px;position:fixed;top:0;left:0;z-index:999;
+  padding:0 16px;position:fixed;top:0;left:0;z-index:999;
+  gap:8px;
 }
-.nav-left{display:flex;align-items:center;gap:12px;}
+.nav-left{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .avatar{
-  width:38px;height:38px;border-radius:50%;
-  background:#0066cc;color:#fff;
+  width:36px;height:36px;border-radius:50%;
+  background:#0066cc;color:#fff;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  font-weight:bold;font-size:16px;
-  cursor:pointer;
+  font-weight:bold;font-size:15px;flex-shrink:0;
 }
 .user-info-mini{
   display:flex;flex-direction:column;
-  font-size:13px;color:#666;line-height:1.2;
-}
-.user-info-mini .name{font-weight:bold;color:#333;font-size:14px;}
-
-.nav-right{display:flex;gap:24px;align-items:center;}
-.nav-item{
-  font:14px/1 sans-serif;color:#666;cursor:pointer;
-  padding:8px 12px;border-radius:8px;transition:0.2s;
+  font-size:12px;color:#666;line-height:1.2;
   white-space:nowrap;
+}
+.user-info-mini .name{font-weight:bold;color:#333;font-size:13px;}
+
+.nav-right{
+  display:flex;gap:6px;align-items:center;
+  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
+  padding-right:4px;
+}
+.nav-right::-webkit-scrollbar{display:none}
+.nav-item{
+  font-size:clamp(12px,1.8vw,14px);
+  color:#666;cursor:pointer;
+  padding:6px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;
+  transition:background 0.2s;
 }
 .nav-item.active{color:#0066cc;background:#e8f0fe;}
 .nav-item:hover{background:#f1f5ff;}
+
+.logout-btn{
+  font-size:clamp(12px,1.8vw,14px);
+  color:#ff4d4f;
+  cursor:pointer;
+  padding:6px 8px;
+  border-radius:6px;
+  white-space:nowrap;
+  flex-shrink:0;
+}
 
 #app{
   position:fixed;top:56px;left:0;
@@ -116,9 +133,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   border:none;border-radius:10px;cursor:pointer;margin-top:6px;font-size:14px;
 }
 .login-box button:last-of-type{background:#f1f2f3;color:#333;}
-
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-thumb{background:#dcdcdc;border-radius:3px}
 </style>
 </head>
 
@@ -136,6 +150,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
     <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
     <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
     <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
+    <div class="logout-btn" onclick="logout()">退出</div>
   </div>
 </div>
 
@@ -161,9 +176,16 @@ const API = '/api';
 const ADMIN = [1];
 let me, uid;
 
-function ava(n){ return n ? n.charAt(0).toUpperCase() : 'U'; }
+function ava(n){ return n ? n[0].toUpperCase() : 'U'; }
 function isAdmin(id){ return ADMIN.includes(Number(id)); }
 function goHome(){ location.href = '/personal.html?uid=' + uid; }
+
+// 退出登录
+function logout(){
+  if(!confirm('确定退出登录？')) return;
+  localStorage.clear();
+  location.reload();
+}
 
 window.onload = function(){
   me = localStorage.getItem('username');
@@ -174,12 +196,6 @@ window.onload = function(){
   }
   setInterval(loadMsg, 2000);
 };
-
-function logout(){
-  if(!confirm('确定退出登录？')) return;
-  localStorage.clear();
-  location.reload();
-}
 
 function showChat(){
   loginPage.style.display = 'none';
