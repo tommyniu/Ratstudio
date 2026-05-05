@@ -44,31 +44,31 @@
   </div>
 </div>
 
+<!-- 🔥 核心：自动执行、自动刷新、不用别的页面配合 -->
 <script>
-// 自动加载顶部导航用户信息
-function loadTopNav() {
-  let username = localStorage.getItem('username');
-  let uid = localStorage.getItem('uid');
-  let avatar = document.getElementById('topAvatar');
-  let miniName = document.getElementById('miniName');
-  let miniUid = document.getElementById('miniUid');
-  let logoutBtn = document.getElementById('logoutBtn');
+(function autoUpdateNav() {
+  // 等待 DOM 加载完毕
+  setTimeout(() => {
+    const username = localStorage.getItem('username');
+    const uid = localStorage.getItem('uid');
+    const avatar = document.getElementById('topAvatar');
+    const miniName = document.getElementById('miniName');
+    const miniUid = document.getElementById('miniUid');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-  if (username && uid) {
-    // 显示用户名首字母
-    let firstChar = username.charAt(0).toUpperCase();
-    avatar.innerText = firstChar;
-    miniName.innerText = username;
-    miniUid.innerText = uid;
-    logoutBtn.style.display = 'block';
-  } else {
-    avatar.innerText = 'U';
-    miniName.innerText = '游客';
-    miniUid.innerText = '未登录';
-    logoutBtn.style.display = 'none';
-  }
-}
-
-// 页面加载时运行
-window.addEventListener('load', loadTopNav);
+    if (username && uid && avatar) {
+      // 取首字母 → 自动显示头像
+      const firstChar = username.charAt(0).toUpperCase();
+      avatar.innerText = firstChar;
+      miniName.innerText = username;
+      miniUid.innerText = uid;
+      logoutBtn.style.display = 'block';
+    } else {
+      if (avatar) avatar.innerText = 'U';
+      if (miniName) miniName.innerText = '游客';
+      if (miniUid) miniUid.innerText = '未登录';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+    }
+  }, 10);
+})();
 </script>
