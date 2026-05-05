@@ -1,58 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>主页 - RatStudio的小站</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+body{background:#f7f8fa;padding-top:80px}
+
+.container{max-width:1000px;margin:0 auto;padding:0 20px}
+.welcome{background:#fff;padding:30px;border-radius:16px;margin-bottom:20px}
+.welcome h1{font-size:22px;margin-bottom:10px}
+.welcome p{color:#666}
+
+.quick{background:#fff;padding:24px;border-radius:16px;margin-bottom:20px}
+.quick h3{margin-bottom:16px}
+.quick .items{display:flex;gap:16px;flex-wrap:wrap}
+.quick .item{padding:12px 16px;background:#f5f5f5;border-radius:8px;color:#333;text-decoration:none}
+.quick .item:hover{background:#e8f0fe}
+
+.recommend{background:#fff;padding:24px;border-radius:16px}
+.recommend h3{margin-bottom:16px}
+.random-btn{padding:10px 16px;background:#0066cc;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-bottom:16px}
+.post-item{padding:16px;border-bottom:1px solid #eee}
+.post-item:last-child{border-bottom:none}
+.post-item .title{font-weight:bold;margin-bottom:6px}
+.post-item .info{font-size:12px;color:#999}
+.post-item a{color:#0066cc;text-decoration:none}
+</style>
+</head>
+
+<body>
+
+<div id="navContainer"></div>
+
+<div class="container">
+  <div class="welcome">
+    <h1>👋 <span id="nick">游客</span>，欢迎回来</h1>
+    <p id="randomMsg">正在加载…</p>
+  </div>
+
+  <div class="quick">
+    <h3>⚡ 快捷导航</h3>
+    <div class="items">
+      <a class="item" href="forum.html">进入论坛</a>
+      <a class="item" href="chat.html">聊天室</a>
+      <a class="item" href="personal.html">个人中心</a>
+    </div>
+  </div>
+
+  <div class="recommend">
+    <h3>📌 每日推荐</h3>
+    <button class="random-btn" id="randomBtn">🎲 随机抽取一篇帖子</button>
+    <div id="randomPost"></div>
+  </div>
+</div>
+
 <script>
-// 加载导航栏并主动更新状态
+// 加载导航栏 + 自动刷新用户信息
 fetch('nav.html')
 .then(res => res.text())
 .then(html => {
   document.getElementById('navContainer').innerHTML = html;
-  // 导航栏加载完成后，主动更新用户信息
-  updateNavUserState();
-});
 
-// 主动更新导航栏用户状态的函数
-function updateNavUserState() {
-  const u = localStorage.getItem('username');
-  const uid = localStorage.getItem('uid');
+  // 刷新用户状态（安全、不冲突、不白屏）
+  let u = localStorage.getItem('username');
+  let uid = localStorage.getItem('uid');
 
-  // 等导航栏DOM渲染完成再执行
-  setTimeout(() => {
-    const avatar = document.getElementById('topAvatar');
-    const nameEl = document.getElementById('miniName');
-    const uidEl = document.getElementById('miniUid');
-    const logoutBtn = document.getElementById('logoutBtn');
+  if(u && uid){
+    document.getElementById('miniName').innerText = u;
+    document.getElementById('miniUid').innerText = uid;
+    document.getElementById('logoutBtn').style.display = 'block';
+    document.getElementById('nick').innerText = u;
 
-    if (avatar && nameEl && uidEl && logoutBtn) {
-      if (u && uid) {
-        avatar.innerText = u.charAt(0).toUpperCase();
-        nameEl.innerText = u;
-        uidEl.innerText = uid;
-        logoutBtn.style.display = 'block';
-        // 绑定退出事件
-        logoutBtn.onclick = () => {
-          if (confirm('确定退出登录？')) {
-            localStorage.clear();
-            location.href = 'index.html';
-          }
-        };
-        // 绑定头像跳转
-        avatar.onclick = () => {
-          location.href = 'personal.html?uid=' + uid;
-        };
-      } else {
-        avatar.innerText = 'U';
-        nameEl.innerText = '游客';
-        uidEl.innerText = '未登录';
-        logoutBtn.style.display = 'none';
+    // 退出登录
+    document.getElementById('logoutBtn').onclick = function(){
+      if(confirm('确定退出登录？')){
+        localStorage.clear();
+        location.href = 'index.html';
       }
     }
-  }, 100); // 给DOM渲染100ms缓冲时间
-}
 
-// 用户名
-let u = localStorage.getItem('username')
-if(u) document.getElementById('nick').innerText = u
+    // 头像点击
+    document.getElementById('topAvatar').onclick = function(){
+      location.href = 'personal.html?uid='+uid;
+    }
+  }else{
+    document.getElementById('logoutBtn').style.display = 'none';
+  }
+});
 
-// ========== 1. OpenClaw 风随机提示语 ==========
-const openclawStyleMsgs = [
+// 欢迎语
+const msgs = [
   "系统就绪，愿今天的代码无BUG。",
   "一切正常，开始你的创作吧。",
   "终端已唤醒，任务加载完成。",
@@ -60,40 +99,32 @@ const openclawStyleMsgs = [
   "服务运行中，祝你思路清晰。",
   "初始化完成，今日状态：稳定。",
   "像 OpenClaw 一样，随时待命。"
-]
-document.getElementById('randomMsg').innerText = 
-  openclawStyleMsgs[Math.floor(Math.random() * openclawStyleMsgs.length)]
+];
+document.getElementById('randomMsg').innerText = msgs[Math.floor(Math.random()*msgs.length)];
 
-// ========== 2. 从 forum.html 抓取真实帖子（可点击） ==========
-let realPosts = []
+// 随机帖子
+let posts = [];
+fetch('forum.html').then(r=>r.text()).then(h=>{
+  let d = document.createElement('div');
+  d.innerHTML = h;
+  d.querySelectorAll('a.post-link').forEach(a=>{
+    posts.push({title:a.innerText, link:a.href});
+  });
+});
 
-// 先拉取论坛页，解析真实帖子列表
-fetch('forum.html')
-.then(res=>res.text())
-.then(html=>{
-  let div = document.createElement('div')
-  div.innerHTML = html
-  div.querySelectorAll('a.post-link').forEach(a=>{
-    realPosts.push({
-      title: a.innerText.trim(),
-      link: a.getAttribute('href'),
-      info: "来自论坛"
-    })
-  })
-})
-
-// 随机抽取真实帖子
 document.getElementById('randomBtn').onclick = function(){
-  if(realPosts.length === 0){
-    document.getElementById('randomPost').innerHTML = `<div class="post-item">暂无帖子数据，请先访问论坛</div>`
-    return
+  if(posts.length === 0){
+    document.getElementById('randomPost').innerHTML = '<div class="post-item">暂无帖子</div>';
+    return;
   }
-  let p = realPosts[Math.floor(Math.random() * realPosts.length)]
+  let p = posts[Math.floor(Math.random()*posts.length)];
   document.getElementById('randomPost').innerHTML = `
     <div class="post-item">
       <div class="title"><a href="${p.link}">${p.title}</a></div>
-      <div class="info">${p.info}</div>
-    </div>
-  `
+      <div class="info">来自论坛</div>
+    </div>`;
 }
 </script>
+
+</body>
+</html>
