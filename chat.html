@@ -114,9 +114,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </div>
 
 <script>
-// ==============================================
-// 🔥 加载导航栏 + 自动同步登录状态（全站通用）
-// ==============================================
 function loadNav() {
   fetch('nav.html')
   .then(res => res.text())
@@ -146,8 +143,6 @@ function loadNav() {
     }
   })
 }
-
-// 启动导航
 loadNav();
 </script>
 
@@ -155,6 +150,10 @@ loadNav();
 const API = '/api';
 const ADMIN = [1];
 let me, uid;
+
+let msgBuffer = [];
+let flushTimer = null;
+const FLUSH_DELAY = 3000;
 
 function ava(n){ return n ? n[0].toUpperCase() : 'U'; }
 function isAdmin(id){ return ADMIN.includes(Number(id)); }
@@ -197,11 +196,26 @@ async function login(){
   location.reload();
 }
 
+// === 优化：发送消息 → 缓冲批量提交 ===
 async function sendMsg(){
   let m = msgInput.value.trim();
-  if(!m)return;
-  await fetch(`${API}/send?uid=${uid}&msg=${encodeURIComponent(m)}`);
-  msgInput.value='';
+  if(!m) return;
+
+  msgBuffer.push(m);
+  msgInput.value = '';
+
+  clearTimeout(flushTimer);
+  flushTimer = setTimeout(flushMessages, FLUSH_DELAY);
+}
+
+async function flushMessages() {
+  if (msgBuffer.length === 0) return;
+  const batch = [...msgBuffer];
+  msgBuffer = [];
+
+  for (let msg of batch) {
+    await fetch(`${API}/send?uid=${uid}&msg=${encodeURIComponent(msg)}`);
+  }
   loadMsg();
 }
 
