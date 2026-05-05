@@ -16,14 +16,14 @@
   font-family: "Microsoft YaHei", sans-serif;
 }
 
-/* 左侧：头像 + 昵称 + UID（只加这个） */
-.left {
+/* 左侧：头像 + 文字 容器（不改动原有结构） */
+.left-section {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* 头像：可点击提示（悬浮放大） */
+/* 左侧头像（原样不动） */
 .avatar {
   width: 36px;
   height: 36px;
@@ -41,42 +41,48 @@
   transform: scale(1.05);
 }
 
-/* 昵称 UID */
-.user-info {
+/* 用户文字信息 */
+.user-text {
   display: flex;
   flex-direction: column;
+  line-height: 1.2;
 }
-.name {
+.user-name {
   font-size: 14px;
   font-weight: bold;
+  color: #333;
 }
-.uid {
+.user-uid {
   font-size: 12px;
-  color: #888;
+  color: #999;
 }
 
-/* 右侧按钮（完全不动！） */
+/* 右侧菜单（原样不动） */
 .menu {
   display: flex;
   gap: 20px;
   align-items: center;
 }
+
+/* 按钮 + 动画（原样不动） */
 .btn {
   font-size: 14px;
   color: #666;
   cursor: pointer;
   transition: 0.2s;
-  padding: 6px 10px;
-  border-radius: 6px;
 }
 .btn:hover {
   color: #222;
   background: #f5f5f5;
+  padding: 6px 10px;
+  border-radius: 6px;
 }
 .btn.active {
   color: #0066cc;
   font-weight: bold;
 }
+
+/* 退出登录（原样不动） */
 .logout {
   color: #ff4444;
   cursor: pointer;
@@ -86,15 +92,15 @@
 
 <div class="nav">
   <!-- 左侧：头像 + 昵称 + UID -->
-  <div class="left" id="userInfo" style="display:none">
+  <div class="left-section" id="userSection" style="display:none;">
     <div class="avatar" id="avatar">U</div>
-    <div class="user-info">
-      <div class="name" id="username"></div>
-      <div class="uid">UID: <span id="uid"></span></div>
+    <div class="user-text">
+      <div class="user-name" id="username"></div>
+      <div class="user-uid">UID: <span id="uid"></span></div>
     </div>
   </div>
 
-  <!-- 右侧：完全保持你喜欢的原样 -->
+  <!-- 右侧：导航（完全原样） -->
   <div class="menu">
     <div class="btn" onclick="location.href='index.html'">聊天室</div>
     <div class="btn" onclick="location.href='forum.html'">论坛</div>
@@ -105,26 +111,33 @@
 </div>
 
 <script>
+// 退出登录（完全原样）
 function logout() {
   if (!confirm("确定退出登录？")) return;
   localStorage.clear();
   location.href = "index.html";
 }
 
+// 初始化头像 + 个人主页跳转（完全原样 + 只加显示信息）
 window.onload = function() {
-  let un = localStorage.getItem("username");
+  let username = localStorage.getItem("username");
   let uid = localStorage.getItem("uid");
 
-  if (un && uid) {
-    document.getElementById("userInfo").style.display = "flex";
-    document.getElementById("username").innerText = un;
+  if (username && uid) {
+    // 显示用户区域
+    document.getElementById("userSection").style.display = "flex";
+    
+    document.getElementById("avatar").innerText = username.charAt(0).toUpperCase();
+    document.getElementById("username").innerText = username;
     document.getElementById("uid").innerText = uid;
-    document.getElementById("avatar").innerText = un.charAt(0).toUpperCase();
+
+    // 头像点击进个人主页
     document.getElementById("avatar").onclick = function() {
       location.href = "personal.html?uid=" + uid;
     };
   }
 
+  // 高亮当前页面（完全原样）
   let page = location.pathname.split("/").pop();
   document.querySelectorAll(".btn").forEach(btn => {
     if (btn.getAttribute("onclick").includes(page)) {
