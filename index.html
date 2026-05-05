@@ -43,7 +43,7 @@ body{background:#f7f8fa;padding-top:80px}
     <h3>⚡ 快捷导航</h3>
     <div class="items">
       <a class="item" href="forum.html">进入论坛</a>
-      <a class="item" href="index.html">聊天室</a>
+      <a class="item" href="chat.html">聊天室</a>
       <a class="item" href="personal.html">个人中心</a>
     </div>
   </div>
@@ -89,7 +89,6 @@ fetch('forum.html')
 .then(html=>{
   let div = document.createElement('div')
   div.innerHTML = html
-  // 假设论坛里帖子链接是 <a class="post-link" href="post.html?id=xxx">标题</a>
   div.querySelectorAll('a.post-link').forEach(a=>{
     realPosts.push({
       title: a.innerText.trim(),
