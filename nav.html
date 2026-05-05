@@ -53,46 +53,16 @@
     <div class="nav-item" onclick="location.href='index.html'">主页</div>
     <div class="nav-item" onclick="location.href='chat.html'">聊天室</div>
     <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
-    <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
     <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
+    <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
     <div class="logout" id="logoutBtn">退出登录</div>
   </div>
 </div>
 
 <script>
-// 等整个页面 DOM 完全加载完再执行，不轮询、不耗资源
+// 只做导航高亮，不读取登录状态
 document.addEventListener('DOMContentLoaded', function(){
-  const u = localStorage.getItem('username');
-  const uid = localStorage.getItem('uid');
-
-  const avatar = document.getElementById('topAvatar');
-  const nameEl = document.getElementById('miniName');
-  const uidEl = document.getElementById('miniUid');
-  const logout = document.getElementById('logoutBtn');
-
-  if (u && uid) {
-    avatar.innerText = u.charAt(0).toUpperCase();
-    nameEl.innerText = u;
-    uidEl.innerText = uid;
-
-    avatar.onclick = function(){
-      location.href = 'personal.html?uid=' + uid;
-    };
-
-    logout.onclick = function(){
-      if(!confirm('确定退出登录？')) return;
-      localStorage.clear();
-      location.href = 'index.html';
-    };
-  } else {
-    avatar.innerText = 'U';
-    nameEl.innerText = '游客';
-    uidEl.innerText = '未登录';
-    logout.style.display = 'none';
-  }
-
-  // 导航高亮
-  const page = location.pathname.split('/').pop();
+  let page = location.pathname.split('/').pop();
   document.querySelectorAll('.nav-item').forEach(i => {
     if (i.getAttribute('onclick').includes(page)) {
       i.classList.add('active');
