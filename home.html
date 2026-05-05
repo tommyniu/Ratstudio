@@ -26,6 +26,7 @@ body{background:#f7f8fa;padding-top:80px}
 .post-item:last-child{border-bottom:none}
 .post-item .title{font-weight:bold;margin-bottom:6px}
 .post-item .info{font-size:12px;color:#999}
+.post-item a{color:#0066cc;text-decoration:none}
 </style>
 </head>
 
@@ -34,8 +35,8 @@ body{background:#f7f8fa;padding-top:80px}
 
 <div class="container">
   <div class="welcome">
-    <h1>👋 欢迎回来，<span id="nick">游客</span></h1>
-    <p>这里是主页，你可以浏览推荐、快捷跳转、随机查看有趣的帖子</p>
+    <h1>👋 <span id="nick">游客</span>，欢迎回来</h1>
+    <p id="randomMsg">正在加载…</p>
   </div>
 
   <div class="quick">
@@ -62,21 +63,52 @@ fetch('nav.html')
   document.getElementById('navContainer').innerHTML = html
 })
 
-// 欢迎词
+// 用户名
 let u = localStorage.getItem('username')
 if(u) document.getElementById('nick').innerText = u
 
-// 随机帖子
-let posts = [
-  {title:"分享一下最近学习心得",info:"作者：admin"},
-  {title:"网页新版本更新公告",info:"作者：系统"},
-  {title:"大家喜欢什么功能？",info:"作者：用户"}
+// ========== 1. OpenClaw 风随机提示语 ==========
+const openclawStyleMsgs = [
+  "系统就绪，愿今天的代码无BUG。",
+  "一切正常，开始你的创作吧。",
+  "终端已唤醒，任务加载完成。",
+  "环境准备完毕，随时可以开工。",
+  "服务运行中，祝你思路清晰。",
+  "初始化完成，今日状态：稳定。",
+  "像 OpenClaw 一样，随时待命。"
 ]
+document.getElementById('randomMsg').innerText = 
+  openclawStyleMsgs[Math.floor(Math.random() * openclawStyleMsgs.length)]
+
+// ========== 2. 从 forum.html 抓取真实帖子（可点击） ==========
+let realPosts = []
+
+// 先拉取论坛页，解析真实帖子列表
+fetch('forum.html')
+.then(res=>res.text())
+.then(html=>{
+  let div = document.createElement('div')
+  div.innerHTML = html
+  // 假设论坛里帖子链接是 <a class="post-link" href="post.html?id=xxx">标题</a>
+  div.querySelectorAll('a.post-link').forEach(a=>{
+    realPosts.push({
+      title: a.innerText.trim(),
+      link: a.getAttribute('href'),
+      info: "来自论坛"
+    })
+  })
+})
+
+// 随机抽取真实帖子
 document.getElementById('randomBtn').onclick = function(){
-  let p = posts[Math.floor(Math.random()*posts.length)]
+  if(realPosts.length === 0){
+    document.getElementById('randomPost').innerHTML = `<div class="post-item">暂无帖子数据，请先访问论坛</div>`
+    return
+  }
+  let p = realPosts[Math.floor(Math.random() * realPosts.length)]
   document.getElementById('randomPost').innerHTML = `
     <div class="post-item">
-      <div class="title">${p.title}</div>
+      <div class="title"><a href="${p.link}">${p.title}</a></div>
       <div class="info">${p.info}</div>
     </div>
   `
