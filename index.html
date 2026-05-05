@@ -136,6 +136,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
     <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
     <div class="nav-item" onclick="location.href='history.html'">日志</div>
     <div class="nav-item" onclick="location.href='plan.html'">规划</div>
+    <div class="nav-item" style="color:#ff4d4f" onclick="logout()">退出</div>
   </div>
 </div>
 
@@ -165,27 +166,22 @@ function ava(n){ return n ? n[0].toUpperCase() : 'U'; }
 function isAdmin(id){ return ADMIN.includes(Number(id)); }
 function goHome(){ location.href = '/personal.html?uid=' + uid; }
 
-window.onload = async function(){
+window.onload = function(){
   me = localStorage.getItem('username');
   uid = localStorage.getItem('uid');
-  
-  // 自动修复 UID 重复问题（登录时校验）
   if(me && uid){
-    try {
-      let res = await fetch(`${API}/checkUser?user=${me}&uid=${uid}`);
-      let realUid = await res.text();
-      if(realUid && realUid !== uid){
-        localStorage.setItem('uid', realUid);
-        uid = realUid;
-      }
-    }catch(e){}
-    
     showChat();
     document.getElementById('topAvatar').onclick = goHome;
   }
-  
   setInterval(loadMsg, 2000);
 };
+
+// 退出登录
+function logout(){
+  if(!confirm('确定退出登录？')) return;
+  localStorage.clear();
+  location.reload();
+}
 
 function showChat(){
   loginPage.style.display = 'none';
@@ -215,11 +211,8 @@ async function login(){
   let res = await fetch(`${API}/login?user=${u}&pwd=${p}`);
   let t = await res.text();
   if(!t||t==='fail')return alert('登录失败');
-  
-  // 登录自动修正 UID
   localStorage.setItem('username',u);
   localStorage.setItem('uid',t);
-  alert('登录成功');
   location.reload();
 }
 
@@ -236,11 +229,11 @@ async function loadMsg(){
   let b = msgBox;
   let auto = Math.abs(b.scrollTop+b.clientHeight-b.scrollHeight)<20;
   b.innerHTML='';
-  list.forEach(o=>{
+  list.forEach((o,idx)=>{
     let isMe = o.uid == uid;
     let withdrawBtn = '';
     if(isMe || isAdmin(uid)){
-      withdrawBtn = `<button onclick="withdraw(${o.id})" class="withdraw-btn">撤回</button>`;
+      withdrawBtn = `<button onclick="withdraw(${idx})" class="withdraw-btn">撤回</button>`;
     }
     b.innerHTML+=`
     <div class="message ${isMe?'me':''}">
@@ -254,10 +247,9 @@ async function loadMsg(){
   if(auto)b.scrollTop=b.scrollHeight;
 }
 
-// 修复撤回功能
-async function withdraw(id){
-  if(!confirm('确定要撤回这条消息？'))return;
-  await fetch(`${API}/deleteMsg?msgId=${id}`);
+async function withdraw(idx){
+  if(!confirm('确定撤回这条消息？'))return;
+  await fetch(`${API}?act=deleteMsg&uid=${uid}&targetId=${idx}`);
   alert('已撤回');
   loadMsg();
 }
