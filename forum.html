@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>论坛 - RatStudio的小站</title>
 <style>
-* {
+/* 全局 iOS 丝滑动画曲线 */
+:root{
+  --ios-ease: cubic-bezier(0.25, 1, 0.5, 1);
+  --ani-fade: all 0.4s var(--ios-ease);
+}
+*{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -18,6 +23,10 @@ html, body {
   background: #f4f5f7;
   color: #333;
 }
+
+/* 全局滚动条 */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
 .container {
   margin-top: 56px;
@@ -35,9 +44,14 @@ html, body {
   background: #f4f5f7;
   padding: 20px;
   display: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: var(--ani-fade);
 }
 .page.active {
   display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .content-wrap {
@@ -45,7 +59,6 @@ html, body {
   margin: 0 auto;
 }
 
-/* 贴吧/B站风格标签栏 */
 .forum-tab-bar {
   background: #fff;
   border-radius: 8px;
@@ -60,13 +73,13 @@ html, body {
   cursor: pointer;
   padding: 4px 0;
   border-bottom: 2px solid transparent;
+  transition: var(--ani-fade);
 }
 .forum-tab.active {
   color: #0066cc;
   border-color: #0066cc;
 }
 
-/* 排序 */
 .sort-bar {
   background: #fff;
   padding: 10px 14px;
@@ -80,25 +93,31 @@ html, body {
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 4px;
+  transition: var(--ani-fade);
 }
 .sort-item.active {
   background: #0066cc;
   color: #fff;
 }
 
-/* 帖子卡片（B站/贴吧质感）*/
+/* 帖子卡片 iOS 丝滑动效 */
 .post-card {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 16px;
   margin-bottom: 10px;
   cursor: pointer;
   border: 1px solid #e5e6eb;
-  transition: box-shadow 0.2s;
+  transition: var(--ani-fade);
 }
 .post-card:hover {
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
+.post-card:active{
+  transform: scale(0.98);
+}
+
 .post-header {
   display: flex;
   align-items: center;
@@ -133,7 +152,7 @@ html, body {
   color: #999;
   margin-left: auto;
 }
-/* 标签 */
+
 .post-tags {
   display: flex;
   gap: 6px;
@@ -170,20 +189,43 @@ html, body {
   display: flex;
   gap: 18px;
   font-size: 13px;
-  color: #666;
+  color: 666;
   align-items: center;
 }
 .post-action {
   cursor: pointer;
+  transition: var(--ani-fade);
+}
+.post-action:active{
+  transform: scale(0.92);
 }
 .post-action.del {
   color: #e53935;
 }
 
-/* 帖子详情 */
+/* 帖子图片样式 */
+.post-img-list{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.post-img-list img{
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--ani-fade);
+}
+.post-img-list img:hover{
+  transform: scale(1.05);
+}
+
+/* 详情 */
 .detail-card {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
   margin-bottom: 12px;
 }
@@ -201,20 +243,28 @@ html, body {
   background: #fff;
   border: 1px solid #e5e6eb;
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   margin-bottom: 12px;
+  transition: var(--ani-fade);
+}
+.back-btn:active{
+  transform: scale(0.96);
 }
 
 /* 评论 */
 .comment-list {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 16px;
 }
 .comment-item {
   padding: 12px 0;
   border-bottom: 1px solid #f2f2f2;
+  transition: var(--ani-fade);
+}
+.comment-item:active{
+  background: #fafafa;
 }
 .comment-avatar {
   width: 32px;
@@ -255,6 +305,10 @@ html, body {
 }
 .comment-action {
   cursor: pointer;
+  transition: var(--ani-fade);
+}
+.comment-action:active{
+  transform: scale(0.92);
 }
 .comment-action.del {
   color: #e53935;
@@ -280,9 +334,13 @@ html, body {
   border: none;
   border-radius: 20px;
   cursor: pointer;
+  transition: var(--ani-fade);
+}
+.comment-send:active{
+  transform: scale(0.92);
 }
 
-/* 发帖按钮 */
+/* 发帖悬浮按钮 */
 .fab {
   position: fixed;
   bottom: 20px;
@@ -297,11 +355,15 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 10px #00000030;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
   z-index: 999;
+  transition: var(--ani-fade);
+}
+.fab:active{
+  transform: scale(0.9);
 }
 
-/* 发帖弹窗 */
+/* 弹窗 iOS 缩放动画 */
 .mask {
   position: fixed;
   top: 0;
@@ -313,15 +375,27 @@ html, body {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s var(--ios-ease);
+}
+.mask.show{
+  display: flex;
+  opacity: 1;
 }
 .pop {
   background: #fff;
   width: 90%;
   max-width: 500px;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 24px;
   position: relative;
+  transform: scale(0.9);
+  transition: transform 0.35s var(--ios-ease);
 }
+.mask.show .pop{
+  transform: scale(1);
+}
+
 .pop-close {
   position: absolute;
   top: 8px;
@@ -336,14 +410,20 @@ html, body {
   background: none;
   border: none;
   color: #666;
+  transition: var(--ani-fade);
 }
+.pop-close:active{
+  transform: scale(0.8);
+}
+
 .pop input, .pop textarea {
   width: 100%;
   padding: 12px;
   border: 1px solid #e5e6eb;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 12px;
   outline: none;
+  transition: var(--ani-fade);
 }
 .pop button {
   width: 100%;
@@ -351,12 +431,60 @@ html, body {
   background: #0066cc;
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
+  transition: var(--ani-fade);
+}
+.pop button:active{
+  transform: scale(0.98);
 }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+/* 图片上传区域 */
+.upload-box{
+  border:1px dashed #ccc;
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:12px;
+}
+.upload-preview{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.upload-preview img{
+  width:80px;
+  height:80px;
+  object-fit:cover;
+  border-radius:8px;
+}
+#fileInput{
+  display:none;
+}
+.upload-btn{
+  display:inline-block;
+  padding:6px 12px;
+  background:#f1f2f3;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:13px;
+}
+
+/* 图片全屏预览层 */
+.img-preview-layer{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.9);
+  display:none;
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+}
+.img-preview-layer img{
+  max-width:90%;
+  max-height:90%;
+}
 </style>
 </head>
 
@@ -368,7 +496,6 @@ html, body {
   <div class="container">
     <div class="page active" id="listPage">
       <div class="content-wrap">
-        <!-- B站/贴吧 标签栏 -->
         <div class="forum-tab-bar">
           <div class="forum-tab active">全部帖子</div>
           <div class="forum-tab">置顶</div>
@@ -400,16 +527,32 @@ html, body {
     </div>
   </div>
 
+  <!-- 发帖弹窗 -->
   <div class="mask" id="postMask">
     <div class="pop">
       <button class="pop-close" onclick="closePost()">×</button>
       <input id="postTitle" placeholder="标题">
       <textarea id="postContent" rows="5" placeholder="内容"></textarea>
+
+      <div class="upload-box">
+        <label class="upload-btn" for="fileInput">选择图片</label>
+        <input type="file" id="fileInput" accept="image/*" multiple>
+        <div class="upload-preview" id="uploadPreview"></div>
+      </div>
+
       <button onclick="doPost()">发布帖子</button>
     </div>
   </div>
 
+  <!-- 图片全屏预览 -->
+  <div class="img-preview-layer" id="imgLayer" onclick="closeImgPreview()">
+    <img id="previewImg" src="">
+  </div>
+
 <script>
+// 图片全局数组
+let imgUrls = [];
+
 function loadNav() {
   fetch('nav.html')
   .then(res => res.text())
@@ -434,8 +577,6 @@ function loadNav() {
 let username = localStorage.getItem('username');
 let uid = localStorage.getItem('uid');
 const API = '/api';
-
-// 🔥 管理员配置（改成你的UID）
 const ADMIN_UIDS = [1];
 function isAdmin() {
   return ADMIN_UIDS.includes(Number(uid));
@@ -452,6 +593,24 @@ window.onload = async () => {
   renderPosts();
   routeByHash();
 
+  // 图片选择监听
+  fileInput.onchange = async function(e){
+    let files = e.target.files;
+    for(let file of files){
+      let form = new FormData();
+      form.append('img', file);
+      let res = await fetch(`${API}/upload`, {
+        method:'POST',
+        body:form
+      });
+      let json = await res.json();
+      if(json.url){
+        imgUrls.push(json.url);
+        renderUploadPreview();
+      }
+    }
+  };
+
   document.querySelectorAll('.sort-item').forEach(el => {
     el.onclick = () => {
       document.querySelectorAll('.sort-item').forEach(i => i.classList.remove('active'));
@@ -463,6 +622,14 @@ window.onload = async () => {
 
   window.addEventListener('hashchange', routeByHash);
 };
+
+function renderUploadPreview(){
+  let html = '';
+  imgUrls.forEach(url=>{
+    html += `<img src="${url}">`;
+  });
+  uploadPreview.innerHTML = html;
+}
 
 async function loadData() {
   posts = await (await fetch(`${API}?act=posts`)).json();
@@ -478,12 +645,23 @@ function renderPosts() {
   const dom = document.getElementById('postList');
   dom.innerHTML = '';
   if (list.length === 0) {
-    dom.innerHTML = `<div style='background:#fff;padding:30px;text-align:center;border-radius:8px;'>暂无帖子</div>`;
+    dom.innerHTML = `<div style='background:#fff;padding:30px;text-align:center;border-radius:12px;'>暂无帖子</div>`;
     return;
   }
 
   list.forEach(p => {
     const isPostAdmin = p.uid == 1;
+    // 渲染帖子图片
+    let imgHtml = '';
+    if(p.imgs){
+      let imgs = JSON.parse(p.imgs);
+      imgHtml += `<div class="post-img-list">`;
+      imgs.forEach(src=>{
+        imgHtml += `<img src="${src}" onclick="openImgPreview('${src}')">`;
+      });
+      imgHtml += `</div>`;
+    }
+
     const card = document.createElement('div');
     card.className = 'post-card';
     card.innerHTML = `
@@ -498,6 +676,7 @@ function renderPosts() {
       </div>
       <div class="post-title">${p.title}</div>
       <div class="post-content-preview">${p.content}</div>
+      ${imgHtml}
       <div class="post-actions">
         <div class="post-action" onclick="likePost(${p.postId},event)">❤️ ${p.like || 0}</div>
         <div class="post-action" onclick="collect(event)">⭐ 收藏</div>
@@ -507,6 +686,14 @@ function renderPosts() {
     card.onclick = () => location.hash = `/` + p.postId;
     dom.appendChild(card);
   });
+}
+
+function openImgPreview(src){
+  previewImg.src = src;
+  imgLayer.style.display = 'flex';
+}
+function closeImgPreview(){
+  imgLayer.style.display = 'none';
 }
 
 function routeByHash() {
@@ -534,6 +721,16 @@ function openDetail(post) {
     ? `<div class="post-action del" onclick="deletePost(${post.postId})">🗑️ 删除帖子</div>`
     : '';
 
+  let imgHtml = '';
+  if(post.imgs){
+    let imgs = JSON.parse(post.imgs);
+    imgHtml += `<div class="post-img-list">`;
+    imgs.forEach(src=>{
+      imgHtml += `<img src="${src}" onclick="openImgPreview('${src}')">`;
+    });
+    imgHtml += `</div>`;
+  }
+
   d.innerHTML = `
     <div class="detail-card">
       <div class="post-header">
@@ -543,6 +740,7 @@ function openDetail(post) {
       </div>
       <div class="detail-title">${post.title}</div>
       <div class="detail-content">${post.content}</div>
+      ${imgHtml}
       <div class="post-actions">
         <div class="post-action" onclick="likePost(${post.postId},event)">❤️ ${post.like || 0}</div>
         <div class="post-action" onclick="collect(event)">⭐ 收藏</div>
@@ -580,9 +778,6 @@ function renderComments() {
   });
 }
 
-// ==========================
-// 🔥 删除修复（现在正常）
-// ==========================
 async function deletePost(pid) {
   if (!confirm('确定删除帖子？')) return;
   await fetch(`${API}?act=deletePost&postId=${pid}`);
@@ -597,12 +792,25 @@ async function deleteComment(cid) {
   renderComments();
 }
 
+function showPost(){
+  postMask.classList.add('show');
+  imgUrls = [];
+  uploadPreview.innerHTML = '';
+  fileInput.value = '';
+  postTitle.value = '';
+  postContent.value = '';
+}
+function closePost(){
+  postMask.classList.remove('show');
+}
+
 async function doPost() {
   const title = document.getElementById('postTitle').value.trim();
   const content = document.getElementById('postContent').value.trim();
   if (!title || !content) return alert('请填写完整');
 
-  await fetch(`${API}?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`);
+  let imgsStr = JSON.stringify(imgUrls);
+  await fetch(`${API}?act=createPost&uid=${uid}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}&imgs=${encodeURIComponent(imgsStr)}`);
   closePost();
   await loadData();
   renderPosts();
@@ -639,8 +847,6 @@ function collect(e) {
   alert('功能开发中~');
 }
 
-function showPost() { document.getElementById('postMask').style.display = 'flex'; }
-function closePost() { document.getElementById('postMask').style.display = 'none'; }
 function goBack() { location.hash = ''; }
 
 loadNav();
