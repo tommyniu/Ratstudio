@@ -9,6 +9,20 @@ export async function onRequestGet({ request, env }) {
 
   try {
     const url = new URL(request.url);
+    
+    // ==========================================
+    // 🔥 核心修改：访问根目录自动跳转到主页 home.html
+    // ==========================================
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      return new Response("", {
+        status: 302,
+        headers: {
+          ...corsHeaders,
+          "Location": "/home.html"
+        }
+      });
+    }
+
     const act = url.searchParams.get("act");
     const uid = url.searchParams.get("uid");
     const targetId = url.searchParams.get("targetId");
