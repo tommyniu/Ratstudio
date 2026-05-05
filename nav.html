@@ -1,4 +1,99 @@
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+
+.top-nav{
+  width:100%;
+  height:56px;
+  background:#fff;
+  border-bottom:1px solid #e5e6eb;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:999;
+}
+
+/* 左上角：个人信息区域 */
+.nav-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+}
+.avatar{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:#0066cc;
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  font-size:16px;
+  transition: all 0.2s ease;
+}
+.avatar:hover{
+  opacity:0.85;
+}
+.user-info-mini{
+  display:flex;
+  flex-direction:column;
+  font-size:12px;
+  color:#666;
+  line-height:1.2;
+}
+.user-info-mini .name{
+  font-weight:bold;
+  color:#333;
+  font-size:13px;
+}
+
+/* 右上角：导航菜单区域 */
+.nav-right{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.nav-item{
+  font-size:14px;
+  color:#666;
+  cursor:pointer;
+  padding:8px 12px;
+  border-radius:8px;
+  transition: all 0.25s ease;
+  white-space:nowrap;
+}
+/* 按钮hover变灰动画 */
+.nav-item:hover{
+  background:#f0f0f0;
+  color:#444;
+}
+/* 当前页面高亮 */
+.nav-item.active{
+  background:#e8f0fe;
+  color:#0066cc;
+}
+
+.logout-btn{
+  font-size:14px;
+  color:#ff4d4f;
+  cursor:pointer;
+  padding:8px 12px;
+  border-radius:8px;
+  transition: all 0.25s ease;
+}
+.logout-btn:hover{
+  background:#fef0f0;
+}
+</style>
+
 <div class="top-nav">
+  <!-- 左上角 头像+昵称+UID -->
   <div class="nav-left" id="userHead" style="display:none">
     <div class="avatar" id="topAvatar">U</div>
     <div class="user-info-mini">
@@ -7,6 +102,7 @@
     </div>
   </div>
 
+  <!-- 右上角 导航按钮组 -->
   <div class="nav-right">
     <div class="nav-item" onclick="location.href='index.html'">聊天室</div>
     <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
@@ -16,67 +112,37 @@
   </div>
 </div>
 
-<style>
-.top-nav{
-  width:100%;height:56px;background:#fff;
-  border-bottom:1px solid #e5e6eb;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;position:fixed;top:0;left:0;z-index:999;
-}
-.nav-left{display:flex;align-items:center;gap:8px;}
-.avatar{
-  width:36px;height:36px;border-radius:50%;
-  background:#0066cc;color:#fff;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:bold;font-size:15px;
-}
-.user-info-mini{
-  display:flex;flex-direction:column;
-  font-size:12px;color:#666;line-height:1.2;
-}
-.user-info-mini .name{font-weight:bold;color:#333;font-size:13px;}
-
-.nav-right{display:flex;gap:6px;align-items:center;}
-.nav-item{
-  font-size:14px;color:#666;cursor:pointer;
-  padding:6px 8px;border-radius:6px;
-}
-.nav-item.active{color:#0066cc;background:#e8f0fe;}
-.logout-btn{
-  font-size:14px;color:#ff4d4f;
-  cursor:pointer;padding:6px 8px;border-radius:6px;
-}
-</style>
-
 <script>
-// 退出
+// 退出登录
 function logout(){
-  if(!confirm('确定退出登录？'))return;
+  if(!confirm('确定退出登录？')) return;
   localStorage.clear();
-  location.href='index.html';
+  location.href = 'index.html';
 }
 
-// 初始化用户信息、头像跳转个人主页
+// 初始化用户信息、头像跳转个人主页、当前页高亮
 window.addEventListener('load',function(){
   let un = localStorage.getItem('username');
   let uid = localStorage.getItem('uid');
+
+  // 显示左上角个人信息
   if(un && uid){
     document.getElementById('userHead').style.display = 'flex';
     document.getElementById('miniName').innerText = un;
     document.getElementById('miniUid').innerText = uid;
     document.getElementById('topAvatar').innerText = un.charAt(0).toUpperCase();
-    // 头像点进个人主页
+    // 头像点击进入个人主页
     document.getElementById('topAvatar').onclick = function(){
       location.href = 'personal.html?uid=' + uid;
     };
   }
 
-  // 当前页面高亮
-  let page = location.pathname.split('/').pop();
-  let items = document.querySelectorAll('.nav-item');
-  items.forEach(el=>{
-    if(el.getAttribute('onclick')?.includes(page)){
-      el.classList.add('active');
+  // 自动高亮当前页面
+  let pageName = location.pathname.split('/').pop();
+  let navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    if(item.getAttribute('onclick').includes(pageName)){
+      item.classList.add('active');
     }
   });
 });
