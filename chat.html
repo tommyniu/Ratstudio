@@ -2,139 +2,240 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>聊天室</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>聊天室 - RatStudio的小站</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Microsoft YaHei,sans-serif}
-body{background:#f4f5f7;height:100vh;overflow:hidden}
-#navContainer{position:fixed;top:0;left:0;width:100%;z-index:999}
-.chat-container{
-  margin-top:56px;
-  height:calc(100% - 56px);
-  display:flex;
-  flex-direction:column;
-  max-width:750px;
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
+
+#app{
+  position:fixed;top:56px;left:0;
+  width:100%;height:calc(100% - 56px);
+  display:flex;flex-direction:column;
+}
+
+#msgBox{
+  flex:1;padding:16px;overflow-y:auto;background:#f9f9f9;
+}
+
+.message{
+  display:flex;gap:8px;margin-bottom:12px;
+  max-width:75%;align-items:flex-start;
+}
+.message.me{
   margin-left:auto;
-  margin-right:auto;
-  padding:10px;
+  flex-direction:row-reverse;
 }
-.chat-box{
-  flex:1;
-  background:#fff;
-  border-radius:10px;
-  padding:14px;
-  overflow-y:auto;
-  margin-bottom:10px;
+
+.msg-avatar{
+  width:32px;height:32px;border-radius:50%;cursor:pointer;
+  background:#0066cc;color:#fff;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:bold;
 }
-.msg{
-  margin-bottom:10px;
-  max-width:75%;
-  word-break:break-word;
+
+.msg-content{
+  display:flex;flex-direction:column;
+  max-width:calc(100% - 44px);
 }
-.msg-mine{
+
+.msg-name{
+  font-size:11px;color:#888;margin-bottom:3px;
+  display:flex;align-items:center;gap:4px;
+}
+.message.me .msg-name{
+  justify-content:flex-end;
+}
+
+.msg-bubble{
+  padding:8px 12px;background:#fff;border:1px solid #e5e6eb;
+  border-radius:10px;font-size:14px;line-height:1.4;
+  width:fit-content;max-width:100%;word-break:break-all;
+}
+.message.me .msg-bubble{
+  background:#0066cc;color:#fff;border-color:#0066cc;
   margin-left:auto;
-  background:#0066cc;
-  color:#fff;
-  padding:8px 12px;
-  border-radius:12px 12px 0 12px;
 }
-.msg-other{
-  margin-right:auto;
-  background:#f1f1f1;
-  padding:8px 12px;
-  border-radius:12px 12px 12px 0;
+
+.admin-tag{background:#ff4d4f;color:#fff;font-size:9px;padding:1px 3px;border-radius:2px}
+.withdraw-btn{font-size:11px;color:#ff4d4f;background:none;border:none;cursor:pointer}
+
+#inputBar{
+  height:68px;background:#fff;border-top:1px solid #e5e6eb;
+  display:flex;align-items:center;gap:10px;padding:0 16px;flex-shrink:0;
 }
-.msg-user{font-size:12px;color:#999;margin-bottom:4px}
-.chat-input{
-  display:flex;
-  gap:8px;
+#msgInput{
+  flex:1;height:42px;padding:0 16px;
+  border:1px solid #e5e6eb;border-radius:10px;
+  background:#fafafa;outline:none;font-size:14px;
 }
-.chat-input input{
-  flex:1;
-  height:44px;
-  border:1px solid #e5e6eb;
-  border-radius:22px;
-  padding:0 16px;
-  outline:none;
+.send-btn{
+  width:70px;height:42px;background:#0066cc;color:#fff;
+  border:none;border-radius:10px;cursor:pointer;font-size:14px;
 }
-.chat-input button{
-  padding:0 20px;
-  background:#0066cc;
-  color:#fff;
-  border:none;
-  border-radius:22px;
-  cursor:pointer;
+
+.login-box{
+  width:90%;max-width:360px;margin:40px auto;padding:24px;
+  background:#fff;border:1px solid #e5e6eb;border-radius:12px;
 }
+.login-box input{
+  width:100%;height:42px;padding:0 16px;margin-bottom:14px;
+  border:1px solid #e5e6eb;border-radius:10px;outline:none;font-size:14px;
+}
+.login-box button{
+  width:100%;height:42px;background:#0066cc;color:#fff;
+  border:none;border-radius:10px;cursor:pointer;margin-top:6px;font-size:14px;
+}
+.login-box button:last-of-type{background:#f1f2f3;color:#333;}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#dcdcdc;border-radius:3px}
 </style>
 </head>
 
 <body>
-  <div id="navContainer"></div>
+<div id="navContainer"></div>
 
-  <div class="chat-container">
-    <div class="chat-box" id="chatBox"></div>
-    <div class="chat-input">
-      <input id="msgInput" placeholder="输入消息...">
-      <button id="sendBtn">发送</button>
-    </div>
+<div id="app">
+  <div id="loginPage" class="login-box">
+    <input id="user" placeholder="账号">
+    <input id="pwd" placeholder="密码" type="password">
+    <button onclick="login()">登录</button>
+    <button onclick="reg()">注册</button>
   </div>
 
-  <script>
-    // 加载导航
-    function loadNav() {
-      fetch('nav.html')
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('navContainer').innerHTML = html;
-        });
+  <div id="chatPage" style="display:none;flex-direction:column;width:100%;height:100%;">
+    <div id="msgBox"></div>
+    <div id="inputBar">
+      <input id="msgInput" placeholder="输入消息...">
+      <button class="send-btn" onclick="sendMsg()">发送</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function loadNav() {
+  fetch('nav.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('navContainer').innerHTML = html;
+
+    let u = localStorage.getItem('username');
+    let uid = localStorage.getItem('uid');
+
+    if (u && uid) {
+      // 🔥 修复：聊天室头像也显示首字母
+      document.getElementById('topAvatar').innerText = u.charAt(0).toUpperCase();
+      document.getElementById('miniName').innerText = u;
+      document.getElementById('miniUid').innerText = uid;
+      document.getElementById('logoutBtn').style.display = 'block';
+
+      document.getElementById('logoutBtn').onclick = function () {
+        if (confirm('确定退出登录？')) {
+          localStorage.clear();
+          location.href = 'index.html';
+        }
+      }
+
+      document.getElementById('topAvatar').onclick = function () {
+        location.href = 'personal.html?uid=' + uid;
+      }
+    } else {
+      document.getElementById('topAvatar').innerText = 'U';
+      document.getElementById('miniName').innerText = '游客';
+      document.getElementById('miniUid').innerText = '未登录';
+      document.getElementById('logoutBtn').style.display = 'none';
     }
+  })
+}
+loadNav();
+</script>
 
-    const username = localStorage.getItem('username');
-    const uid = localStorage.getItem('uid');
-    const chatBox = document.getElementById('chatBox');
-    const msgInput = document.getElementById('msgInput');
-    const sendBtn = document.getElementById('sendBtn');
+<script>
+const API = '/api';
+const ADMIN = [1];
+let me, uid;
 
-    if (!username || !uid) {
-      alert('请先登录');
-      location.href = 'login.html';
+function ava(n){ return n ? n[0].toUpperCase() : 'U'; }
+function isAdmin(id){ return ADMIN.includes(Number(id)); }
+
+window.onload = function(){
+  me = localStorage.getItem('username');
+  uid = localStorage.getItem('uid');
+  if(me && uid){
+    showChat();
+  }
+  setInterval(loadMsg, 2000);
+};
+
+function showChat(){
+  loginPage.style.display = 'none';
+  chatPage.style.display = 'flex';
+  loadMsg();
+}
+
+async function reg(){
+  let u = user.value.trim(), p = pwd.value.trim();
+  if(!u||!p)return alert('请输入账号密码');
+  let res = await fetch(`${API}/reg?user=${u}&pwd=${p}`);
+  let t = await res.text();
+  if(t.startsWith('uid:')){
+    localStorage.setItem('username',u);
+    localStorage.setItem('uid',t.replace('uid:',''));
+    alert('注册成功');
+    location.reload();
+  }else alert('注册失败');
+}
+
+async function login(){
+  let u = user.value.trim(), p = pwd.value.trim();
+  let res = await fetch(`${API}/login?user=${u}&pwd=${p}`);
+  let t = await res.text();
+  if(!t||t==='fail')return alert('登录失败');
+  localStorage.setItem('username',u);
+  localStorage.setItem('uid',t);
+  location.reload();
+}
+
+// 🔥 修复：发送消息只点一次！
+async function sendMsg(){
+  let m = msgInput.value.trim();
+  if(!m) return;
+
+  await fetch(`${API}/send?uid=${uid}&msg=${encodeURIComponent(m)}`);
+  msgInput.value = '';
+  loadMsg();
+}
+
+async function loadMsg(){
+  let list = await(await fetch(`${API}/msg`)).json();
+  let b = msgBox;
+  let auto = Math.abs(b.scrollTop+b.clientHeight-b.scrollHeight)<20;
+  b.innerHTML='';
+  list.forEach((o,idx)=>{
+    let isMe = o.uid == uid;
+    let withdrawBtn = '';
+    if(isMe || isAdmin(uid)){
+      withdrawBtn = `<button onclick="withdraw(${idx})" class="withdraw-btn">撤回</button>`;
     }
+    b.innerHTML+=`
+    <div class="message ${isMe?'me':''}">
+      <div class="msg-avatar" onclick="location.href='/personal.html?uid=${o.uid}'">${ava(o.user)}</div>
+      <div class="msg-content">
+        <div class="msg-name">${o.user} ${isAdmin(o.uid)?'<span class="admin-tag">管理员</span>':''} ${withdrawBtn}</div>
+        <div class="msg-bubble">${o.msg}</div>
+      </div>
+    </div>`;
+  });
+  if(auto)b.scrollTop=b.scrollHeight;
+}
 
-    loadNav();
-    fetchMessages();
-
-    // 🔥 修复：发送消息只需要点一次！
-    sendBtn.addEventListener('click', sendMessage);
-    msgInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
-
-    async function fetchMessages() {
-      const res = await fetch('/api?act=getChat');
-      const msgs = await res.json();
-      chatBox.innerHTML = '';
-      msgs.forEach(m => {
-        const div = document.createElement('div');
-        div.className = m.uid == uid ? 'msg msg-mine' : 'msg msg-other';
-        div.innerHTML = `
-          <div class="msg-user">${m.user}</div>
-          <div>${m.content}</div>
-        `;
-        chatBox.appendChild(div);
-      });
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    async function sendMessage() {
-      const content = msgInput.value.trim();
-      if (!content) return;
-
-      await fetch(`/api?act=sendChat&uid=${uid}&user=${username}&content=${encodeURIComponent(content)}`);
-      msgInput.value = '';
-      fetchMessages();
-    }
-
-    setInterval(fetchMessages, 3000);
-  </script>
+async function withdraw(idx){
+  if(!confirm('确定撤回这条消息？'))return;
+  await fetch(`${API}?act=deleteMsg&uid=${uid}&targetId=${idx}`);
+  alert('已撤回');
+  loadMsg();
+}
+</script>
 </body>
 </html>
