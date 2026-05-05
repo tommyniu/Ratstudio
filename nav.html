@@ -33,12 +33,10 @@
 .nav-item.active{color:#0066cc;background:#e8f0fe;}
 
 .logout{
-  font-size:13px;color:#ff4444!important;
+  font-size:13px;color:#ff4444;
   padding:6px 8px;border-radius:6px;
-  cursor:pointer!important;
-  background:transparent!important;
-  border:none!important;
-  z-index:9999!important;
+  cursor:pointer;
+  z-index:9999;
 }
 </style>
 
@@ -46,8 +44,8 @@
   <div class="nav-left">
     <div id="topAvatar" class="avatar">U</div>
     <div class="user-info-mini">
-      <div id="miniName">加载中...</div>
-      <div>UID: <span id="miniUid">-</span></div>
+      <div id="miniName">游客</div>
+      <div>UID: <span id="miniUid">未登录</span></div>
     </div>
   </div>
 
@@ -55,56 +53,50 @@
     <div class="nav-item" onclick="location.href='index.html'">主页</div>
     <div class="nav-item" onclick="location.href='chat.html'">聊天室</div>
     <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
-    <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
     <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
-    <button class="logout" id="logoutBtn">退出登录</button>
+    <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
+    <div class="logout" id="logoutBtn">退出登录</div>
   </div>
 </div>
 
 <script>
-// 强制立即读取
-const u = localStorage.getItem('username');
-const uid = localStorage.getItem('uid');
+// 等整个页面 DOM 完全加载完再执行，不轮询、不耗资源
+document.addEventListener('DOMContentLoaded', function(){
+  const u = localStorage.getItem('username');
+  const uid = localStorage.getItem('uid');
 
-const avatar = document.getElementById('topAvatar');
-const nameEl = document.getElementById('miniName');
-const uidEl = document.getElementById('miniUid');
-const logout = document.getElementById('logoutBtn');
+  const avatar = document.getElementById('topAvatar');
+  const nameEl = document.getElementById('miniName');
+  const uidEl = document.getElementById('miniUid');
+  const logout = document.getElementById('logoutBtn');
 
-// ======================================
-// 已登录
-// ======================================
-if (u && uid) {
-  avatar.innerText = u.charAt(0).toUpperCase();
-  nameEl.innerText = u;
-  uidEl.innerText = uid;
+  if (u && uid) {
+    avatar.innerText = u.charAt(0).toUpperCase();
+    nameEl.innerText = u;
+    uidEl.innerText = uid;
 
-  avatar.onclick = () => {
-    location.href = 'personal.html?uid=' + uid;
-  };
+    avatar.onclick = function(){
+      location.href = 'personal.html?uid=' + uid;
+    };
 
-  logout.onclick = () => {
-    if (!confirm('确定退出登录？')) return;
-    localStorage.clear();
-    location.href = 'index.html';
-  };
-} 
-
-// ======================================
-// 未登录
-// ======================================
-else {
-  avatar.innerText = 'U';
-  nameEl.innerText = '游客';
-  uidEl.innerText = '未登录';
-  logout.style.display = 'none';
-}
-
-// 高亮
-const page = location.pathname.split('/').pop();
-document.querySelectorAll('.nav-item').forEach(i => {
-  if (i.getAttribute('onclick').includes(page)) {
-    i.classList.add('active');
+    logout.onclick = function(){
+      if(!confirm('确定退出登录？')) return;
+      localStorage.clear();
+      location.href = 'index.html';
+    };
+  } else {
+    avatar.innerText = 'U';
+    nameEl.innerText = '游客';
+    uidEl.innerText = '未登录';
+    logout.style.display = 'none';
   }
+
+  // 导航高亮
+  const page = location.pathname.split('/').pop();
+  document.querySelectorAll('.nav-item').forEach(i => {
+    if (i.getAttribute('onclick').includes(page)) {
+      i.classList.add('active');
+    }
+  });
 });
 </script>
