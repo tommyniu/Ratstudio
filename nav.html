@@ -1,28 +1,100 @@
 <style>
 .top-nav{
-  width:100%;height:56px;background:#fff;
+  width:100%;
+  height:56px;
+  background:#fff;
   border-bottom:1px solid #e5e6eb;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 12px;position:fixed;top:0;left:0;z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 12px;
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:9999;
+  /* 挤压动画过渡 */
+  transition: all 0.25s ease;
 }
-.nav-left{display:flex;align-items:center;gap:8px;}
+/* 左侧区域 自适应挤压 */
+.nav-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:1;
+  min-width:0;
+}
 .avatar{
-  width:36px;height:36px;border-radius:50%;
-  background:#0066cc;color:#fff;
-  display:flex;align-items:center;justify-content:center;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#0066cc;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
+  flex-shrink:0;
+  font-weight:bold;
 }
-.user-info-mini{font-size:12px;line-height:1.2}
-.name{font-weight:bold;color:#333;}
-.nav-right{display:flex;gap:6px;align-items:center;}
+.user-info-mini{
+  font-size:12px;
+  line-height:1.2;
+  /* 文字挤压省略 */
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:120px;
+}
+.name-text{
+  font-weight:bold;
+  color:#333;
+}
+/* 右侧导航 自动挤压、换行不溢出 */
+.nav-right{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-shrink:2;
+  flex-wrap:nowrap;
+  overflow:hidden;
+}
 .nav-item{
-  font-size:13px;color:#666;padding:6px 8px;border-radius:6px;
-  white-space:nowrap; cursor:pointer;
-}
-.nav-item:hover{background:#f5f5f5;}
-.logout{
-  font-size:13px;color:red;padding:6px 8px;border-radius:6px;
+  font-size:13px;
+  color:#666;
+  padding:6px 8px;
+  border-radius:6px;
+  white-space:nowrap;
   cursor:pointer;
+  /* 挤压动画 */
+  transition: padding 0.25s ease, font-size 0.25s ease;
+  flex-shrink:1;
+  text-align:center;
+}
+.nav-item:hover{
+  background:#f5f5f5;
+}
+.logout-btn{
+  font-size:13px;
+  color:red;
+  padding:6px 8px;
+  border-radius:6px;
+  cursor:pointer;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+
+/* 手机端适配 + 挤压收缩 */
+@media (max-width: 600px) {
+  .top-nav {
+    padding:0 8px;
+  }
+  .user-info-mini {
+    max-width:80px;
+  }
+  .nav-item {
+    padding:4px 5px;
+    font-size:12px;
+  }
 }
 </style>
 
@@ -30,7 +102,7 @@
   <div class="nav-left">
     <div id="topAvatar" class="avatar">U</div>
     <div class="user-info-mini">
-      <div id="miniName">游客</div>
+      <div id="miniName" class="name-text">游客</div>
       <div>UID: <span id="miniUid">未登录</span></div>
     </div>
   </div>
@@ -40,12 +112,11 @@
     <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
     <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
     <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
-    <div id="logoutBtn" class="logout">退出登录</div>
+    <div id="logoutBtn" class="logout-btn" style="display:none;">退出登录</div>
   </div>
 </div>
 
 <script>
-// 🔥 全站自动执行，所有页面头像 100% 正常
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(() => {
     const u = localStorage.getItem('username');
