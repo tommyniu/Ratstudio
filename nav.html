@@ -12,14 +12,13 @@
   top:0;
   left:0;
   z-index:9999;
-  /* 全局过渡动画 */
-  transition: all 0.3s ease;
+  /* iOS 丝滑缓动 */
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
-/* 滚动收缩态 */
 .top-nav.scroll-shrink{
   height:46px;
   padding:0 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.07);
 }
 
 .nav-left{
@@ -28,7 +27,7 @@
   gap:8px;
   flex-shrink:1;
   min-width:0;
-  transition: gap 0.3s ease;
+  transition: gap 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .top-nav.scroll-shrink .nav-left{
   gap:6px;
@@ -46,7 +45,7 @@
   cursor:pointer;
   flex-shrink:0;
   font-weight:bold;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .top-nav.scroll-shrink .avatar{
   width:30px;
@@ -61,7 +60,7 @@
   overflow:hidden;
   text-overflow:ellipsis;
   max-width:120px;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .top-nav.scroll-shrink .user-info-mini{
   font-size:11px;
@@ -79,7 +78,7 @@
   flex-shrink:2;
   flex-wrap:nowrap;
   overflow:hidden;
-  transition: gap 0.3s ease;
+  transition: gap 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .top-nav.scroll-shrink .nav-right{
   gap:4px;
@@ -92,16 +91,20 @@
   border-radius:6px;
   white-space:nowrap;
   cursor:pointer;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
   flex-shrink:1;
   text-align:center;
+}
+.nav-item:hover{
+  background:#f5f5f5;
+  transform: scale(1.05);
+}
+.nav-item:active{
+  transform: scale(0.96);
 }
 .top-nav.scroll-shrink .nav-item{
   padding:4px 6px;
   font-size:12px;
-}
-.nav-item:hover{
-  background:#f5f5f5;
 }
 
 .logout-btn{
@@ -112,7 +115,10 @@
   cursor:pointer;
   white-space:nowrap;
   flex-shrink:0;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.logout-btn:active{
+  transform: scale(0.96);
 }
 .top-nav.scroll-shrink .logout-btn{
   padding:4px 6px;
@@ -156,7 +162,6 @@
 </div>
 
 <script>
-// 头像用户名初始化
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(() => {
     const u = localStorage.getItem('username');
@@ -179,7 +184,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }, 10);
 
-  // 滚动收缩动画
   const topNav = document.getElementById('topNav');
   let scrollTimer;
   window.addEventListener('scroll', () => {
@@ -189,12 +193,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }else{
       topNav.classList.remove('scroll-shrink');
     }
-    // 防抖动
     scrollTimer = setTimeout(()=>{
       if(window.scrollY <= 20){
         topNav.classList.remove('scroll-shrink');
       }
-    },100);
+    },150);
   });
 });
 </script>
