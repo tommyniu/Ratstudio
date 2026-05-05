@@ -60,6 +60,7 @@
 </div>
 
 <script>
+// 完全和你个人主页一样的逻辑
 function getAvatarChar(n){ return n ? n[0].toUpperCase() : 'U'; }
 
 function logout() {
@@ -69,6 +70,7 @@ function logout() {
 }
 
 window.onload = function(){
+  // 从 localStorage 读取当前登录用户
   const myName = localStorage.getItem('username') || '';
   const myUid = localStorage.getItem('uid') || '';
   
