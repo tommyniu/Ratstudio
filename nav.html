@@ -44,31 +44,28 @@
   </div>
 </div>
 
-<!-- 🔥 核心：自动执行、自动刷新、不用别的页面配合 -->
 <script>
-(function autoUpdateNav() {
-  // 等待 DOM 加载完毕
+// 🔥 全站自动执行，所有页面头像 100% 正常
+document.addEventListener('DOMContentLoaded', function() {
   setTimeout(() => {
-    const username = localStorage.getItem('username');
+    const u = localStorage.getItem('username');
     const uid = localStorage.getItem('uid');
     const avatar = document.getElementById('topAvatar');
     const miniName = document.getElementById('miniName');
     const miniUid = document.getElementById('miniUid');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    if (username && uid && avatar) {
-      // 取首字母 → 自动显示头像
-      const firstChar = username.charAt(0).toUpperCase();
-      avatar.innerText = firstChar;
-      miniName.innerText = username;
+    if (u && uid && avatar) {
+      avatar.innerText = u.charAt(0).toUpperCase();
+      miniName.innerText = u;
       miniUid.innerText = uid;
       logoutBtn.style.display = 'block';
     } else {
-      if (avatar) avatar.innerText = 'U';
-      if (miniName) miniName.innerText = '游客';
-      if (miniUid) miniUid.innerText = '未登录';
-      if (logoutBtn) logoutBtn.style.display = 'none';
+      avatar.innerText = 'U';
+      miniName.innerText = '游客';
+      miniUid.innerText = '未登录';
+      logoutBtn.style.display = 'none';
     }
   }, 10);
-})();
+});
 </script>
