@@ -19,14 +19,12 @@ html, body {
   color: #333;
 }
 
-/* 容器全屏 */
 .container {
   margin-top: 56px;
   height: calc(100% - 56px);
   position: relative;
 }
 
-/* 列表页 + 详情页 全屏覆盖 */
 .page {
   position: absolute;
   top: 0;
@@ -42,13 +40,12 @@ html, body {
   display: block;
 }
 
-/* 内容居中 */
 .content-wrap {
   max-width: 750px;
   margin: 0 auto;
 }
 
-/* 排序栏 */
+/* 排序 */
 .sort-bar {
   background: #fff;
   padding: 10px 14px;
@@ -122,9 +119,13 @@ html, body {
   gap: 18px;
   font-size: 13px;
   color: #666;
+  align-items: center;
 }
 .post-action {
   cursor: pointer;
+}
+.post-action.del {
+  color: #e53935;
 }
 
 /* 帖子详情 */
@@ -153,7 +154,7 @@ html, body {
   margin-bottom: 12px;
 }
 
-/* 评论区 */
+/* 评论 */
 .comment-list {
   background: #fff;
   border-radius: 8px;
@@ -197,13 +198,16 @@ html, body {
   font-size: 12px;
   color: #999;
   margin-top: 4px;
+  display: flex;
+  gap: 12px;
 }
 .comment-action {
-  margin-right: 12px;
   cursor: pointer;
 }
+.comment-action.del {
+  color: #e53935;
+}
 
-/* 评论框 */
 .comment-input-bar {
   display: flex;
   gap: 8px;
@@ -245,7 +249,7 @@ html, body {
   z-index: 999;
 }
 
-/* 发帖弹窗 */
+/* 发帖弹窗 —— 修复关闭按钮大小 */
 .mask {
   position: fixed;
   top: 0;
@@ -268,12 +272,18 @@ html, body {
 }
 .pop-close {
   position: absolute;
-  top: 12px;
-  right: 14px;
-  font-size: 20px;
+  top: 8px;
+  right: 10px;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   background: none;
   border: none;
+  color: #666;
 }
 .pop input, .pop textarea {
   width: 100%;
@@ -301,11 +311,9 @@ html, body {
 <body>
   <div id="navContainer"></div>
 
-  <!-- 发帖悬浮按钮 -->
   <div class="fab" onclick="showPost()">+</div>
 
   <div class="container">
-    <!-- 列表页 -->
     <div class="page active" id="listPage">
       <div class="content-wrap">
         <div class="sort-bar">
@@ -317,7 +325,6 @@ html, body {
       </div>
     </div>
 
-    <!-- 详情页（全屏覆盖） -->
     <div class="page" id="detailPage">
       <div class="content-wrap">
         <button class="back-btn" onclick="goBack()">← 返回列表</button>
@@ -334,7 +341,6 @@ html, body {
     </div>
   </div>
 
-  <!-- 发帖弹窗 -->
   <div class="mask" id="postMask">
     <div class="pop">
       <button class="pop-close" onclick="closePost()">×</button>
@@ -345,7 +351,6 @@ html, body {
   </div>
 
 <script>
-// 加载导航
 function loadNav() {
   fetch('nav.html').then(r=>r.text()).then(h=>{
     document.getElementById('navContainer').innerHTML = h;
@@ -377,8 +382,8 @@ window.onload = async () => {
   loadNav();
   await loadData();
   renderPosts();
+  routeByHash();
 
-  // 排序切换
   document.querySelectorAll('.sort-item').forEach(el => {
     el.onclick = () => {
       document.querySelectorAll('.sort-item').forEach(i => i.classList.remove('active'));
@@ -387,34 +392,27 @@ window.onload = async () => {
       renderPosts();
     };
   });
+
+  window.addEventListener('hashchange', routeByHash);
 };
 
-// 加载数据
 async function loadData() {
   posts = await (await fetch(`${API}?act=posts`)).json();
   comments = await (await fetch(`${API}?act=comments`)).json();
 }
 
-// 渲染帖子（支持排序）
 function renderPosts() {
   let list = [...posts];
-
-  if (sortType === 'new') {
-    list.sort((a, b) => b.postId - a.postId);
-  } else if (sortType === 'old') {
-    list.sort((a, b) => a.postId - b.postId);
-  } else if (sortType === 'hot') {
-    list.sort((a, b) => (b.like || 0) - (a.like || 0));
-  }
+  if (sortType === 'new') list.sort((a,b)=>b.postId - a.postId);
+  if (sortType === 'old') list.sort((a,b)=>a.postId - b.postId);
+  if (sortType === 'hot') list.sort((a,b)=>(b.like||0)-(a.like||0));
 
   const dom = document.getElementById('postList');
   dom.innerHTML = '';
-
   if (list.length === 0) {
     dom.innerHTML = `<div style='background:#fff;padding:30px;text-align:center;border-radius:8px;'>暂无帖子</div>`;
     return;
   }
-
   list.forEach(p => {
     const card = document.createElement('div');
     card.className = 'post-card';
@@ -429,21 +427,42 @@ function renderPosts() {
       <div class="post-actions">
         <div class="post-action" onclick="likePost(${p.postId},event)">❤️ ${p.like || 0}</div>
         <div class="post-action" onclick="collect(event)">⭐ 收藏</div>
-        <div class="post-action">💬 ${comments.filter(c => c.postId === p.postId).length}</div>
+        <div class="post-action">💬 ${comments.filter(c=>c.postId===p.postId).length}</div>
       </div>
     `;
-    card.onclick = () => openDetail(p);
+    card.onclick = () => {
+      location.hash = `/` + p.postId;
+    };
     dom.appendChild(card);
   });
 }
 
-// 打开帖子（全屏覆盖）
+// 路由：支持 /forum#/1 /forum#/2
+function routeByHash() {
+  const hash = location.hash;
+  if (!hash || hash === '#/') {
+    document.getElementById('listPage').classList.add('active');
+    document.getElementById('detailPage').classList.remove('active');
+    return;
+  }
+  const pid = parseInt(hash.replace('#/', ''));
+  if (pid) {
+    const p = posts.find(x => x.postId === pid);
+    if (p) openDetail(p);
+  }
+}
+
 function openDetail(post) {
   currentPost = post;
   document.getElementById('listPage').classList.remove('active');
   document.getElementById('detailPage').classList.add('active');
 
   const d = document.getElementById('detailContainer');
+  // 自己的帖子才显示删除按钮
+  const delBtnHtml = (post.user === username)
+    ? `<div class="post-action del" onclick="deletePost(${post.postId})">🗑️ 删除帖子</div>`
+    : '';
+
   d.innerHTML = `
     <div class="detail-card">
       <div class="post-header">
@@ -456,18 +475,23 @@ function openDetail(post) {
       <div class="post-actions">
         <div class="post-action" onclick="likePost(${post.postId},event)">❤️ ${post.like || 0}</div>
         <div class="post-action" onclick="collect(event)">⭐ 收藏</div>
+        ${delBtnHtml}
       </div>
     </div>
   `;
   renderComments();
 }
 
-// 渲染评论
 function renderComments() {
   const c = document.getElementById('commentListContainer');
   const cs = comments.filter(x => x.postId === currentPost.postId);
   c.innerHTML = '';
   cs.forEach(cm => {
+    // 自己的评论才显示删除
+    const delBtnHtml = (cm.user === username)
+      ? `<div class="comment-action del" onclick="deleteComment(${cm.cid})">删除</div>`
+      : '';
+
     c.innerHTML += `
       <div class="comment-item">
         <div class="comment-avatar">${cm.user.charAt(0).toUpperCase()}</div>
@@ -478,13 +502,30 @@ function renderComments() {
         <div class="comment-text">${cm.text}</div>
         <div class="comment-actions">
           <div class="comment-action" onclick="likeComment(${cm.cid},event)">❤️ ${cm.like || 0}</div>
+          ${delBtnHtml}
         </div>
       </div>
     `;
   });
 }
 
-// 发布帖子 → 自动进入帖子
+// ========== 帖子删除 ==========
+async function deletePost(pid) {
+  if (!confirm('确定要删除此帖子吗？删除后不可恢复。')) return;
+  await fetch(`${API}?act=deletePost&postId=${pid}`);
+  await loadData();
+  location.hash = ''; // 删完回列表
+}
+
+// ========== 评论删除 ==========
+async function deleteComment(cid) {
+  if (!confirm('确定要删除这条评论吗？')) return;
+  await fetch(`${API}?act=deleteComment&cid=${cid}`);
+  await loadData();
+  renderComments();
+}
+
+// 发布后自动打开帖子
 async function doPost() {
   const title = document.getElementById('postTitle').value.trim();
   const content = document.getElementById('postContent').value.trim();
@@ -495,12 +536,10 @@ async function doPost() {
   await loadData();
   renderPosts();
 
-  // 自动打开最新帖子
   const newPost = posts.sort((a,b)=>b.postId-a.postId)[0];
-  openDetail(newPost);
+  location.hash = `/` + newPost.postId;
 }
 
-// 发表评论
 async function submitComment() {
   const txt = document.getElementById('commentInput').value.trim();
   if (!txt) return;
@@ -510,7 +549,6 @@ async function submitComment() {
   renderComments();
 }
 
-// 点赞
 async function likePost(pid, e) {
   e.stopPropagation();
   await fetch(`${API}?act=like&postId=${pid}`);
@@ -526,19 +564,14 @@ async function likeComment(cid, e) {
   renderComments();
 }
 
-// 收藏提示
 function collect(e) {
   e.stopPropagation();
   alert('功能开发中，敬请期待');
 }
 
-// 弹窗
 function showPost() { document.getElementById('postMask').style.display = 'flex'; }
 function closePost() { document.getElementById('postMask').style.display = 'none'; }
-function goBack() {
-  document.getElementById('detailPage').classList.remove('active');
-  document.getElementById('listPage').classList.add('active');
-}
+function goBack() { location.hash = ''; }
 
 loadNav();
 </script>
