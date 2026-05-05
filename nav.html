@@ -12,17 +12,28 @@
   top:0;
   left:0;
   z-index:9999;
-  /* 挤压动画过渡 */
-  transition: all 0.25s ease;
+  /* 全局过渡动画 */
+  transition: all 0.3s ease;
 }
-/* 左侧区域 自适应挤压 */
+/* 滚动收缩态 */
+.top-nav.scroll-shrink{
+  height:46px;
+  padding:0 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
 .nav-left{
   display:flex;
   align-items:center;
   gap:8px;
   flex-shrink:1;
   min-width:0;
+  transition: gap 0.3s ease;
 }
+.top-nav.scroll-shrink .nav-left{
+  gap:6px;
+}
+
 .avatar{
   width:36px;
   height:36px;
@@ -35,21 +46,32 @@
   cursor:pointer;
   flex-shrink:0;
   font-weight:bold;
+  transition: all 0.3s ease;
 }
+.top-nav.scroll-shrink .avatar{
+  width:30px;
+  height:30px;
+  font-size:12px;
+}
+
 .user-info-mini{
   font-size:12px;
   line-height:1.2;
-  /* 文字挤压省略 */
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
   max-width:120px;
+  transition: all 0.3s ease;
+}
+.top-nav.scroll-shrink .user-info-mini{
+  font-size:11px;
+  max-width:90px;
 }
 .name-text{
   font-weight:bold;
   color:#333;
 }
-/* 右侧导航 自动挤压、换行不溢出 */
+
 .nav-right{
   display:flex;
   align-items:center;
@@ -57,7 +79,12 @@
   flex-shrink:2;
   flex-wrap:nowrap;
   overflow:hidden;
+  transition: gap 0.3s ease;
 }
+.top-nav.scroll-shrink .nav-right{
+  gap:4px;
+}
+
 .nav-item{
   font-size:13px;
   color:#666;
@@ -65,14 +92,18 @@
   border-radius:6px;
   white-space:nowrap;
   cursor:pointer;
-  /* 挤压动画 */
-  transition: padding 0.25s ease, font-size 0.25s ease;
+  transition: all 0.3s ease;
   flex-shrink:1;
   text-align:center;
+}
+.top-nav.scroll-shrink .nav-item{
+  padding:4px 6px;
+  font-size:12px;
 }
 .nav-item:hover{
   background:#f5f5f5;
 }
+
 .logout-btn{
   font-size:13px;
   color:red;
@@ -81,9 +112,14 @@
   cursor:pointer;
   white-space:nowrap;
   flex-shrink:0;
+  transition: all 0.3s ease;
+}
+.top-nav.scroll-shrink .logout-btn{
+  padding:4px 6px;
+  font-size:12px;
 }
 
-/* 手机端适配 + 挤压收缩 */
+/* 手机端适配挤压 */
 @media (max-width: 600px) {
   .top-nav {
     padding:0 8px;
@@ -95,10 +131,13 @@
     padding:4px 5px;
     font-size:12px;
   }
+  .top-nav.scroll-shrink .user-info-mini{
+    max-width:60px;
+  }
 }
 </style>
 
-<div class="top-nav">
+<div class="top-nav" id="topNav">
   <div class="nav-left">
     <div id="topAvatar" class="avatar">U</div>
     <div class="user-info-mini">
@@ -117,6 +156,7 @@
 </div>
 
 <script>
+// 头像用户名初始化
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(() => {
     const u = localStorage.getItem('username');
@@ -138,5 +178,23 @@ document.addEventListener('DOMContentLoaded', function() {
       logoutBtn.style.display = 'none';
     }
   }, 10);
+
+  // 滚动收缩动画
+  const topNav = document.getElementById('topNav');
+  let scrollTimer;
+  window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimer);
+    if(window.scrollY > 20){
+      topNav.classList.add('scroll-shrink');
+    }else{
+      topNav.classList.remove('scroll-shrink');
+    }
+    // 防抖动
+    scrollTimer = setTimeout(()=>{
+      if(window.scrollY <= 20){
+        topNav.classList.remove('scroll-shrink');
+      }
+    },100);
+  });
 });
 </script>
