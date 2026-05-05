@@ -45,6 +45,27 @@ html, body {
   margin: 0 auto;
 }
 
+/* 贴吧/B站风格标签栏 */
+.forum-tab-bar {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.forum-tab {
+  cursor: pointer;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+.forum-tab.active {
+  color: #0066cc;
+  border-color: #0066cc;
+}
+
 /* 排序 */
 .sort-bar {
   background: #fff;
@@ -65,7 +86,7 @@ html, body {
   color: #fff;
 }
 
-/* 帖子卡片 */
+/* 帖子卡片（B站/贴吧质感）*/
 .post-card {
   background: #fff;
   border-radius: 8px;
@@ -73,6 +94,10 @@ html, body {
   margin-bottom: 10px;
   cursor: pointer;
   border: 1px solid #e5e6eb;
+  transition: box-shadow 0.2s;
+}
+.post-card:hover {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 .post-header {
   display: flex;
@@ -95,10 +120,37 @@ html, body {
   font-size: 14px;
   font-weight: 500;
 }
+.admin-badge {
+  background: #e53935;
+  color: #fff;
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
 .post-time {
   font-size: 12px;
   color: #999;
   margin-left: auto;
+}
+/* 标签 */
+.post-tags {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.tag {
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.tag.top {
+  background: #e53935;
+  color: #fff;
+}
+.tag.good {
+  background: #36ad6a;
+  color: #fff;
 }
 .post-title {
   font-size: 16px;
@@ -249,7 +301,7 @@ html, body {
   z-index: 999;
 }
 
-/* 发帖弹窗 —— 修复关闭按钮大小 */
+/* 发帖弹窗 */
 .mask {
   position: fixed;
   top: 0;
@@ -316,6 +368,13 @@ html, body {
   <div class="container">
     <div class="page active" id="listPage">
       <div class="content-wrap">
+        <!-- B站/贴吧 标签栏 -->
+        <div class="forum-tab-bar">
+          <div class="forum-tab active">全部帖子</div>
+          <div class="forum-tab">置顶</div>
+          <div class="forum-tab">精华</div>
+        </div>
+
         <div class="sort-bar">
           <div class="sort-item active" data-sort="new">倒序（最新）</div>
           <div class="sort-item" data-sort="old">正序（最早）</div>
@@ -352,8 +411,10 @@ html, body {
 
 <script>
 function loadNav() {
-  fetch('nav.html').then(r=>r.text()).then(h=>{
-    document.getElementById('navContainer').innerHTML = h;
+  fetch('nav.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('navContainer').innerHTML = html;
     let u = localStorage.getItem('username');
     let id = localStorage.getItem('uid');
     if (u && id) {
@@ -373,6 +434,13 @@ function loadNav() {
 let username = localStorage.getItem('username');
 let uid = localStorage.getItem('uid');
 const API = '/api';
+
+// 🔥 管理员配置（改成你的UID）
+const ADMIN_UIDS = [1];
+function isAdmin() {
+  return ADMIN_UIDS.includes(Number(uid));
+}
+
 let posts = [];
 let comments = [];
 let currentPost = null;
@@ -413,14 +481,20 @@ function renderPosts() {
     dom.innerHTML = `<div style='background:#fff;padding:30px;text-align:center;border-radius:8px;'>暂无帖子</div>`;
     return;
   }
+
   list.forEach(p => {
+    const isPostAdmin = p.uid == 1;
     const card = document.createElement('div');
     card.className = 'post-card';
     card.innerHTML = `
       <div class="post-header">
         <div class="post-avatar">${p.user?.charAt(0).toUpperCase() || 'U'}</div>
-        <div class="post-username">${p.user}</div>
+        <div class="post-username">${p.user} ${isPostAdmin ? '<span class="admin-badge">管理</span>' : ''}</div>
         <div class="post-time">${p.time || ''}</div>
+      </div>
+      <div class="post-tags">
+        ${p.top ? '<span class="tag top">置顶</span>' : ''}
+        ${p.good ? '<span class="tag good">精华</span>' : ''}
       </div>
       <div class="post-title">${p.title}</div>
       <div class="post-content-preview">${p.content}</div>
@@ -430,14 +504,11 @@ function renderPosts() {
         <div class="post-action">💬 ${comments.filter(c=>c.postId===p.postId).length}</div>
       </div>
     `;
-    card.onclick = () => {
-      location.hash = `/` + p.postId;
-    };
+    card.onclick = () => location.hash = `/` + p.postId;
     dom.appendChild(card);
   });
 }
 
-// 路由：支持 /forum#/1 /forum#/2
 function routeByHash() {
   const hash = location.hash;
   if (!hash || hash === '#/') {
@@ -458,8 +529,8 @@ function openDetail(post) {
   document.getElementById('detailPage').classList.add('active');
 
   const d = document.getElementById('detailContainer');
-  // 自己的帖子才显示删除按钮
-  const delBtnHtml = (post.user === username)
+  const isOwner = post.user === username;
+  const delBtn = (isOwner || isAdmin())
     ? `<div class="post-action del" onclick="deletePost(${post.postId})">🗑️ 删除帖子</div>`
     : '';
 
@@ -467,7 +538,7 @@ function openDetail(post) {
     <div class="detail-card">
       <div class="post-header">
         <div class="post-avatar">${post.user.charAt(0).toUpperCase()}</div>
-        <div class="post-username">${post.user}</div>
+        <div class="post-username">${post.user} ${post.uid==1?'<span class="admin-badge">管理</span>':''}</div>
         <div class="post-time">${post.time || ''}</div>
       </div>
       <div class="detail-title">${post.title}</div>
@@ -475,7 +546,7 @@ function openDetail(post) {
       <div class="post-actions">
         <div class="post-action" onclick="likePost(${post.postId},event)">❤️ ${post.like || 0}</div>
         <div class="post-action" onclick="collect(event)">⭐ 收藏</div>
-        ${delBtnHtml}
+        ${delBtn}
       </div>
     </div>
   `;
@@ -487,8 +558,8 @@ function renderComments() {
   const cs = comments.filter(x => x.postId === currentPost.postId);
   c.innerHTML = '';
   cs.forEach(cm => {
-    // 自己的评论才显示删除
-    const delBtnHtml = (cm.user === username)
+    const isCommentOwner = cm.user === username;
+    const delBtn = (isCommentOwner || isAdmin())
       ? `<div class="comment-action del" onclick="deleteComment(${cm.cid})">删除</div>`
       : '';
 
@@ -496,36 +567,36 @@ function renderComments() {
       <div class="comment-item">
         <div class="comment-avatar">${cm.user.charAt(0).toUpperCase()}</div>
         <div class="comment-user">
-          <div class="comment-name">${cm.user}</div>
+          <div class="comment-name">${cm.user} ${cm.uid==1?'<span class="admin-badge">管理</span>':''}</div>
           <div class="comment-time">${cm.time || ''}</div>
         </div>
         <div class="comment-text">${cm.text}</div>
         <div class="comment-actions">
           <div class="comment-action" onclick="likeComment(${cm.cid},event)">❤️ ${cm.like || 0}</div>
-          ${delBtnHtml}
+          ${delBtn}
         </div>
       </div>
     `;
   });
 }
 
-// ========== 帖子删除 ==========
+// ==========================
+// 🔥 删除修复（现在正常）
+// ==========================
 async function deletePost(pid) {
-  if (!confirm('确定要删除此帖子吗？删除后不可恢复。')) return;
+  if (!confirm('确定删除帖子？')) return;
   await fetch(`${API}?act=deletePost&postId=${pid}`);
   await loadData();
-  location.hash = ''; // 删完回列表
+  location.hash = '';
 }
 
-// ========== 评论删除 ==========
 async function deleteComment(cid) {
-  if (!confirm('确定要删除这条评论吗？')) return;
+  if (!confirm('确定删除评论？')) return;
   await fetch(`${API}?act=deleteComment&cid=${cid}`);
   await loadData();
   renderComments();
 }
 
-// 发布后自动打开帖子
 async function doPost() {
   const title = document.getElementById('postTitle').value.trim();
   const content = document.getElementById('postContent').value.trim();
@@ -535,7 +606,6 @@ async function doPost() {
   closePost();
   await loadData();
   renderPosts();
-
   const newPost = posts.sort((a,b)=>b.postId-a.postId)[0];
   location.hash = `/` + newPost.postId;
 }
@@ -566,7 +636,7 @@ async function likeComment(cid, e) {
 
 function collect(e) {
   e.stopPropagation();
-  alert('功能开发中，敬请期待');
+  alert('功能开发中~');
 }
 
 function showPost() { document.getElementById('postMask').style.display = 'flex'; }
