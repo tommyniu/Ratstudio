@@ -8,22 +8,23 @@
   top: 0;
   left: 0;
   z-index: 999;
+  /* 布局关键：左 + 自动中间留白 + 右 */
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 0 24px;
   box-sizing: border-box;
   font-family: "Microsoft YaHei", sans-serif;
 }
 
-/* 左侧整体：头像 + 昵称UID */
+/* 左侧用户区域：固定宽度，不挤压右边 */
 .user-left {
+  width: 200px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* 头像原样 */
+/* 头像 */
 .avatar {
   width: 36px;
   height: 36px;
@@ -37,7 +38,7 @@
   cursor: pointer;
 }
 
-/* 昵称 UID 文字排版 */
+/* 昵称UID文字 */
 .user-info {
   display: flex;
   flex-direction: column;
@@ -53,14 +54,19 @@
   color: #888;
 }
 
-/* 右侧菜单 完全保留你原版 */
+/* 中间空白层：自动占满剩余空间，把右边按钮死死推到最右 */
+.mid-fill {
+  flex: 1;
+}
+
+/* 右侧菜单：永远钉在右上角，不会左移 */
 .menu {
   display: flex;
   gap: 20px;
   align-items: center;
 }
 
-/* 按钮动画 完全保留你原版 */
+/* 按钮动画完全保留你原版 */
 .btn {
   font-size: 14px;
   color: #666;
@@ -78,7 +84,7 @@
   font-weight: bold;
 }
 
-/* 退出登录 原样 */
+/* 退出登录 */
 .logout {
   color: #ff4444;
   cursor: pointer;
@@ -87,7 +93,7 @@
 </style>
 
 <div class="nav">
-  <!-- 左上角：头像 + 昵称 + UID -->
+  <!-- 左上角：头像+昵称+UID 固定宽度 -->
   <div class="user-left" id="userWrap" style="display:none">
     <div class="avatar" id="avatar">U</div>
     <div class="user-info">
@@ -96,7 +102,10 @@
     </div>
   </div>
 
-  <!-- 右上角：导航选项 位置完全不变 -->
+  <!-- 中间自动撑开 隔离左右 -->
+  <div class="mid-fill"></div>
+
+  <!-- 右上角：导航永远钉在最右，不会被挤 -->
   <div class="menu">
     <div class="btn" onclick="location.href='index.html'">聊天室</div>
     <div class="btn" onclick="location.href='forum.html'">论坛</div>
