@@ -8,7 +8,6 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
-/* 你的原有样式 100% 保留 */
 .container{
   width:100%;height:calc(100% - 56px);
   margin-top:56px;padding:30px;overflow-y:auto;
@@ -22,6 +21,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 }
 .plan-box li{
   margin-left:20px;line-height:1.7;margin-bottom:6px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+/* 已完成项：灰色文字 + 右侧对勾 */
+.done{
+  color:#999;
+  text-decoration:none;
+}
+.done-check{
+  color:#52c41a;
+  font-weight:bold;
+  margin-left:10px;
 }
 
 ::-webkit-scrollbar{width:6px}
@@ -41,14 +51,13 @@ fetch('nav.html')
 });
 </script>
 
-<!-- 你的内容完全不变 -->
 <div class="container">
 <div class="plan-box">
 <h3>📌 近期规划</h3>
 <ul>
-<li>网页化：修改UI，使其看起来更像大型论坛网站页面</li>
+<li><span class="done">网页化：修改UI，使其看起来更像大型论坛网站页面</span><span class="done-check">✓</span></li>
 <li>论坛功能完善，增加评论，显示详细内容等功能</li>
-<li>用户主页：增加用户主页，显示其发帖，点赞数</li>
+<li><span class="done">用户主页：增加用户主页，显示其发帖，点赞数</span><span class="done-check">✓</span></li>
 <li>时间显示：显示发帖时间，记录点赞、注册、登录时间等</li>
 </ul>
 </div>
