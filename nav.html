@@ -1,52 +1,3 @@
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
-.top-nav{
-  width:100%;height:56px;background:#fff;
-  border-bottom:1px solid #e5e6eb;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;position:fixed;top:0;left:0;z-index:999;
-  gap:8px;
-}
-.nav-left{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.avatar{
-  width:36px;height:36px;border-radius:50%;
-  background:#0066cc;color:#fff;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:bold;font-size:15px;flex-shrink:0;
-}
-.user-info-mini{
-  display:flex;flex-direction:column;
-  font-size:12px;color:#666;line-height:1.2;
-  white-space:nowrap;
-}
-.user-info-mini .name{font-weight:bold;color:#333;font-size:13px;}
-
-.nav-right{
-  display:flex;gap:6px;align-items:center;
-  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
-  padding-right:4px;
-}
-.nav-right::-webkit-scrollbar{display:none}
-.nav-item{
-  font-size:clamp(12px,1.8vw,14px);
-  color:#666;cursor:pointer;
-  padding:6px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;
-  transition:background 0.2s;
-}
-.nav-item.active{color:#0066cc;background:#e8f0fe;}
-.nav-item:hover{background:#f1f5ff;}
-
-.logout-btn{
-  font-size:clamp(12px,1.8vw,14px);
-  color:#ff4d4f;
-  cursor:pointer;
-  padding:6px 8px;
-  border-radius:6px;
-  white-space:nowrap;
-  flex-shrink:0;
-}
-</style>
-
 <div class="top-nav">
   <div class="nav-left" id="userHead" style="display:none">
     <div class="avatar" id="topAvatar">U</div>
@@ -55,55 +6,78 @@
       <div>UID: <span id="miniUid">1</span></div>
     </div>
   </div>
+
   <div class="nav-right">
-    <div class="nav-item data-href="index.html">聊天室</div>
-    <div class="nav-item data-href="forum.html">论坛</div>
-    <div class="nav-item data-href="history.html">更新日志</div>
-    <div class="nav-item data-href="plan.html">开发规划</div>
-    <div class="logout-btn" id="logoutBtn">退出</div>
+    <div class="nav-item" onclick="location.href='index.html'">聊天室</div>
+    <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
+    <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
+    <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
+    <div class="logout-btn" onclick="logout()">退出</div>
   </div>
 </div>
 
+<style>
+.top-nav{
+  width:100%;height:56px;background:#fff;
+  border-bottom:1px solid #e5e6eb;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;position:fixed;top:0;left:0;z-index:999;
+}
+.nav-left{display:flex;align-items:center;gap:8px;}
+.avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:#0066cc;color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:bold;font-size:15px;
+}
+.user-info-mini{
+  display:flex;flex-direction:column;
+  font-size:12px;color:#666;line-height:1.2;
+}
+.user-info-mini .name{font-weight:bold;color:#333;font-size:13px;}
+
+.nav-right{display:flex;gap:6px;align-items:center;}
+.nav-item{
+  font-size:14px;color:#666;cursor:pointer;
+  padding:6px 8px;border-radius:6px;
+}
+.nav-item.active{color:#0066cc;background:#e8f0fe;}
+.logout-btn{
+  font-size:14px;color:#ff4d4f;
+  cursor:pointer;padding:6px 8px;border-radius:6px;
+}
+</style>
+
 <script>
-// 导航跳转修复
-document.querySelectorAll('.nav-item').forEach(item=>{
-  item.onclick = function(){
-    const url = this.getAttribute('data-href');
-    location.href = url;
-  }
-});
-
-// 退出登录
-document.getElementById('logoutBtn').onclick = function(){
-  if(!confirm('确定退出登录？')) return;
+// 退出
+function logout(){
+  if(!confirm('确定退出登录？'))return;
   localStorage.clear();
-  location.href = 'index.html';
-};
+  location.href='index.html';
+}
 
-// 初始化用户信息 + 头像进个人主页 + 当前页面高亮
-function initUserNav(){
-  const username = localStorage.getItem('username');
-  const uid = localStorage.getItem('uid');
-  if(username && uid){
+// 初始化用户信息、头像跳转个人主页
+window.addEventListener('load',function(){
+  let un = localStorage.getItem('username');
+  let uid = localStorage.getItem('uid');
+  if(un && uid){
     document.getElementById('userHead').style.display = 'flex';
-    document.getElementById('miniName').innerText = username;
+    document.getElementById('miniName').innerText = un;
     document.getElementById('miniUid').innerText = uid;
-    document.getElementById('topAvatar').innerText = username.charAt(0).toUpperCase();
-    // 头像点击跳个人主页
-    document.getElementById('topAvatar').onclick = ()=>{
+    document.getElementById('topAvatar').innerText = un.charAt(0).toUpperCase();
+    // 头像点进个人主页
+    document.getElementById('topAvatar').onclick = function(){
       location.href = 'personal.html?uid=' + uid;
     };
   }
 
-  // 自动高亮当前页面
-  let page = location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.nav-item').forEach(item=>{
-    if(item.getAttribute('data-href') === page){
-      item.classList.add('active');
+  // 当前页面高亮
+  let page = location.pathname.split('/').pop();
+  let items = document.querySelectorAll('.nav-item');
+  items.forEach(el=>{
+    if(el.getAttribute('onclick')?.includes(page)){
+      el.classList.add('active');
     }
   });
-}
-
-// 执行初始化
-initUserNav();
+});
 </script>
