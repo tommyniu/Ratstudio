@@ -56,20 +56,20 @@
     </div>
   </div>
   <div class="nav-right">
-    <div class="nav-item data-page="index">聊天室</div>
-    <div class="nav-item data-page="forum">论坛</div>
-    <div class="nav-item data-page="history">更新日志</div>
-    <div class="nav-item data-page="plan">开发规划</div>
+    <div class="nav-item data-href="index.html">聊天室</div>
+    <div class="nav-item data-href="forum.html">论坛</div>
+    <div class="nav-item data-href="history.html">更新日志</div>
+    <div class="nav-item data-href="plan.html">开发规划</div>
     <div class="logout-btn" id="logoutBtn">退出</div>
   </div>
 </div>
 
 <script>
-// 路由跳转
+// 导航跳转修复
 document.querySelectorAll('.nav-item').forEach(item=>{
   item.onclick = function(){
-    const page = this.getAttribute('data-page');
-    location.href = page + '.html';
+    const url = this.getAttribute('data-href');
+    location.href = url;
   }
 });
 
@@ -80,7 +80,7 @@ document.getElementById('logoutBtn').onclick = function(){
   location.href = 'index.html';
 };
 
-// 头像进入个人主页
+// 初始化用户信息 + 头像进个人主页 + 当前页面高亮
 function initUserNav(){
   const username = localStorage.getItem('username');
   const uid = localStorage.getItem('uid');
@@ -89,19 +89,21 @@ function initUserNav(){
     document.getElementById('miniName').innerText = username;
     document.getElementById('miniUid').innerText = uid;
     document.getElementById('topAvatar').innerText = username.charAt(0).toUpperCase();
+    // 头像点击跳个人主页
     document.getElementById('topAvatar').onclick = ()=>{
       location.href = 'personal.html?uid=' + uid;
     };
   }
-  // 高亮当前页面
-  const pageName = location.pathname.split('/').pop().replace('.html','');
+
+  // 自动高亮当前页面
+  let page = location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.nav-item').forEach(item=>{
-    if(item.getAttribute('data-page') === pageName){
+    if(item.getAttribute('data-href') === page){
       item.classList.add('active');
     }
   });
 }
 
-// 初始化
+// 执行初始化
 initUserNav();
 </script>
