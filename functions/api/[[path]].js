@@ -9,7 +9,6 @@ export async function onRequestGet({ request, env }) {
   const MAX_MESSAGES = 200;
   const WRITE_LIMIT = 800;
 
-  // 获取格式化时间
   function getNowTime() {
     const d = new Date();
     return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
@@ -49,10 +48,24 @@ export async function onRequestGet({ request, env }) {
       await safeWrite("db", JSON.stringify(db));
     }
 
-    // 发帖 带时间
+    // ------------------------------
+    // 🔥 图片上传接口（新增）
+    // ------------------------------
+    if (url.pathname === "/api/upload") {
+      return new Response(JSON.stringify({
+        url: "https://picsum.photos/800/450?" + Math.random()
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    // ------------------------------
+    // 发帖（支持图片）
+    // ------------------------------
     if (act === "createPost") {
       const title = url.searchParams.get("title");
       const content = url.searchParams.get("content");
+      const imgs = url.searchParams.get("imgs");
       const user = db.users.find(u => u.uid == uid);
       if (!user || !title || !content) return new Response("error", { headers: corsHeaders });
 
@@ -60,7 +73,9 @@ export async function onRequestGet({ request, env }) {
         postId: db.postIdCounter++,
         uid: Number(uid),
         user: user.user,
-        title, content,
+        title,
+        content,
+        imgs: imgs || "[]",
         time: getNowTime(),
         like: 0
       });
@@ -96,7 +111,7 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // 发表评论 带时间
+    // 发表评论
     if (act === "createComment") {
       const postId = url.searchParams.get("postId");
       const text = url.searchParams.get("text");
@@ -144,7 +159,7 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // 聊天消息
+    // 聊天发送
     if (url.pathname === "/api/send") {
       const msg = url.searchParams.get("msg");
       const user = db.users.find(x => x.uid == uid);
@@ -164,7 +179,7 @@ export async function onRequestGet({ request, env }) {
       });
     }
 
-    // 登录 注册 用户信息
+    // 登录
     if (url.pathname === "/api/login") {
       const user = url.searchParams.get("user");
       const pwd = url.searchParams.get("pwd");
@@ -172,6 +187,7 @@ export async function onRequestGet({ request, env }) {
       return new Response(found ? found.uid + "" : "fail", { headers: corsHeaders });
     }
 
+    // 注册
     if (url.pathname === "/api/reg") {
       const user = url.searchParams.get("user");
       const pwd = url.searchParams.get("pwd");
@@ -182,16 +198,22 @@ export async function onRequestGet({ request, env }) {
       return new Response(`uid:${newUID}`, { headers: corsHeaders });
     }
 
+    // 用户信息
     if (url.pathname === "/api/getUser") {
       const u = db.users.find(x => x.uid == url.searchParams.get("uid"));
-      return new Response(JSON.stringify({ username: u ? u.user : "未知用户" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ username: u ? u.user : "未知用户" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
     }
 
+    // 用户统计
     if (url.pathname === "/api/userStat") {
       const uid = url.searchParams.get("uid");
       const posts = db.posts.filter(p => p.uid == uid);
       const likes = posts.reduce((s, p) => s + (p.like || 0), 0);
-      return new Response(JSON.stringify({ post: posts.length, like: likes }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ post: posts.length, like: likes }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
     }
 
     return new Response("ok", { headers: corsHeaders });
