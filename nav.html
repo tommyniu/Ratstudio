@@ -1,123 +1,148 @@
 <style>
-  .top-nav {
-    width: 100%;
-    height: 56px;
-    background: #fff;
-    border-bottom: 1px solid #e5e6eb;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 999;
-    box-sizing: border-box;
-  }
+/* 全局导航容器 */
+.top-nav {
+  width: 100%;
+  height: 56px;
+  background: #ffffff;
+  border-bottom: 1px solid #E5E6EB;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-sizing: border-box;
+  font-family: "Microsoft YaHei", sans-serif;
+}
 
-  /* 左侧：头像 + 名字 + UID */
-  .nav-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #0066cc;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .user-info {
-    display: flex;
-    flex-direction: column;
-    font-size: 12px;
-    color: #666;
-    line-height: 1.2;
-  }
-  .user-name {
-    font-weight: bold;
-    color: #333;
-    font-size: 13px;
-  }
+/* 左侧：用户信息 */
+.left-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  /* 右侧：四个按钮 + 退出 */
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .nav-item {
-    font-size: 14px;
-    color: #666;
-    cursor: pointer;
-    padding: 6px 0;
-    transition: 0.2s;
-  }
-  .nav-item:hover {
-    color: #333;
-  }
-  .nav-item.active {
-    color: #0066cc;
-    font-weight: bold;
-  }
-  .logout {
-    color: #ff4444;
-    cursor: pointer;
-    font-size: 14px;
-  }
+/* 头像 */
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0066CC;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 昵称 + UID */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.3;
+}
+.user-name {
+  font-weight: bold;
+  color: #333;
+  font-size: 13px;
+}
+
+/* 右侧：导航菜单 */
+.right-area {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* 导航按钮 */
+.nav-btn {
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.nav-btn:hover {
+  color: #333;
+}
+.nav-btn.active {
+  color: #0066CC;
+  font-weight: bold;
+}
+
+/* 退出登录 */
+.logout {
+  font-size: 14px;
+  color: #ff4444;
+  cursor: pointer;
+}
 </style>
 
+<!-- 顶部导航结构 -->
 <div class="top-nav">
-  <div class="nav-left" id="userHead" style="display:none">
-    <div class="avatar" id="topAvatar">U</div>
+  <!-- 左侧：头像 + 信息 -->
+  <div class="left-area" id="userInfo" style="display:none">
+    <div class="avatar" id="avatar"></div>
     <div class="user-info">
-      <div class="user-name" id="miniName">用户名</div>
-      <div>UID: <span id="miniUid">1</span></div>
+      <div class="user-name" id="username"></div>
+      <div>UID: <span id="uid"></span></div>
     </div>
   </div>
 
-  <div class="nav-right">
-    <div class="nav-item" onclick="location.href='index.html'">聊天室</div>
-    <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
-    <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
-    <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
-    <div class="logout" onclick="logout()">退出</div>
+  <!-- 右侧：菜单 -->
+  <div class="right-area">
+    <div class="nav-btn" data-page="index.html">聊天室</div>
+    <div class="nav-btn" data-page="forum.html">论坛</div>
+    <div class="nav-btn" data-page="history.html">更新日志</div>
+    <div class="nav-btn" data-page="plan.html">开发规划</div>
+    <div class="logout" id="logoutBtn">退出登录</div>
   </div>
 </div>
 
 <script>
-function logout() {
-  if (!confirm('确定退出？')) return;
-  localStorage.clear();
-  location.href = 'index.html';
-}
-
-window.addEventListener('load', function () {
-  let username = localStorage.getItem('username');
+// 加载完成后执行
+window.onload = function() {
+  // 读取登录信息
+  let un = localStorage.getItem('username');
   let uid = localStorage.getItem('uid');
 
-  if (username && uid) {
-    document.getElementById('userHead').style.display = 'flex';
-    document.getElementById('miniName').innerText = username;
-    document.getElementById('miniUid').innerText = uid;
-    document.getElementById('topAvatar').innerText = username.charAt(0).toUpperCase();
-    document.getElementById('topAvatar').onclick = () => {
+  // 显示用户信息
+  if (un && uid) {
+    document.getElementById('userInfo').style.display = 'flex';
+    document.getElementById('username').innerText = un;
+    document.getElementById('uid').innerText = uid;
+    document.getElementById('avatar').innerText = un.charAt(0).toUpperCase();
+
+    // 头像点击跳个人主页
+    document.getElementById('avatar').onclick = function() {
       location.href = 'personal.html?uid=' + uid;
     };
   }
 
+  // 导航跳转
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.onclick = function() {
+      location.href = this.getAttribute('data-page');
+    };
+  });
+
+  // 退出登录
+  document.getElementById('logoutBtn').onclick = function() {
+    if (!confirm('确定退出登录？')) return;
+    localStorage.clear();
+    location.href = 'index.html';
+  };
+
   // 高亮当前页面
-  let page = location.pathname.split('/').pop();
-  document.querySelectorAll('.nav-item').forEach(el => {
-    if (el.getAttribute('onclick').includes(page)) {
-      el.classList.add('active');
+  let nowPage = location.pathname.split('/').pop();
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    if (btn.getAttribute('data-page') === nowPage) {
+      btn.classList.add('active');
     }
   });
-});
+}
 </script>
