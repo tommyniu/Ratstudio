@@ -21,10 +21,12 @@
 
 .nav-right{
   display:flex;gap:6px;align-items:center;
+  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
 }
+.nav-right::-webkit-scrollbar{display:none}
 .nav-item{
   font-size:13px;color:#666;cursor:pointer;
-  padding:6px 8px;border-radius:6px;
+  padding:6px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;
   transition:0.2s;
 }
 .nav-item:hover{
@@ -34,12 +36,12 @@
 
 .logout{
   font-size:13px;color:#ff4444;cursor:pointer;
-  padding:6px 8px;border-radius:6px;
+  padding:6px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;
 }
 </style>
 
 <div class="top-nav">
-  <div class="nav-left">
+  <div class="nav-left" id="userHead">
     <div class="avatar" id="topAvatar">U</div>
     <div class="user-info-mini">
       <div class="name" id="miniName">用户名</div>
@@ -48,8 +50,8 @@
   </div>
 
   <div class="nav-right">
-    <div class="nav-item" onclick="location.href='home.html'">主页</div>
-    <div class="nav-item" onclick="location.href='index.html'">聊天室</div>
+    <div class="nav-item" onclick="location.href='index.html'">主页</div>
+    <div class="nav-item" onclick="location.href='chat.html'">聊天室</div>
     <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
     <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
     <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
@@ -58,28 +60,29 @@
 </div>
 
 <script>
-// 最简单、最稳定、绝对能用
+function getAvatarChar(n){ return n ? n[0].toUpperCase() : 'U'; }
+
 function logout() {
   if(!confirm('确定退出登录？')) return;
   localStorage.clear();
-  location.href='home.html';
+  location.href='index.html';
 }
 
-// 立即执行，不等待页面加载
-(function(){
-  let name = localStorage.getItem('username');
-  let uid  = localStorage.getItem('uid');
-
-  if(name && uid){
-    document.getElementById('topAvatar').innerText = name.charAt(0).toUpperCase();
-    document.getElementById('miniName').innerText = name;
-    document.getElementById('miniUid').innerText = uid;
+window.onload = function(){
+  const myName = localStorage.getItem('username') || '';
+  const myUid = localStorage.getItem('uid') || '';
+  
+  if(myName && myUid){
+    document.getElementById('topAvatar').innerText = getAvatarChar(myName);
+    document.getElementById('miniName').innerText = myName;
+    document.getElementById('miniUid').innerText = myUid;
   }
 
-  // 高亮
-  let now = location.pathname.split('/').pop();
-  document.querySelectorAll('.nav-item').forEach(i=>{
-    if(i.getAttribute('onclick').includes(now)) i.classList.add('active');
+  let page = location.pathname.split('/').pop();
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    if(el.getAttribute('onclick').includes(page)){
+      el.classList.add('active');
+    }
   });
-})();
+}
 </script>
