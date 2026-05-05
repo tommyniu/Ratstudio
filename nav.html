@@ -65,62 +65,58 @@
 </div>
 
 <script>
-// 工具函数
 function getAvatarChar(n){ return n ? n[0].toUpperCase() : 'U'; }
 
-// 页面全局函数
-let myName = localStorage.getItem('username') || '';
-let myUid = localStorage.getItem('uid') || '';
+// 立即读取登录状态（不延迟、不卡顿）
+let myName = localStorage.getItem('username');
+let myUid  = localStorage.getItem('uid');
 
-// 初始化状态
-function initUserNav(){
-  const avatarEl = document.getElementById('topAvatar');
-  const nameEl = document.getElementById('miniName');
-  const uidEl = document.getElementById('miniUid');
-  const logoutBtn = document.getElementById('logoutBtn');
+let avatar   = document.getElementById('topAvatar');
+let nameText = document.getElementById('miniName');
+let uidText  = document.getElementById('miniUid');
+let logoutBtn = document.getElementById('logoutBtn');
 
-  if(myName && myUid){
-    // 已登录状态
-    avatarEl.innerText = getAvatarChar(myName);
-    nameEl.innerText = myName;
-    uidEl.innerText = myUid;
+// ==============================================
+// 已登录
+// ==============================================
+if (myName && myUid) {
+  avatar.innerText = getAvatarChar(myName);
+  nameText.innerText = myName;
+  uidText.innerText = myUid;
 
-    // 已登录：头像点进个人主页
-    avatarEl.onclick = function(){
-      location.href = 'personal.html?uid=' + myUid;
-    };
+  // 点击头像 → 个人主页
+  avatar.onclick = function(){
+    location.href = "personal.html?uid=" + myUid;
+  };
 
-    // 显示退出按钮可点击
-    logoutBtn.style.display = 'block';
-    logoutBtn.onclick = function(){
-      if(!confirm('确定退出登录？')) return;
-      localStorage.clear();
-      location.href = 'index.html';
-    };
-  }else{
-    // 未登录状态
-    avatarEl.innerText = 'U';
-    nameEl.innerText = '游客';
-    uidEl.innerText = '未登录';
-
-    // 未登录：头像点进登录页
-    avatarEl.onclick = function(){
-      location.href = 'login.html';
-    };
-
-    // 未登录隐藏退出按钮
-    logoutBtn.style.display = 'none';
-  }
-
-  // 导航高亮
-  let page = location.pathname.split('/').pop();
-  document.querySelectorAll('.nav-item').forEach(el=>{
-    if(el.getAttribute('onclick').includes(page)){
-      el.classList.add('active');
-    }
-  });
+  // 退出登录正常工作
+  logoutBtn.onclick = function(){
+    if(!confirm('确定退出登录？')) return;
+    localStorage.clear();
+    location.href = "index.html";
+  };
 }
 
-// 立即执行初始化
-initUserNav();
+// ==============================================
+// 未登录
+// ==============================================
+else {
+  avatar.innerText = "U";
+  nameText.innerText = "游客";
+  uidText.innerText = "未登录";
+
+  // 未登录 → 头像不跳转
+  avatar.onclick = function(){};
+
+  // 隐藏退出按钮
+  logoutBtn.style.display = "none";
+}
+
+// 导航高亮
+let page = location.pathname.split('/').pop();
+document.querySelectorAll('.nav-item').forEach(el=>{
+  if(el.getAttribute('onclick').includes(page)){
+    el.classList.add('active');
+  }
+});
 </script>
