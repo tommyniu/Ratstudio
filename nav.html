@@ -3,7 +3,7 @@
   width:100%;height:56px;background:#fff;
   border-bottom:1px solid #e5e6eb;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 12px;position:fixed;top:0;left:0;z-index:999;
+  padding:0 12px;position:fixed;top:0;left:0;z-index:9999;
   gap:8px;
 }
 .nav-left{display:flex;align-items:center;gap:8px;flex-shrink:0;}
@@ -21,12 +21,10 @@
 
 .nav-right{
   display:flex;gap:6px;align-items:center;
-  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
 }
-.nav-right::-webkit-scrollbar{display:none}
 .nav-item{
   font-size:13px;color:#666;cursor:pointer;
-  padding:6px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;
+  padding:6px 8px;border-radius:6px;white-space:nowrap;
   transition:0.2s;
 }
 .nav-item:hover{
@@ -35,21 +33,20 @@
 .nav-item.active{color:#0066cc;background:#e8f0fe;}
 
 .logout{
-  font-size:13px;color:#ff4444;cursor:pointer!important;
-  padding:6px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;
+  font-size:13px;color:#ff4444!important;
+  padding:6px 8px;border-radius:6px;
+  cursor:pointer!important;
+  background:transparent!important;
+  border:none!important;
   z-index:9999!important;
-  pointer-events:all!important;
-}
-.logout:hover{
-  background:#f5f5f5;
 }
 </style>
 
 <div class="top-nav">
   <div class="nav-left">
-    <div class="avatar" id="topAvatar">U</div>
+    <div id="topAvatar" class="avatar">U</div>
     <div class="user-info-mini">
-      <div class="name" id="miniName">未登录</div>
+      <div id="miniName">加载中...</div>
       <div>UID: <span id="miniUid">-</span></div>
     </div>
   </div>
@@ -60,63 +57,54 @@
     <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
     <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
     <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
-    <div class="logout" id="logoutBtn">退出登录</div>
+    <button class="logout" id="logoutBtn">退出登录</button>
   </div>
 </div>
 
 <script>
-function getAvatarChar(n){ return n ? n[0].toUpperCase() : 'U'; }
+// 强制立即读取
+const u = localStorage.getItem('username');
+const uid = localStorage.getItem('uid');
 
-// 立即读取登录状态（不延迟、不卡顿）
-let myName = localStorage.getItem('username');
-let myUid  = localStorage.getItem('uid');
+const avatar = document.getElementById('topAvatar');
+const nameEl = document.getElementById('miniName');
+const uidEl = document.getElementById('miniUid');
+const logout = document.getElementById('logoutBtn');
 
-let avatar   = document.getElementById('topAvatar');
-let nameText = document.getElementById('miniName');
-let uidText  = document.getElementById('miniUid');
-let logoutBtn = document.getElementById('logoutBtn');
-
-// ==============================================
+// ======================================
 // 已登录
-// ==============================================
-if (myName && myUid) {
-  avatar.innerText = getAvatarChar(myName);
-  nameText.innerText = myName;
-  uidText.innerText = myUid;
+// ======================================
+if (u && uid) {
+  avatar.innerText = u.charAt(0).toUpperCase();
+  nameEl.innerText = u;
+  uidEl.innerText = uid;
 
-  // 点击头像 → 个人主页
-  avatar.onclick = function(){
-    location.href = "personal.html?uid=" + myUid;
+  avatar.onclick = () => {
+    location.href = 'personal.html?uid=' + uid;
   };
 
-  // 退出登录正常工作
-  logoutBtn.onclick = function(){
-    if(!confirm('确定退出登录？')) return;
+  logout.onclick = () => {
+    if (!confirm('确定退出登录？')) return;
     localStorage.clear();
-    location.href = "index.html";
+    location.href = 'index.html';
   };
-}
+} 
 
-// ==============================================
+// ======================================
 // 未登录
-// ==============================================
+// ======================================
 else {
-  avatar.innerText = "U";
-  nameText.innerText = "游客";
-  uidText.innerText = "未登录";
-
-  // 未登录 → 头像不跳转
-  avatar.onclick = function(){};
-
-  // 隐藏退出按钮
-  logoutBtn.style.display = "none";
+  avatar.innerText = 'U';
+  nameEl.innerText = '游客';
+  uidEl.innerText = '未登录';
+  logout.style.display = 'none';
 }
 
-// 导航高亮
-let page = location.pathname.split('/').pop();
-document.querySelectorAll('.nav-item').forEach(el=>{
-  if(el.getAttribute('onclick').includes(page)){
-    el.classList.add('active');
+// 高亮
+const page = location.pathname.split('/').pop();
+document.querySelectorAll('.nav-item').forEach(i => {
+  if (i.getAttribute('onclick').includes(page)) {
+    i.classList.add('active');
   }
 });
 </script>
