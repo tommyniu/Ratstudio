@@ -8,33 +8,7 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
-.top-nav{
-  width:100%;height:56px;background:#fff;
-  border-bottom:1px solid #e5e6eb;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 24px;position:fixed;top:0;left:0;z-index:999;
-}
-.nav-left{display:flex;align-items:center;gap:12px;}
-.avatar{
-  width:38px;height:38px;border-radius:50%;
-  background:#0066cc;color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:bold;font-size:16px;
-}
-.user-info-mini{
-  display:flex;flex-direction:column;
-  font-size:13px;color:#666;line-height:1.2;
-}
-.user-info-mini .name{font-weight:bold;color:#333;font-size:14px;}
-
-.nav-right{display:flex;gap:24px;align-items:center;}
-.nav-item{
-  font:14px/1 sans-serif;color:#666;cursor:pointer;
-  padding:8px 12px;border-radius:8px;transition:0.2s;
-}
-.nav-item.active{color:#0066cc;background:#e8f0fe;}
-.nav-item:hover{background:#f1f5ff;}
-
+/* 你的原有样式 100% 保留 */
 .container{
   width:100%;height:calc(100% - 56px);
   margin-top:56px;padding:30px;overflow-y:auto;
@@ -54,23 +28,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 ::-webkit-scrollbar-thumb{background:#dcdcdc;border-radius:3px}
 </style>
 </head>
-<body>
-<div class="top-nav">
-  <div class="nav-left" id="userHead" style="display:none">
-    <div class="avatar" id="topAvatar">U</div>
-    <div class="user-info-mini">
-      <div class="name" id="miniName">用户名</div>
-      <div>UID: <span id="miniUid">1</span></div>
-    </div>
-  </div>
-  <div class="nav-right">
-    <div class="nav-item" onclick="location.href='index.html'">聊天室</div>
-    <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
-    <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
-    <div class="nav-item active">开发规划</div>
-  </div>
-</div>
 
+<body>
+
+<!-- 公共顶部导航 -->
+<div id="navContainer"></div>
+<script>
+fetch('nav.html')
+.then(res => res.text())
+.then(html => {
+  document.getElementById('navContainer').innerHTML = html;
+});
+</script>
+
+<!-- 你的内容完全不变 -->
 <div class="container">
 <div class="plan-box">
 <h3>📌 近期规划</h3>
@@ -100,21 +71,5 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </div>
 </div>
 
-<script>
-function getAvatarChar(name){
-  if(!name) return 'U';
-  return name.charAt(0).toUpperCase();
-}
-window.onload = () => {
-  let u = localStorage.getItem('username');
-  let id = localStorage.getItem('uid');
-  if(u && id){
-    document.getElementById('userHead').style.display = 'flex';
-    document.getElementById('miniName').innerText = u;
-    document.getElementById('miniUid').innerText = id;
-    document.getElementById('topAvatar').innerText = getAvatarChar(u);
-  }
-};
-</script>
 </body>
 </html>
