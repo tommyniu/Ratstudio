@@ -36,7 +36,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 .like{background:#f1f2f3;color:#61666d}
 .del-post{background:#ffebeb;color:#ed2633;margin-left:10px}
 
-/* 发帖按钮 右上角悬浮 */
 .fixed-add-btn{
   position:fixed;
   top:66px;
@@ -79,15 +78,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 
 <body>
 <div id="navContainer"></div>
-<script>
-fetch('nav.html')
-.then(res=>res.text())
-.then(html=>{
-  document.getElementById('navContainer').innerHTML = html;
-});
-</script>
 
-<!-- 右上角悬浮发帖按钮 -->
 <button class="fixed-add-btn" onclick="showPost()">+</button>
 
 <div class="container">
@@ -109,6 +100,43 @@ fetch('nav.html')
     <button onclick="createPost()">发布帖子</button>
   </div>
 </div>
+
+<script>
+// ==============================================
+// 🔥 导航自动加载 + 登录状态同步（全站通用）
+// ==============================================
+function loadNav() {
+  fetch('nav.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('navContainer').innerHTML = html;
+
+    let u = localStorage.getItem('username');
+    let uid = localStorage.getItem('uid');
+
+    if (u && uid) {
+      document.getElementById('miniName').innerText = u;
+      document.getElementById('miniUid').innerText = uid;
+      document.getElementById('logoutBtn').style.display = 'block';
+
+      document.getElementById('logoutBtn').onclick = function () {
+        if (confirm('确定退出登录？')) {
+          localStorage.clear();
+          location.href = 'index.html';
+        }
+      }
+
+      document.getElementById('topAvatar').onclick = function () {
+        location.href = 'personal.html?uid=' + uid;
+      }
+    } else {
+      document.getElementById('logoutBtn').style.display = 'none';
+    }
+  })
+}
+
+loadNav();
+</script>
 
 <script>
 let username = "", uid = "";
