@@ -46,8 +46,8 @@
 </style>
 
 <div class="top-nav">
-  <div class="nav-left" id="userHead">
-    <div class="avatar" id="topAvatar" onclick="goPersonal()">U</div>
+  <div class="nav-left">
+    <div class="avatar" id="topAvatar">U</div>
     <div class="user-info-mini">
       <div class="name" id="miniName">未登录</div>
       <div>UID: <span id="miniUid">-</span></div>
@@ -60,45 +60,67 @@
     <div class="nav-item" onclick="location.href='forum.html'">论坛</div>
     <div class="nav-item" onclick="location.href='history.html'">更新日志</div>
     <div class="nav-item" onclick="location.href='plan.html'">开发规划</div>
-    <div class="logout" onclick="logout()">退出登录</div>
+    <div class="logout" id="logoutBtn">退出登录</div>
   </div>
 </div>
 
 <script>
-// 强制立即执行，不等待页面加载
-(function(){
-  function getAvatarChar(n){ return n ? n[0].toUpperCase() : 'U'; }
+// 工具函数
+function getAvatarChar(n){ return n ? n[0].toUpperCase() : 'U'; }
 
-  window.goPersonal = function(){
-    let uid = localStorage.getItem('uid');
-    if(uid) location.href='personal.html?uid='+uid;
+// 页面全局函数
+let myName = localStorage.getItem('username') || '';
+let myUid = localStorage.getItem('uid') || '';
+
+// 初始化状态
+function initUserNav(){
+  const avatarEl = document.getElementById('topAvatar');
+  const nameEl = document.getElementById('miniName');
+  const uidEl = document.getElementById('miniUid');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  if(myName && myUid){
+    // 已登录状态
+    avatarEl.innerText = getAvatarChar(myName);
+    nameEl.innerText = myName;
+    uidEl.innerText = myUid;
+
+    // 已登录：头像点进个人主页
+    avatarEl.onclick = function(){
+      location.href = 'personal.html?uid=' + myUid;
+    };
+
+    // 显示退出按钮可点击
+    logoutBtn.style.display = 'block';
+    logoutBtn.onclick = function(){
+      if(!confirm('确定退出登录？')) return;
+      localStorage.clear();
+      location.href = 'index.html';
+    };
+  }else{
+    // 未登录状态
+    avatarEl.innerText = 'U';
+    nameEl.innerText = '游客';
+    uidEl.innerText = '未登录';
+
+    // 未登录：头像点进登录页
+    avatarEl.onclick = function(){
+      location.href = 'login.html';
+    };
+
+    // 未登录隐藏退出按钮
+    logoutBtn.style.display = 'none';
   }
 
-  window.logout = function() {
-    if(!confirm('确定退出登录？')) return;
-    localStorage.clear();
-    location.href='index.html';
-  }
-
-  // 立即加载用户信息
-  let myName = localStorage.getItem('username');
-  let myUid  = localStorage.getItem('uid');
-  
-  if(myName && myUid) {
-    document.getElementById('topAvatar').innerText = getAvatarChar(myName);
-    document.getElementById('miniName').innerText = myName;
-    document.getElementById('miniUid').innerText = myUid;
-  } else {
-    document.getElementById('miniName').innerText = "游客";
-    document.getElementById('miniUid').innerText = "未登录";
-  }
-
-  // 高亮当前页面
+  // 导航高亮
   let page = location.pathname.split('/').pop();
   document.querySelectorAll('.nav-item').forEach(el=>{
     if(el.getAttribute('onclick').includes(page)){
       el.classList.add('active');
     }
   });
-})();
+}
+
+// 立即执行初始化
+initUserNav();
 </script>
