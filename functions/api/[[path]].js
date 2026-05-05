@@ -1,7 +1,25 @@
 export async function onRequestGet({ request, env }) {
+  return handleRequest(request, env);
+}
+
+export async function onRequestPost({ request, env }) {
+  return handleRequest(request, env);
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    }
+  });
+}
+
+async function handleRequest(request, env) {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
 
@@ -18,7 +36,7 @@ export async function onRequestGet({ request, env }) {
     const url = new URL(request.url);
     const act = url.searchParams.get("act");
     const uid = url.searchParams.get("uid");
-    const targetId = url.searchParams.get("targetId");
+    const targetId = url.searchParams.get("targetId") || url.searchParams.get("postId");
 
     let writeCountData = await env.CHAT_DB.get("writeCount").then(r => r ? JSON.parse(r) : { count: 0, date: new Date().toDateString() });
     const today = new Date().toDateString();
@@ -48,9 +66,7 @@ export async function onRequestGet({ request, env }) {
       await safeWrite("db", JSON.stringify(db));
     }
 
-    // ------------------------------
-    // 🔥 图片上传接口（新增）
-    // ------------------------------
+    // 🔥 图片上传（支持POST）
     if (url.pathname === "/api/upload") {
       return new Response(JSON.stringify({
         url: "https://picsum.photos/800/450?" + Math.random()
@@ -59,9 +75,7 @@ export async function onRequestGet({ request, env }) {
       });
     }
 
-    // ------------------------------
     // 发帖（支持图片）
-    // ------------------------------
     if (act === "createPost") {
       const title = url.searchParams.get("title");
       const content = url.searchParams.get("content");
@@ -98,7 +112,7 @@ export async function onRequestGet({ request, env }) {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // 删除帖子
+    // ✅ 删除帖子（修复参数）
     if (act === "deletePost") {
       const isAdmin = ADMIN_UIDS.includes(Number(uid));
       const post = db.posts.find(p => p.postId == Number(targetId));
@@ -219,16 +233,6 @@ export async function onRequestGet({ request, env }) {
     return new Response("ok", { headers: corsHeaders });
 
   } catch (e) {
-    return new Response("error", { headers: corsHeaders });
+    return new Response("error:"+e, { headers: corsHeaders });
   }
-}
-
-export async function onRequestOptions() {
-  return new Response(null, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    }
-  });
 }
