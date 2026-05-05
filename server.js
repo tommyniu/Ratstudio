@@ -11,8 +11,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static('public'));
 
+// 👇 适配你现在的结构：直接从根目录读取HTML文件
+app.use(express.static(__dirname));
+
+// 数据库、上传接口等保持不变
 const db = { users: [], posts: [], comments: [] };
 if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads');
 if (!fs.existsSync('./db.json')) fs.writeFileSync('./db.json', JSON.stringify(db));
@@ -37,6 +40,7 @@ app.post('/api/upload', upload.single('img'), (req, res) => {
   res.json({ url });
 });
 
+// 其他接口（注册、登录、发帖等）保持不变
 app.get('/api/reg', (req, res) => {
   const { user, pwd } = req.query;
   if (db.users.find(u => u.user === user)) return res.send('exists');
@@ -54,10 +58,8 @@ app.get('/api/login', (req, res) => {
 
 app.get('/api', (req, res) => {
   const { act, uid, postId, cid } = req.query;
-
   if (act === 'posts') return res.json(db.posts);
   if (act === 'comments') return res.json(db.comments);
-
   if (act === 'createPost') {
     const { title, content, imgs } = req.query;
     const user = db.users.find(u => u.uid === uid)?.user || '匿名';
@@ -71,21 +73,18 @@ app.get('/api', (req, res) => {
     saveDB();
     return res.send('ok');
   }
-
   if (act === 'deletePost') {
     db.posts = db.posts.filter(p => p.postId != postId);
     db.comments = db.comments.filter(c => c.postId != postId);
     saveDB();
     return res.send('ok');
   }
-
   if (act === 'like') {
     const p = db.posts.find(x => x.postId == postId);
     if (p) p.like++;
     saveDB();
     return res.send('ok');
   }
-
   if (act === 'createComment') {
     const { postId, text } = req.query;
     const user = db.users.find(u => u.uid === uid)?.user || '匿名';
@@ -97,20 +96,17 @@ app.get('/api', (req, res) => {
     saveDB();
     return res.send('ok');
   }
-
   if (act === 'deleteComment') {
     db.comments = db.comments.filter(x => x.cid != cid);
     saveDB();
     return res.send('ok');
   }
-
   if (act === 'likeComment') {
     const c = db.comments.find(x => x.cid == cid);
     if (c) c.like++;
     saveDB();
     return res.send('ok');
   }
-
   res.send('ok');
 });
 
