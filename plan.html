@@ -23,7 +23,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
   margin-left:20px;line-height:1.7;margin-bottom:6px;
   display:flex;justify-content:space-between;align-items:center;
 }
-/* 已完成项：灰色文字 + 右侧对勾 */
 .done{
   color:#999;
   text-decoration:none;
@@ -40,45 +39,92 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f1f2f3;color:#333}
 </head>
 
 <body>
-
-<!-- 公共顶部导航 -->
 <div id="navContainer"></div>
-<script>
-fetch('nav.html')
-.then(res => res.text())
-.then(html => {
-  document.getElementById('navContainer').innerHTML = html;
-});
-</script>
 
 <div class="container">
 <div class="plan-box">
-<h3>📌 近期规划</h3>
+<h3>📌 近期规划（最高优先）</h3>
 <ul>
 <li><span class="done">网页化：修改UI，使其看起来更像大型论坛网站页面</span><span class="done-check">✓</span></li>
-<li>论坛功能完善，增加评论，显示详细内容等功能</li>
+<li>评论系统：帖子楼层评论、回复、删除、显示时间</li>
+<li>私信系统：用户一对一私聊、未读提示、消息记录</li>
 <li><span class="done">用户主页：增加用户主页，显示其发帖，点赞数</span><span class="done-check">✓</span></li>
-<li>时间显示：显示发帖时间，记录点赞、注册、登录时间等</li>
+<li>时间显示：发帖、评论、登录、注册、点赞时间</li>
+<li>个人资料：用户名、头像、个性签名展示</li>
 </ul>
 </div>
 
 <div class="plan-box">
 <h3>🚀 中期规划</h3>
 <ul>
-<li>通知：在网页右上角添加通知按钮，显示系统提示、收到点赞、评论等信息</li>
-<li>关注：关注某用户，在其发送帖子时通过通知提醒你</li>
-<li>主页：添加主页功能，在主页增加公告等功能，并随机推荐内容</li>
-<li>UI：增加亮色暗色模式切换，添加按钮点击弹性动画</li>
+<li>通知系统：收到评论、点赞、私信、关注提醒</li>
+<li>关注系统：关注用户、动态推送、主页信息流</li>
+<li>主页强化：公告、热门帖子、随机推荐、分类导航</li>
+<li>主题模式：亮色/暗色切换、全站动画效果优化</li>
+<li>搜索功能：搜索帖子、用户、评论内容</li>
+<li>帖子收藏：收藏喜欢的帖子、个人中心查看</li>
+<li>帖子分类：不同板块展示、标签筛选</li>
+</ul>
+</div>
+
+<div class="plan-box">
+<h3>⚙️ 运营与体验</h3>
+<ul>
+<li>签到系统：每日签到奖励、积分记录</li>
+<li>用户等级：发帖/评论/签到升级</li>
+<li>帖子编辑：自己发布的帖子支持修改</li>
+<li>帖子浏览量：显示阅读次数、热门排序</li>
+<li>表情功能：评论和聊天支持基础表情</li>
 </ul>
 </div>
 
 <div class="plan-box">
 <h3>🔮 远期 / 超远期规划</h3>
 <ul>
-<li>待定</li>
+<li>图片上传：发帖、评论、头像支持图片</li>
+<li>管理员后台：用户管理、帖子管理、公告发布</li>
+<li>举报系统：举报违规帖子/评论/用户</li>
+<li>黑名单：屏蔽指定用户发言、私信</li>
+<li>多端适配：完美支持手机、平板、PC</li>
+<li>数据统计：全站帖子数、用户数、活跃度</li>
+<li>开放扩展：插件化、自定义页面功能</li>
 </ul>
 </div>
 </div>
+
+<script>
+// 加载导航栏
+function loadNav() {
+  fetch('nav.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('navContainer').innerHTML = html;
+
+    let u = localStorage.getItem('username');
+    let uid = localStorage.getItem('uid');
+
+    if (u && uid) {
+      document.getElementById('miniName').innerText = u;
+      document.getElementById('miniUid').innerText = uid;
+      document.getElementById('logoutBtn').style.display = 'block';
+
+      document.getElementById('logoutBtn').onclick = function () {
+        if (confirm('确定退出登录？')) {
+          localStorage.clear();
+          location.href = 'index.html';
+        }
+      }
+
+      document.getElementById('topAvatar').onclick = function () {
+        location.href = 'personal.html?uid=' + uid;
+      }
+    } else {
+      document.getElementById('logoutBtn').style.display = 'none';
+    }
+  })
+}
+loadNav();
+</script>
 
 </body>
 </html>
